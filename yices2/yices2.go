@@ -1,4 +1,4 @@
-package yices
+package yices2
 
 // #cgo CFLAGS: -g -fPIC
 // #cgo LDFLAGS:  -lyices -lgmp
