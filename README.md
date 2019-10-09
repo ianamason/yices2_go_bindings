@@ -3,3 +3,12 @@
 
 # yices2_go_bindings
 Golang bindings for yices2
+
+
+## Installation
+
+To install, simply do
+```
+go get github.com/ianamason/yices2_go_bindings/cmd/yices_info
+
+```

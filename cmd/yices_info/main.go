@@ -7,6 +7,6 @@ import (
 
 func main() {
 
-	fmt.Primntln(yices2.version())
+	fmt.Println(yices2.version())
 
 }
