@@ -6,5 +6,5 @@ package yices2
 import "C"
 
 func Version() string {
-	return C.GoString(yices_version)
+	return C.GoString(C.yices_version)
 }
