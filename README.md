@@ -1,2 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ianamason/yices2_go_bindings)](https://goreportcard.com/report/github.com/ianamason/yices2_go_bindings)
+
 # yices2_go_bindings
 Golang bindings for yices2
