@@ -173,3 +173,33 @@ func Function_type3(tau1 Type_t, tau2 Type_t, tau3 Type_t, rng Type_t) Type_t {
 /*************************
  *   TYPE EXPLORATION    *
  ************************/
+
+func Type_is_bool(tau Type_t) int32 {  return int32(C.yices_type_is_bool(C.int32_t(tau))) }
+
+func Type_is_int(tau Type_t) int32 {  return int32(C.yices_type_is_int(C.int32_t(tau))) }
+
+func Type_is_real(tau Type_t) int32 {  return int32(C.yices_type_is_real(C.int32_t(tau))) }
+
+func Type_is_arithmetic(tau Type_t) int32 {  return int32(C.yices_type_is_arithmetic(C.int32_t(tau))) }
+
+func Type_is_bitvector(tau Type_t) int32 {  return int32(C.yices_type_is_bitvector(C.int32_t(tau))) }
+
+func Type_is_tuple(tau Type_t) int32 {  return int32(C.yices_type_is_tuple(C.int32_t(tau))) }
+
+func Type_is_function(tau Type_t) int32 {  return int32(C.yices_type_is_function(C.int32_t(tau))) }
+
+func Type_is_scalar(tau Type_t) int32 {  return int32(C.yices_type_is_scalar(C.int32_t(tau))) }
+
+func Type_is_uninterpreted(tau Type_t) int32 {  return int32(C.yices_type_is_uninterpreted(C.int32_t(tau))) }
+
+func Test_subtype(tau Type_t, sigma Type_t) int32 {  return int32(C.yices_test_subtype(C.int32_t(tau), C.int32_t(sigma))) }
+
+func Compatible_types(tau Type_t, sigma Type_t) int32 {  return int32(C.yices_compatible_types(C.int32_t(tau), C.int32_t(sigma))) }
+
+func Bvtype_size(tau Type_t) uint32  { return uint32(C.yices_bvtype_size(C.int32_t(tau))) }
+
+func Scalar_type_card(tau Type_t) uint32  { return uint32(C.yices_scalar_type_card(C.int32_t(tau))) }
+
+func Type_num_children(tau Type_t) int32  { return int32(C.yices_type_num_children(C.int32_t(tau))) }
+
+func Type_child(tau Type_t, i int32) Type_t { return Type_t(C.yices_type_child(C.int32_t(tau), C.int32_t(i))) }
