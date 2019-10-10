@@ -7,6 +7,9 @@ import (
 
 func main() {
 
-	fmt.Println(yices2.Version())
+	fmt.Printf("Yices version no: %s\n", yices2.Version())
+	fmt.Printf("Yices build arch: %s\n", yices2.Build_arch())
+	fmt.Printf("Yices build mode: %s\n", yices2.Build_mode())
+	fmt.Printf("Yices build date: %s\n", yices2.Build_date())
 
 }
