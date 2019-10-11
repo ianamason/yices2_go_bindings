@@ -647,3 +647,125 @@ func Arith_lt0_atom(t Term_t) Term_t {
 /*********************************
  *  BITVECTOR TERM CONSTRUCTORS  *
  ********************************/
+
+
+func Bvconst_uint32(bits uint32,  x uint32) Term_t {
+	return Term_t(C.yices_bvconst_uint32(C.uint32_t(bits), C.uint32_t(x)))
+}
+
+func Bvconst_uint64(bits uint32,  x uint64) Term_t {
+	return Term_t(C.yices_bvconst_uint64(C.uint32_t(bits), C.uint64_t(x)))
+}
+
+func Bvconst_int32(bits uint32,  x int32) Term_t {
+	return Term_t(C.yices_bvconst_int32(C.uint32_t(bits), C.int32_t(x)))
+}
+
+func Bvconst_int64(bits uint32,  x int64) Term_t {
+	return Term_t(C.yices_bvconst_int64(C.uint32_t(bits), C.int64_t(x)))
+}
+
+/* iam: FIXME
+#ifdef __GMP_H__
+__YICES_DLLSPEC__ extern term_t yices_bvconst_mpz(uint32_t n, const mpz_t x);
+#endif
+*/
+
+func Bvconst_zero(bits uint32) Term_t {
+	return Term_t(C.yices_bvconst_zero(C.uint32_t(bits)))
+}
+
+func Bvconst_one(bits uint32) Term_t {
+	return Term_t(C.yices_bvconst_one(C.uint32_t(bits)))
+}
+
+func Bvconst_minus_one(bits uint32) Term_t {
+	return Term_t(C.yices_bvconst_minus_one(C.uint32_t(bits)))
+}
+
+//iam: FIXME check that bits is restricted to len(a)
+func Bvconstr_from_array(a []int32) Term_t {
+	bits := C.uint32_t(len(a))
+	return Term_t(C.yices_bvconst_from_array(bits, (*C.int32_t)(&a[0])))
+}
+
+
+func Parse_bvbin(s string) Term_t {
+	return Term_t(C.yices_parse_bvbin(C.CString(s)))
+}
+
+func Parse_bvhex(s string) Term_t {
+	return Term_t(C.yices_parse_bvhex(C.CString(s)))
+}
+
+func Bvadd(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvadd(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bsubv(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvsub(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvneg(t Term_t) Term_t {
+	return Term_t(C.yices_bvneg(C.term_t(t)))
+}
+
+func Bvmul(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvmul(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvsquare(t Term_t) Term_t {
+	return Term_t(C.yices_bvsquare(C.term_t(t)))
+}
+
+func Bvpower(t1 Term_t, d uint32) Term_t {
+	return Term_t(C.yices_bvpower(C.term_t(t1), C.uint32_t(d)))
+}
+
+func Bvdiv(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvdiv(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvrem(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvrem(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvsdiv(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvsdiv(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvsrem(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvsrem(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvsmod(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvsmod(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvnot(t Term_t) Term_t {
+	return Term_t(C.yices_bvnot(C.term_t(t)))
+}
+
+func Bvnand(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvnand(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvnor(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvnor(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvxnor(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvxnor(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvshl(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvshl(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvlshr(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvlshr(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvashr(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvashr(C.term_t(t1), C.term_t(t2)))
+}
