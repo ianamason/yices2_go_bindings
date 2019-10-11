@@ -451,3 +451,115 @@ func Lambda(vars []Term_t, body Term_t) Term_t {
 /**********************************
  *  ARITHMETIC TERM CONSTRUCTORS  *
  *********************************/
+
+func Zero() Term_t {
+	return Term_t(C.yices_zero())
+}
+
+func Int32(val int32) Term_t {
+	return Term_t(C.yices_int32(C.int32_t(val)))
+}
+
+func Int64(val int64) Term_t {
+	return Term_t(C.yices_int64(C.int64_t(val)))
+}
+
+func Rational32(num int32, den uint32) Term_t {
+	return Term_t(C.yices_rational32(C.int32_t(num), C.uint32_t(den)))
+}
+
+func Rational64(num int64, den uint64) Term_t {
+	return Term_t(C.yices_rational64(C.int64_t(num), C.uint64_t(den)))
+}
+
+/* iam: FIXME in the too hard basket for now.
+https://github.com/golang/go/blob/master/misc/cgo/gmp/gmp.go
+#ifdef __GMP_H__
+__YICES_DLLSPEC__ extern term_t yices_mpz(const mpz_t z);
+__YICES_DLLSPEC__ extern term_t yices_mpq(const mpq_t q);
+#endif
+*/
+
+
+func Parse_rational(s string) Term_t {
+	return Term_t(C.yices_parse_rational(C.CString(s)))
+}
+
+func Parse_float(s string) Term_t {
+	return Term_t(C.yices_parse_float(C.CString(s)))
+}
+
+/*
+ * ARITHMETIC OPERATIONS
+ */
+
+func Add(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_add(C.term_t(t1), C.term_t(t2)))
+}
+
+func Sub(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_sub(C.term_t(t1), C.term_t(t2)))
+}
+
+func Neg(t1 Term_t) Term_t {
+	return Term_t(C.yices_neg(C.term_t(t1)))
+}
+
+func Mul(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_mul(C.term_t(t1), C.term_t(t2)))
+}
+
+func Square(t1 Term_t) Term_t {
+	return Term_t(C.yices_square(C.term_t(t1)))
+}
+
+func Power(t1 Term_t, d uint32) Term_t {
+	return Term_t(C.yices_power(C.term_t(t1), C.uint32_t(d)))
+}
+
+func Sum(argv []Term_t) Term_t {
+	count := C.uint32_t(len(argv))
+	return Term_t(C.yices_sum(count, (*C.term_t)(&argv[0])))
+}
+
+func Product(argv []Term_t) Term_t {
+	count := C.uint32_t(len(argv))
+	return Term_t(C.yices_product(count, (*C.term_t)(&argv[0])))
+}
+
+func Division(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_division(C.term_t(t1), C.term_t(t2)))
+}
+
+func Idiv(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_idiv(C.term_t(t1), C.term_t(t2)))
+}
+
+func Imod(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_imod(C.term_t(t1), C.term_t(t2)))
+}
+
+func Divides_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_divides_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Is_int_atom(t Term_t) Term_t {
+	return Term_t(C.yices_is_int_atom(C.term_t(t)))
+}
+
+func Abs(t1 Term_t) Term_t {
+	return Term_t(C.yices_abs(C.term_t(t1)))
+}
+
+func Floor(t1 Term_t) Term_t {
+	return Term_t(C.yices_floor(C.term_t(t1)))
+}
+
+func Ceil(t1 Term_t) Term_t {
+	return Term_t(C.yices_ceil(C.term_t(t1)))
+}
+
+/*
+ * POLYNOMIALS
+ */
+
