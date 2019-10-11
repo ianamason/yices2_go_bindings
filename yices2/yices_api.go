@@ -1,8 +1,11 @@
 package yices2
-// #cgo CFLAGS: -g -fPIC
-// #cgo LDFLAGS:  -lyices -lgmp
-// #include <yices.h>
-// type_t yices_type_vector_get(type_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
+
+/*
+#cgo CFLAGS: -g -fPIC
+#cgo LDFLAGS:  -lyices -lgmp
+#include <yices.h>
+type_t yices_type_vector_get(type_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
+*/
 import "C"
 
 import "os"
@@ -253,7 +256,6 @@ func Type_child(tau Type_t, i int32) Type_t {
 	return Type_t(C.yices_type_child(C.int32_t(tau), C.int32_t(i)))
 }
 
-
 func Type_children(tau Type_t) (children []Type_t) {
 	//iam: FIXME is there an easier way?
 	var tv [1]C.type_vector_t
@@ -270,4 +272,3 @@ func Type_children(tau Type_t) (children []Type_t) {
 	C.yices_delete_type_vector(&tv[0])
 	return
 }
-
