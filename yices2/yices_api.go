@@ -295,3 +295,7 @@ func False() Term_t {
 func Constant(tau Type_t, index int32) Term_t {
 	return Term_t(C.yices_constant(C.type_t(tau), C.int32_t(index)))
 }
+
+func New_uninterpreted_term(tau Type_t) Term_t {
+	return Term_t(C.yices_new_uninterpreted_term(C.type_t(tau)))
+}
