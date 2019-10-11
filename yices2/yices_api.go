@@ -769,3 +769,166 @@ func Bvlshr(t1 Term_t, t2 Term_t) Term_t {
 func Bvashr(t1 Term_t, t2 Term_t) Term_t {
 	return Term_t(C.yices_bvashr(C.term_t(t1), C.term_t(t2)))
 }
+
+func Bvand(t []Term_t) Term_t {
+	count := C.uint32_t(len(t))
+	return Term_t(C.yices_bvand(count, (*C.term_t)(&t[0])))
+}
+
+func Bvor(t []Term_t) Term_t {
+	count := C.uint32_t(len(t))
+	return Term_t(C.yices_bvor(count, (*C.term_t)(&t[0])))
+}
+
+func Bvxor(t []Term_t) Term_t {
+	count := C.uint32_t(len(t))
+	return Term_t(C.yices_bvxor(count, (*C.term_t)(&t[0])))
+}
+
+func Bvand2(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvand2(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvor2(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvor2(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvxor2(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvxor2(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvand3(t1 Term_t, t2 Term_t, t3 Term_t) Term_t {
+	return Term_t(C.yices_bvand3(C.term_t(t1), C.term_t(t2), C.term_t(t3)))
+}
+
+func Bvor3(t1 Term_t, t2 Term_t, t3 Term_t) Term_t {
+	return Term_t(C.yices_bvor3(C.term_t(t1), C.term_t(t2), C.term_t(t3)))
+}
+
+func Bvsum(t []Term_t) Term_t {
+	count := C.uint32_t(len(t))
+	return Term_t(C.yices_bvsum(count, (*C.term_t)(&t[0])))
+}
+
+func Bvproduct(t []Term_t) Term_t {
+	count := C.uint32_t(len(t))
+	return Term_t(C.yices_bvproduct(count, (*C.term_t)(&t[0])))
+}
+
+func Shift_left0(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_shift_left0(C.term_t(t), C.uint32_t(n)))
+}
+
+func Shift_left1(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_shift_left1(C.term_t(t), C.uint32_t(n)))
+}
+
+func Shift_right0(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_shift_right0(C.term_t(t), C.uint32_t(n)))
+}
+
+func Shift_right1(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_shift_right1(C.term_t(t), C.uint32_t(n)))
+}
+
+func Ashift_right(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_ashift_right(C.term_t(t), C.uint32_t(n)))
+}
+
+func Rotate_left(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_rotate_left(C.term_t(t), C.uint32_t(n)))
+}
+
+func Rotate_right(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_rotate_right(C.term_t(t), C.uint32_t(n)))
+}
+
+func Bvextract(t Term_t, i uint32, j uint32) Term_t {
+	return Term_t(C.yices_bvextract(C.term_t(t), C.uint32_t(i), C.uint32_t(j)))
+}
+
+func Bvconcat2(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvconcat2(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvconcat(t []Term_t) Term_t {
+	count := C.uint32_t(len(t))
+	return Term_t(C.yices_bvconcat(count, (*C.term_t)(&t[0])))
+}
+
+func Bvrepeat(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_bvrepeat(C.term_t(t),  C.uint32_t(n)))
+}
+
+func Sign_extend(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_sign_extend(C.term_t(t),  C.uint32_t(n)))
+}
+
+func Zero_extend(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_zero_extend(C.term_t(t),  C.uint32_t(n)))
+}
+
+func Redand(t Term_t) Term_t {
+	return Term_t(C.yices_redand(C.term_t(t)))
+}
+
+func Redor(t Term_t) Term_t {
+	return Term_t(C.yices_redor(C.term_t(t)))
+}
+
+func Redcomp(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_redcomp(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvarray(t []Term_t) Term_t {
+	count := C.uint32_t(len(t))
+	return Term_t(C.yices_bvarray(count, (*C.term_t)(&t[0])))
+}
+
+func Bitextract(t Term_t, n uint32) Term_t {
+	return Term_t(C.yices_bitextract(C.term_t(t),  C.uint32_t(n)))
+}
+
+func Bveq_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bveq_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvneq_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvneq_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvge_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvge_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvgt_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvgt_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvle_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvle_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvlt_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvlt_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvsge_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvsge_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvsgt_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvsgt_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvsle_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvsle_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Bvslt_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_bvslt_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+/**************
+ *  PARSING   *
+ *************/
