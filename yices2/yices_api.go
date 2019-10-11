@@ -932,3 +932,142 @@ func Bvslt_atom(t1 Term_t, t2 Term_t) Term_t {
 /**************
  *  PARSING   *
  *************/
+
+func Parse_type(s string) Type_t {
+	return Type_t(C.yices_parse_type(C.CString(s)))
+}
+
+func Parse_term(s string) Term_t {
+	return Term_t(C.yices_parse_term(C.CString(s)))
+}
+
+/*******************
+ *  SUBSTITUTIONS  *
+ ******************/
+
+func Subst_term(vars []Term_t, vals []Term_t, t Term_t) Term_t {
+	count := C.uint32_t(len(vars))
+	return Term_t(C.yices_subst_term(count, (*C.term_t)(&vars[0]), (*C.term_t)(&vals[0]), C.term_t(t)))
+}
+
+func Subst_term_array(vars []Term_t, vals []Term_t, t []Term_t) Term_t {
+	count := C.uint32_t(len(vars))
+	tcount := C.uint32_t(len(t))
+	return Term_t(C.yices_subst_term_array(count, (*C.term_t)(&vars[0]), (*C.term_t)(&vals[0]), tcount, (*C.term_t)(&t[0])))
+}
+
+
+/************
+ *  NAMES   *
+ ***********/
+
+func Set_type_name(tau Type_t, name string) int32 {
+	return int32(C.yices_set_type_name(C.type_t(tau), C.CString(name)))
+}
+
+func Set_term_name(t Term_t, name string) int32 {
+	return int32(C.yices_set_term_name(C.term_t(t), C.CString(name)))
+}
+
+func Remove_type_name(name string) {
+	C.yices_remove_type_name(C.CString(name))
+}
+
+func Remove_term_name(name string) {
+	C.yices_remove_term_name(C.CString(name))
+}
+
+func Get_type_by_name(name string) Type_t {
+	return Type_t(C.yices_get_type_by_name(C.CString(name)))
+}
+
+func Get_term_by_name(name string) Term_t {
+	return Term_t(C.yices_get_term_by_name(C.CString(name)))
+}
+
+func Clear_type_name(tau Type_t) int32 {
+	return int32(C.yices_clear_type_name(C.type_t(tau)))
+}
+
+func Clear_term_name(t Term_t) int32 {
+	return int32(C.yices_clear_term_name(C.term_t(t)))
+}
+
+func Get_type_name(tau Type_t) string {
+	return C.GoString(C.yices_get_type_name(C.type_t(tau)))
+}
+
+/***********************
+ *  TERM EXPLORATION   *
+ **********************/
+
+
+func Type_of_term(t Term_t) Type_t {
+	return Type_t(C.yices_type_of_term(C.term_t(t)))
+}
+
+
+func Term_is_bool(t Term_t) int32 {
+	return int32(C.yices_term_is_bool(C.term_t(t)))
+}
+
+func Term_is_int(t Term_t) int32 {
+	return int32(C.yices_term_is_int(C.term_t(t)))
+}
+
+func Term_is_real(t Term_t) int32 {
+	return int32(C.yices_term_is_real(C.term_t(t)))
+}
+
+func Term_is_arithmetic(t Term_t) int32 {
+	return int32(C.yices_term_is_arithmetic(C.term_t(t)))
+}
+
+func Term_is_bitvector(t Term_t) int32 {
+	return int32(C.yices_term_is_bitvector(C.term_t(t)))
+}
+
+func Term_is_tuple(t Term_t) int32 {
+	return int32(C.yices_term_is_tuple(C.term_t(t)))
+}
+
+func Term_is_function(t Term_t) int32 {
+	return int32(C.yices_term_is_function(C.term_t(t)))
+}
+
+func Term_is_scalar(t Term_t) int32 {
+	return int32(C.yices_term_is_scalar(C.term_t(t)))
+}
+
+func Term_bitsize(t Term_t) uint32 {
+	return uint32(C.yices_term_bitsize(C.term_t(t)))
+}
+
+func Term_is_ground(t Term_t) int32 {
+	return int32(C.yices_term_is_ground(C.term_t(t)))
+}
+
+func Term_is_atomic(t Term_t) int32 {
+	return int32(C.yices_term_is_atomic(C.term_t(t)))
+}
+
+func Term_is_composite(t Term_t) int32 {
+	return int32(C.yices_term_is_composite(C.term_t(t)))
+}
+
+
+func Term_is_projection(t Term_t) int32 {
+	return int32(C.yices_term_is_projection(C.term_t(t)))
+}
+
+func Term_is_sum(t Term_t) int32 {
+	return int32(C.yices_term_is_sum(C.term_t(t)))
+}
+
+func Term_is_bvsum(t Term_t) int32 {
+	return int32(C.yices_term_is_bvsum(C.term_t(t)))
+}
+
+func Term_is_product(t Term_t) int32 {
+	return int32(C.yices_term_is_product(C.term_t(t)))
+}
