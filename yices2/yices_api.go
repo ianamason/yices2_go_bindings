@@ -299,3 +299,12 @@ func Constant(tau Type_t, index int32) Term_t {
 func New_uninterpreted_term(tau Type_t) Term_t {
 	return Term_t(C.yices_new_uninterpreted_term(C.type_t(tau)))
 }
+
+func New_variable(tau Type_t) Term_t {
+	return Term_t(C.yices_new_variable(C.type_t(tau)))	
+}
+
+func Application(fun Term_t, argv []Term_t) Term_t {
+	argc := len(argv)
+	return Term_t(C.yices_application(C.term_t(fun), C.uint32_t(argc), (*C.term_t)(&argv[0])))
+}
