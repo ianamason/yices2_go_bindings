@@ -1055,7 +1055,6 @@ func Term_is_composite(t Term_t) int32 {
 	return int32(C.yices_term_is_composite(C.term_t(t)))
 }
 
-
 func Term_is_projection(t Term_t) int32 {
 	return int32(C.yices_term_is_projection(C.term_t(t)))
 }
@@ -1070,4 +1069,16 @@ func Term_is_bvsum(t Term_t) int32 {
 
 func Term_is_product(t Term_t) int32 {
 	return int32(C.yices_term_is_product(C.term_t(t)))
+}
+
+func Term_constructor(t Term_t) Term_constructor_t {
+	return Term_constructor_t(C.yices_term_constructor(C.term_t(t)))
+}
+
+func Term_num_children(t Term_t) int32 {
+	return int32(C.yices_term_num_children(C.term_t(t)))
+}
+
+func Term_child(t Term_t, i int32) Term_t {
+	return Term_t(C.yices_term_child(C.term_t(t), C.int32_t(i)))
 }
