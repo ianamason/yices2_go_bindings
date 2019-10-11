@@ -480,7 +480,6 @@ __YICES_DLLSPEC__ extern term_t yices_mpq(const mpq_t q);
 #endif
 */
 
-
 func Parse_rational(s string) Term_t {
 	return Term_t(C.yices_parse_rational(C.CString(s)))
 }
@@ -563,3 +562,88 @@ func Ceil(t1 Term_t) Term_t {
  * POLYNOMIALS
  */
 
+func Poly_int32(a []int32, t []Term_t) Term_t {
+	count := C.uint32_t(len(a))
+	return Term_t(C.yices_poly_int32(count, (*C.int32_t)(&a[0]), (*C.term_t)(&t[0])))
+}
+
+func Poly_int64(a []int64, t []Term_t) Term_t {
+	count := C.uint32_t(len(a))
+	return Term_t(C.yices_poly_int64(count, (*C.int64_t)(&a[0]), (*C.term_t)(&t[0])))
+}
+
+func Poly_rational32(num []int32, den []uint32, t []Term_t) Term_t {
+	count := C.uint32_t(len(num))
+	return Term_t(C.yices_poly_rational32(count, (*C.int32_t)(&num[0]), (*C.uint32_t)(&den[0]), (*C.term_t)(&t[0])))
+}
+
+func Poly_rational64(num []int64, den []uint64, t []Term_t) Term_t {
+	count := C.uint32_t(len(num))
+	return Term_t(C.yices_poly_rational64(count, (*C.int64_t)(&num[0]), (*C.uint64_t)(&den[0]), (*C.term_t)(&t[0])))
+}
+
+
+/* iam: FIXME in the too hard basket for now.
+https://github.com/golang/go/blob/master/misc/cgo/gmp/gmp.go
+#ifdef __GMP_H__
+__YICES_DLLSPEC__ extern term_t yices_poly_mpz(uint32_t n, const mpz_t z[], const term_t t[]);
+__YICES_DLLSPEC__ extern term_t yices_poly_mpq(uint32_t n, const mpq_t q[], const term_t t[]);
+#endif
+*/
+
+	
+/*
+ * ARITHMETIC ATOMS
+ */
+
+func Arith_eq_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_arith_eq_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Arith_neq_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_arith_neq_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Arith_geq_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_arith_geq_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Arith_leq_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_arith_leq_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Arith_gt_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_arith_gt_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Arith_lt_atom(t1 Term_t, t2 Term_t) Term_t {
+	return Term_t(C.yices_arith_lt_atom(C.term_t(t1), C.term_t(t2)))
+}
+
+func Arith_eq0_atom(t Term_t) Term_t {
+	return Term_t(C.yices_arith_eq0_atom(C.term_t(t)))
+}
+
+func Arith_neq0_atom(t Term_t) Term_t {
+	return Term_t(C.yices_arith_neq0_atom(C.term_t(t)))
+}
+
+func Arith_geq0_atom(t Term_t) Term_t {
+	return Term_t(C.yices_arith_geq0_atom(C.term_t(t)))
+}
+
+func Arith_leq0_atom(t Term_t) Term_t {
+	return Term_t(C.yices_arith_leq0_atom(C.term_t(t)))
+}
+
+func Arith_gt0_atom(t Term_t) Term_t {
+	return Term_t(C.yices_arith_gt0_atom(C.term_t(t)))
+}
+
+func Arith_lt0_atom(t Term_t) Term_t {
+	return Term_t(C.yices_arith_lt0_atom(C.term_t(t)))
+}
+
+/*********************************
+ *  BITVECTOR TERM CONSTRUCTORS  *
+ ********************************/
