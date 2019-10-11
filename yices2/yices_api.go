@@ -1,8 +1,8 @@
 package yices2
-
 // #cgo CFLAGS: -g -fPIC
 // #cgo LDFLAGS:  -lyices -lgmp
 // #include <yices.h>
+// type_t yices_type_vector_get(type_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
 import "C"
 
 import "os"
@@ -252,3 +252,22 @@ func Type_num_children(tau Type_t) int32 {
 func Type_child(tau Type_t, i int32) Type_t {
 	return Type_t(C.yices_type_child(C.int32_t(tau), C.int32_t(i)))
 }
+
+
+func Type_children(tau Type_t) (children []Type_t) {
+	//iam: FIXME is there an easier way?
+	var tv [1]C.type_vector_t
+	C.yices_init_type_vector(&tv[0])
+	ycount := int32(C.yices_type_children(C.int32_t(tau), &tv[0]))
+	if ycount != -1 {
+		count := int(tv[0].size)
+		children = make([]Type_t, count, count)
+		// defined in the preamble yices_type_vector_get(type_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			children[i] = Type_t(C.yices_type_vector_get(&tv[0], C.uint32_t(i)))
+		}
+	}
+	C.yices_delete_type_vector(&tv[0])
+	return
+}
+
