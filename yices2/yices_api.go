@@ -308,3 +308,146 @@ func Application(fun Term_t, argv []Term_t) Term_t {
 	argc := len(argv)
 	return Term_t(C.yices_application(C.term_t(fun), C.uint32_t(argc), (*C.term_t)(&argv[0])))
 }
+
+func Application1(fun Term_t, arg1 Term_t) Term_t {
+	argv := []C.term_t{ C.term_t(arg1) }
+	return Term_t(C.yices_application(C.term_t(fun), C.uint32_t(1), (*C.term_t)(&argv[0])))
+}
+
+func Application2(fun Term_t, arg1 Term_t, arg2 Term_t) Term_t {
+	argv := []C.term_t{ C.term_t(arg1), C.term_t(arg2) }
+	return Term_t(C.yices_application(C.term_t(fun), C.uint32_t(2), (*C.term_t)(&argv[0])))
+}
+
+func Application3(fun Term_t, arg1 Term_t, arg2 Term_t, arg3 Term_t) Term_t {
+	argv := []C.term_t{ C.term_t(arg1), C.term_t(arg2), C.term_t(arg3) }
+	return Term_t(C.yices_application(C.term_t(fun), C.uint32_t(3), (*C.term_t)(&argv[0])))
+}
+
+func Ite(cond Term_t, then_term Term_t, else_term Term_t)  Term_t {
+	return Term_t(C.yices_ite(C.term_t(cond), C.term_t(then_term), C.term_t(else_term)))
+}
+
+func Eq(lhs Term_t, rhs Term_t) Term_t {
+	return Term_t(C.yices_eq(C.term_t(lhs), (C.term_t(rhs))))
+}
+
+func Neq(lhs Term_t, rhs Term_t) Term_t {
+	return Term_t(C.yices_neq(C.term_t(lhs), (C.term_t(rhs))))
+}
+
+func Not(arg Term_t) Term_t {
+	return Term_t(C.yices_not(C.term_t(arg)))
+}
+
+func Or(disjuncts []Term_t) Term_t {
+	count := C.uint32_t(len(disjuncts))
+	return Term_t(C.yices_or(count, (*C.term_t)(&disjuncts[0])))
+}
+
+func And(conjuncts []Term_t) Term_t {
+	count := C.uint32_t(len(conjuncts))
+	return Term_t(C.yices_and(count, (*C.term_t)(&conjuncts[0])))
+}
+
+func Xor(xorjuncts []Term_t) Term_t {
+	count := C.uint32_t(len(xorjuncts))
+	return Term_t(C.yices_xor(count, (*C.term_t)(&xorjuncts[0])))
+}
+
+func Or2(arg1 Term_t, arg2 Term_t) Term_t {
+	return Term_t(C.yices_or2(C.term_t(arg1), C.term_t(arg2)))
+}
+
+func And2(arg1 Term_t, arg2 Term_t) Term_t {
+	return Term_t(C.yices_and2(C.term_t(arg1), C.term_t(arg2)))
+}
+
+func Xor2(arg1 Term_t, arg2 Term_t) Term_t {
+	return Term_t(C.yices_xor2(C.term_t(arg1), C.term_t(arg2)))
+}
+
+func Or3(arg1 Term_t, arg2 Term_t, arg3 Term_t) Term_t {
+	return Term_t(C.yices_or3(C.term_t(arg1), C.term_t(arg2), C.term_t(arg3)))
+}
+
+func And3(arg1 Term_t, arg2 Term_t, arg3 Term_t) Term_t {
+	return Term_t(C.yices_and3(C.term_t(arg1), C.term_t(arg2), C.term_t(arg3)))
+}
+
+func Xor3(arg1 Term_t, arg2 Term_t, arg3 Term_t) Term_t {
+	return Term_t(C.yices_xor3(C.term_t(arg1), C.term_t(arg2), C.term_t(arg3)))
+}
+
+func Iff(lhs Term_t, rhs Term_t) Term_t {
+	return Term_t(C.yices_iff(C.term_t(lhs), (C.term_t(rhs))))
+}
+
+func Implies(lhs Term_t, rhs Term_t) Term_t {
+	return Term_t(C.yices_implies(C.term_t(lhs), (C.term_t(rhs))))
+}
+
+
+func Tuple(argv []Term_t) Term_t {
+	count := C.uint32_t(len(argv))
+	return Term_t(C.yices_tuple(count, (*C.term_t)(&argv[0])))
+}
+
+
+func Pair(arg1 Term_t, arg2 Term_t) Term_t {
+	return Term_t(C.yices_pair(C.term_t(arg1), C.term_t(arg2)))
+}
+
+func Triple(arg1 Term_t, arg2 Term_t, arg3 Term_t) Term_t {
+	return Term_t(C.yices_triple(C.term_t(arg1), C.term_t(arg2), C.term_t(arg3)))
+}
+
+func Select(index uint32, tuple Term_t) Term_t {
+	return Term_t(C.yices_select(C.uint32_t(index), C.term_t(tuple)))
+}
+
+func Tuple_update(tuple Term_t,  index uint32, value Term_t) Term_t {
+	return Term_t(C.yices_tuple_update(C.term_t(tuple), C.uint32_t(index), C.term_t(value)))
+}
+
+func Update(fun Term_t, argv []Term_t, value Term_t) Term_t {
+	count := C.uint32_t(len(argv))
+	return  Term_t(C.yices_update(C.term_t(fun), count, (*C.term_t)(&argv[0]), C.term_t(value)))
+}
+
+func Update1(fun Term_t, arg1 Term_t, value Term_t) Term_t {
+	return Term_t(C.yices_update1(C.term_t(fun), C.term_t(arg1), C.term_t(value)))
+}
+
+func Update2(fun Term_t, arg1 Term_t, arg2 Term_t, value Term_t) Term_t {
+	return Term_t(C.yices_update2(C.term_t(fun), C.term_t(arg1), C.term_t(arg2), C.term_t(value)))
+}
+
+func Update3(fun Term_t, arg1 Term_t, arg2 Term_t, arg3 Term_t, value Term_t) Term_t {
+	return Term_t(C.yices_update3(C.term_t(fun), C.term_t(arg1), C.term_t(arg2), C.term_t(arg3), C.term_t(value)))
+}
+
+
+func Distinct(argv []Term_t) Term_t {
+	n := C.uint32_t(len(argv))
+	return Term_t(C.yices_distinct(n, (*C.term_t)(&argv[0])))
+}
+
+func Forall(vars []Term_t, body Term_t) Term_t {
+	n := C.uint32_t(len(vars))
+	return Term_t(C.yices_forall(n, (*C.term_t)(&vars[0]), C.term_t(body)))
+}
+
+func Exists(vars []Term_t, body Term_t) Term_t {
+	n := C.uint32_t(len(vars))
+	return Term_t(C.yices_exists(n, (*C.term_t)(&vars[0]), C.term_t(body)))
+}
+
+func Lambda(vars []Term_t, body Term_t) Term_t {
+	n := C.uint32_t(len(vars))
+	return Term_t(C.yices_lambda(n, (*C.term_t)(&vars[0]), C.term_t(body)))
+}
+
+/**********************************
+ *  ARITHMETIC TERM CONSTRUCTORS  *
+ *********************************/
