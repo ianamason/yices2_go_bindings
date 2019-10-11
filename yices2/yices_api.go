@@ -113,6 +113,9 @@ func Error_string() string {
 
 type Type_t int32
 
+const NULL_TYPE Type_t = -1
+
+
 func Bool_type() Type_t {
 	return Type_t(C.yices_bool_type())
 }
@@ -154,42 +157,42 @@ func Tuple_type(tau []Type_t) Type_t {
 
 func Tuple_type(tau []Type_t) Type_t {
 	tau_len := len(tau)
-	return Type_t(C.yices_tuple_type(C.uint32_t(tau_len), (*C.int32_t)(&tau[0])))
+	return Type_t(C.yices_tuple_type(C.uint32_t(tau_len), (*C.type_t)(&tau[0])))
 }
 
 func Tuple_type1(tau1 Type_t) Type_t {
-	carr := []C.int32_t{C.int32_t(tau1)}
-	return Type_t(C.yices_tuple_type(C.uint32_t(1), (*C.int32_t)(&carr[0])))
+	carr := []C.type_t{C.type_t(tau1)}
+	return Type_t(C.yices_tuple_type(C.uint32_t(1), (*C.type_t)(&carr[0])))
 }
 
 func Tuple_type2(tau1 Type_t, tau2 Type_t) Type_t {
-	carr := []C.int32_t{C.int32_t(tau1), C.int32_t(tau2)}
-	return Type_t(C.yices_tuple_type(C.uint32_t(2), (*C.int32_t)(&carr[0])))
+	carr := []C.type_t{C.type_t(tau1), C.type_t(tau2)}
+	return Type_t(C.yices_tuple_type(C.uint32_t(2), (*C.type_t)(&carr[0])))
 }
 
 func Tuple_type3(tau1 Type_t, tau2 Type_t, tau3 Type_t) Type_t {
-	carr := []C.int32_t{C.int32_t(tau1), C.int32_t(tau2), C.int32_t(tau3)}
-	return Type_t(C.yices_tuple_type(C.uint32_t(3), (*C.int32_t)(&carr[0])))
+	carr := []C.type_t{C.type_t(tau1), C.type_t(tau2), C.type_t(tau3)}
+	return Type_t(C.yices_tuple_type(C.uint32_t(3), (*C.type_t)(&carr[0])))
 }
 
 func Function_type(dom []Type_t, rng Type_t) Type_t {
 	dom_len := len(dom)
-	return Type_t(C.yices_function_type(C.uint32_t(dom_len), (*C.int32_t)(&dom[0]), C.int32_t(rng)))
+	return Type_t(C.yices_function_type(C.uint32_t(dom_len), (*C.type_t)(&dom[0]), C.type_t(rng)))
 }
 
 func Function_type1(tau1 Type_t, rng Type_t) Type_t {
-	carr := []C.int32_t{C.int32_t(tau1)}
-	return Type_t(C.yices_function_type(C.uint32_t(1), (*C.int32_t)(&carr[0]), C.int32_t(rng)))
+	carr := []C.type_t{C.type_t(tau1)}
+	return Type_t(C.yices_function_type(C.uint32_t(1), (*C.type_t)(&carr[0]), C.type_t(rng)))
 }
 
 func Function_type2(tau1 Type_t, tau2 Type_t, rng Type_t) Type_t {
-	carr := []C.int32_t{C.int32_t(tau1), C.int32_t(tau2)}
-	return Type_t(C.yices_function_type(C.uint32_t(2), (*C.int32_t)(&carr[0]), C.int32_t(rng)))
+	carr := []C.type_t{C.type_t(tau1), C.type_t(tau2)}
+	return Type_t(C.yices_function_type(C.uint32_t(2), (*C.type_t)(&carr[0]), C.type_t(rng)))
 }
 
 func Function_type3(tau1 Type_t, tau2 Type_t, tau3 Type_t, rng Type_t) Type_t {
-	carr := []C.int32_t{C.int32_t(tau1), C.int32_t(tau2), C.int32_t(tau3)}
-	return Type_t(C.yices_function_type(C.uint32_t(3), (*C.int32_t)(&carr[0]), C.int32_t(rng)))
+	carr := []C.type_t{C.type_t(tau1), C.type_t(tau2), C.type_t(tau3)}
+	return Type_t(C.yices_function_type(C.uint32_t(3), (*C.type_t)(&carr[0]), C.type_t(rng)))
 }
 
 /*************************
@@ -197,70 +200,70 @@ func Function_type3(tau1 Type_t, tau2 Type_t, tau3 Type_t, rng Type_t) Type_t {
  ************************/
 
 func Type_is_bool(tau Type_t) int32 {
-	return int32(C.yices_type_is_bool(C.int32_t(tau)))
+	return int32(C.yices_type_is_bool(C.type_t(tau)))
 }
 
 func Type_is_int(tau Type_t) int32 {
-	return int32(C.yices_type_is_int(C.int32_t(tau)))
+	return int32(C.yices_type_is_int(C.type_t(tau)))
 }
 
 func Type_is_real(tau Type_t) int32 {
-	return int32(C.yices_type_is_real(C.int32_t(tau)))
+	return int32(C.yices_type_is_real(C.type_t(tau)))
 }
 
 func Type_is_arithmetic(tau Type_t) int32 {
-	return int32(C.yices_type_is_arithmetic(C.int32_t(tau)))
+	return int32(C.yices_type_is_arithmetic(C.type_t(tau)))
 }
 
 func Type_is_bitvector(tau Type_t) int32 {
-	return int32(C.yices_type_is_bitvector(C.int32_t(tau)))
+	return int32(C.yices_type_is_bitvector(C.type_t(tau)))
 }
 
 func Type_is_tuple(tau Type_t) int32 {
-	return int32(C.yices_type_is_tuple(C.int32_t(tau)))
+	return int32(C.yices_type_is_tuple(C.type_t(tau)))
 }
 
 func Type_is_function(tau Type_t) int32 {
-	return int32(C.yices_type_is_function(C.int32_t(tau)))
+	return int32(C.yices_type_is_function(C.type_t(tau)))
 }
 
 func Type_is_scalar(tau Type_t) int32 {
-	return int32(C.yices_type_is_scalar(C.int32_t(tau)))
+	return int32(C.yices_type_is_scalar(C.type_t(tau)))
 }
 
 func Type_is_uninterpreted(tau Type_t) int32 {
-	return int32(C.yices_type_is_uninterpreted(C.int32_t(tau)))
+	return int32(C.yices_type_is_uninterpreted(C.type_t(tau)))
 }
 
 func Test_subtype(tau Type_t, sigma Type_t) int32 {
-	return int32(C.yices_test_subtype(C.int32_t(tau), C.int32_t(sigma)))
+	return int32(C.yices_test_subtype(C.type_t(tau), C.type_t(sigma)))
 }
 
 func Compatible_types(tau Type_t, sigma Type_t) int32 {
-	return int32(C.yices_compatible_types(C.int32_t(tau), C.int32_t(sigma)))
+	return int32(C.yices_compatible_types(C.type_t(tau), C.type_t(sigma)))
 }
 
 func Bvtype_size(tau Type_t) uint32 {
-	return uint32(C.yices_bvtype_size(C.int32_t(tau)))
+	return uint32(C.yices_bvtype_size(C.type_t(tau)))
 }
 
 func Scalar_type_card(tau Type_t) uint32 {
-	return uint32(C.yices_scalar_type_card(C.int32_t(tau)))
+	return uint32(C.yices_scalar_type_card(C.type_t(tau)))
 }
 
 func Type_num_children(tau Type_t) int32 {
-	return int32(C.yices_type_num_children(C.int32_t(tau)))
+	return int32(C.yices_type_num_children(C.type_t(tau)))
 }
 
 func Type_child(tau Type_t, i int32) Type_t {
-	return Type_t(C.yices_type_child(C.int32_t(tau), C.int32_t(i)))
+	return Type_t(C.yices_type_child(C.type_t(tau), C.int32_t(i)))
 }
 
 func Type_children(tau Type_t) (children []Type_t) {
 	//iam: FIXME is there an easier way?
 	var tv [1]C.type_vector_t
 	C.yices_init_type_vector(&tv[0])
-	ycount := int32(C.yices_type_children(C.int32_t(tau), &tv[0]))
+	ycount := int32(C.yices_type_children(C.type_t(tau), &tv[0]))
 	if ycount != -1 {
 		count := int(tv[0].size)
 		children = make([]Type_t, count, count)
@@ -271,4 +274,24 @@ func Type_children(tau Type_t) (children []Type_t) {
 	}
 	C.yices_delete_type_vector(&tv[0])
 	return
+}
+
+/***********************
+ *  TERM CONSTRUCTORS  *
+ **********************/
+
+type Term_t int32
+
+const NULL_TERM Term_t = -1
+
+func True() Term_t {
+	return Term_t(C.yices_true())
+}
+
+func False() Term_t {
+	return Term_t(C.yices_false())
+}
+
+func Constant(tau Type_t, index int32) Term_t {
+	return Term_t(C.yices_constant(C.type_t(tau), C.int32_t(index)))
 }
