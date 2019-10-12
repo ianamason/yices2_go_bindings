@@ -3,18 +3,24 @@ package yices2
 /*
 #cgo CFLAGS: -g -fPIC
 #cgo LDFLAGS:  -lyices -lgmp
+#include <stdlib.h>
 #include <yices.h>
 type_t yices_type_vector_get(type_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
 */
 import "C"
 
 import "os"
+import "unsafe"
 
 /*
  *  See yices.h for comments.
  *
  *  Naming convention:   yices_foo  becomes yices2.Foo  (will probably ditch the 2 at some stage)
  *
+ *  bd: - free the strings returned by yices.
+ *      - check that some int32 retvals could be bool
+ *
+ * iam: - free the result of C.CString using C.free (maybe wrapped with unsafe.Pointer?)
  */
 
 /*********************
@@ -139,21 +145,6 @@ func New_scalar_type(card uint32) Type_t {
 func New_uninterpreted_type() Type_t {
 	return Type_t(C.yices_new_uninterpreted_type())
 }
-
-/*
-//iam: icky
-func type_slice_to_C_array(s []Type_t) *C.int {
-	var carr = make([]C.int, len(s), len(s))
-	for i := 0; i < len(s); i++ {
-		carr[i] = C.int(s[i])
-	}
-	return &carr[0]
-}
-func Tuple_type(tau []Type_t) Type_t {
-	tau_len := len(tau)
-	return Type_t(C.yices_tuple_type(C.uint32_t(tau_len), type_slice_to_C_array(tau)))
-}
-*/
 
 func Tuple_type(tau []Type_t) Type_t {
 	tau_len := len(tau)
@@ -481,11 +472,15 @@ __YICES_DLLSPEC__ extern term_t yices_mpq(const mpq_t q);
 */
 
 func Parse_rational(s string) Term_t {
-	return Term_t(C.yices_parse_rational(C.CString(s)))
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	return Term_t(C.yices_parse_rational(cs))
 }
 
 func Parse_float(s string) Term_t {
-	return Term_t(C.yices_parse_float(C.CString(s)))
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	return Term_t(C.yices_parse_float(cs))
 }
 
 /*
@@ -691,11 +686,15 @@ func Bvconstr_from_array(a []int32) Term_t {
 
 
 func Parse_bvbin(s string) Term_t {
-	return Term_t(C.yices_parse_bvbin(C.CString(s)))
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	return Term_t(C.yices_parse_bvbin(cs))
 }
 
 func Parse_bvhex(s string) Term_t {
-	return Term_t(C.yices_parse_bvhex(C.CString(s)))
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	return Term_t(C.yices_parse_bvhex(cs))
 }
 
 func Bvadd(t1 Term_t, t2 Term_t) Term_t {
@@ -934,11 +933,15 @@ func Bvslt_atom(t1 Term_t, t2 Term_t) Term_t {
  *************/
 
 func Parse_type(s string) Type_t {
-	return Type_t(C.yices_parse_type(C.CString(s)))
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	return Type_t(C.yices_parse_type(cs))
 }
 
 func Parse_term(s string) Term_t {
-	return Term_t(C.yices_parse_term(C.CString(s)))
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	return Term_t(C.yices_parse_term(cs))
 }
 
 /*******************
@@ -962,27 +965,39 @@ func Subst_term_array(vars []Term_t, vals []Term_t, t []Term_t) Term_t {
  ***********/
 
 func Set_type_name(tau Type_t, name string) int32 {
-	return int32(C.yices_set_type_name(C.type_t(tau), C.CString(name)))
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+	return int32(C.yices_set_type_name(C.type_t(tau), cs))
 }
 
 func Set_term_name(t Term_t, name string) int32 {
-	return int32(C.yices_set_term_name(C.term_t(t), C.CString(name)))
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+	return int32(C.yices_set_term_name(C.term_t(t), cs))
 }
 
 func Remove_type_name(name string) {
-	C.yices_remove_type_name(C.CString(name))
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+	C.yices_remove_type_name(cs)
 }
 
 func Remove_term_name(name string) {
-	C.yices_remove_term_name(C.CString(name))
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+	C.yices_remove_term_name(cs)
 }
 
 func Get_type_by_name(name string) Type_t {
-	return Type_t(C.yices_get_type_by_name(C.CString(name)))
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+	return Type_t(C.yices_get_type_by_name(cs))
 }
 
 func Get_term_by_name(name string) Term_t {
-	return Term_t(C.yices_get_term_by_name(C.CString(name)))
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+	return Term_t(C.yices_get_term_by_name(cs))
 }
 
 func Clear_type_name(tau Type_t) int32 {
