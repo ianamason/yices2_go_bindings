@@ -96,7 +96,9 @@ func Print_error(f *os.File) int32 {
 } //iam: FIXME error checking and File without the os.
 
 func Error_string() string {
-	return C.GoString(C.yices_error_string())
+	cs := C.yices_error_string()
+	defer C.yices_free_string(cs)
+	return C.GoString(cs)
 }
 
 /********************************
@@ -1009,6 +1011,7 @@ func Clear_term_name(t Term_t) int32 {
 }
 
 func Get_type_name(tau Type_t) string {
+	//FIXME: check if the name needs to be freed
 	return C.GoString(C.yices_get_type_name(C.type_t(tau)))
 }
 
