@@ -1189,3 +1189,29 @@ func Garbage_collect(ts []Term_t, taus []Type_t,  keep_named int32) {
 /****************************
  *  CONTEXT CONFIGURATION   *
  ***************************/
+
+
+type Config C.ctx_config_t
+
+func New_config() *Config {
+	return (* Config)(C.yices_new_config())
+}
+
+func Free_config(cfg  *Config) {
+	C.yices_free_config((*C.ctx_config_t)(cfg))
+}
+
+func Set_config(cfg  *Config, name string, value string) int32 {
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
+	cvalue := C.CString(value)
+	defer C.free(unsafe.Pointer(cvalue))
+	return int32(C.yices_set_config((*C.ctx_config_t)(cfg), cname, cvalue))
+}
+
+func Default_config_for_logic(cfg  *Config, logic string) int32 {
+	clogic := C.CString(logic)
+	defer C.free(unsafe.Pointer(clogic))
+	return int32(C.yices_default_config_for_logic((*C.ctx_config_t)(cfg), clogic))
+}
+
