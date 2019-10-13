@@ -1100,3 +1100,92 @@ func Term_num_children(t Term_t) int32 {
 func Term_child(t Term_t, i int32) Term_t {
 	return Term_t(C.yices_term_child(C.term_t(t), C.int32_t(i)))
 }
+
+func Proj_index(t Term_t) int32 {
+	return int32(C.yices_proj_index(C.term_t(t)))
+}
+
+func Proj_arg(t Term_t) Term_t {
+	return Term_t(C.yices_proj_arg(C.term_t(t)))
+}
+
+
+func Bool_const_value(t Term_t, val *int32) int32  {
+	return int32(C.yices_bool_const_value(C.term_t(t), (* C.int32_t)(val)))
+}
+
+func Bv_const_value(t Term_t, val []int32) int32 {
+	return int32(C.yices_bv_const_value(C.term_t(t), (* C.int32_t)(&val[0])))
+}
+
+func Scalar_const_value(t Term_t, val *int32) int32  {
+	return int32(C.yices_scalar_const_value(C.term_t(t), (* C.int32_t)(val)))
+}
+
+/* iam: FIXME
+#ifdef __GMP_H__
+__YICES_DLLSPEC__ extern int32_t yices_rational_const_value(term_t t, mpq_t q);
+#endif
+*/
+
+/* iam: FIXME
+#ifdef __GMP_H__
+__YICES_DLLSPEC__ extern int32_t yices_sum_component(term_t t, int32_t i, mpq_t coeff, term_t *term);
+#endif
+*/
+
+func Bvsum_component(t Term_t, i int32, val []int32, term *Term_t) int32 {
+	return int32(C.yices_bvsum_component(C.term_t(t), C.int32_t(i), (* C.int32_t)(&val[0]), (*C.term_t)(term)))
+}
+
+func Product_component(t Term_t, i int32, term *Term_t, exp *uint32) int32 {
+	return int32(C.yices_product_component(C.term_t(t), C.int32_t(i), (* C.term_t)(term), (* C.uint32_t)(exp)))
+}
+
+/*************************
+ *  GARBAGE COLLECTION   *
+ ************************/
+
+func Num_terms() uint32 {
+	return uint32(C.yices_num_terms())
+}
+
+func Num_types() uint32 {
+	return uint32(C.yices_num_types())
+}
+
+func Incref_term(t Term_t) {
+	C.yices_incref_term(C.term_t(t))
+}
+
+func Decref_term(t Term_t) {
+	C.yices_decref_term(C.term_t(t))
+}
+
+func Incref_type(tau Type_t) {
+	C.yices_incref_type(C.type_t(tau))
+}
+
+func Decref_type(tau Type_t) {
+	C.yices_decref_type(C.type_t(tau))
+}
+
+func Num_posref_terms() uint32 {
+	return uint32(C.yices_num_posref_terms())
+}
+
+func Num_posref_types() uint32 {
+	return uint32(C.yices_num_posref_types())
+}
+
+
+func Garbage_collect(ts []Term_t, taus []Type_t,  keep_named int32) {
+	t_count := C.uint32_t(len(ts))
+	tau_count := C.uint32_t(len(taus))
+	C.yices_garbage_collect((* C.term_t)(&ts[0]), t_count, (* C.type_t)(&taus[0]), tau_count, C.int32_t(keep_named))
+} 
+
+
+/****************************
+ *  CONTEXT CONFIGURATION   *
+ ***************************/
