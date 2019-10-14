@@ -8,6 +8,11 @@ package yices2
 //iam: avoid ugly pointer arithmetic
 type_t yices_type_vector_get(type_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
 term_t yices_term_vector_get(term_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
+void yices_yval_vector_get(yval_vector_t *vec, uint32_t elem, yval_t* val){
+      yval_t *v = &vec->data[elem];
+      val->node_id = v->node_id;
+      val->node_tag = v->node_tag;
+}
 */
 import "C"
 
@@ -18,6 +23,9 @@ import "unsafe"
  *  See yices.h for comments.
  *
  *  Naming convention:   yices_foo  becomes yices2.Foo  (will probably ditch the 2 at some stage)
+ *
+ *  This layer (yices_api.go) is a thin wrapper to the yices_api. A more go-like layer will sit atop
+ *  much like the python version of the API.
  *
  *  bd: - free the strings returned by yices.
  *      - check that some int32 retvals could be bool
@@ -1386,3 +1394,350 @@ func Model_collect_defined_terms(model *Model_t) (terms []Term_t) {
 /*
  * EVALUATION FOR SIMPLE TYPES
  */
+
+
+func Get_bool_value(model *Model_t, t Term_t, val *int32) int32 {
+	return int32(C.yices_get_bool_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(val)))
+}
+
+func Get_int32_value(model *Model_t, t Term_t, val *int32) int32 {
+	return int32(C.yices_get_int32_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(val)))
+}
+
+func Get_int64_value(model *Model_t, t Term_t, val *int64) int32 {
+	return int32(C.yices_get_int64_value((* C.model_t)(model), C.term_t(t), (* C.int64_t)(val)))
+}
+
+func Get_rational32_value(model *Model_t, t Term_t, num *int32, den *uint32) int32 {
+	return int32(C.yices_get_rational32_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(num), (* C.uint32_t)(den)))
+}
+
+func Get_rational64_value(model *Model_t, t Term_t, num *int64, den *uint64) int32 {
+	return int32(C.yices_get_rational64_value((* C.model_t)(model), C.term_t(t), (* C.int64_t)(num), (* C.uint64_t)(den)))
+}
+
+func Get_double_value(model *Model_t, t Term_t, val *float64) int32 {
+	return int32(C.yices_get_double_value((* C.model_t)(model), C.term_t(t), (* C.double)(val)))
+}
+
+/*
+#ifdef __GMP_H__
+__YICES_DLLSPEC__ extern int32_t yices_get_mpz_value(model_t *mdl, term_t t, mpz_t val);
+__YICES_DLLSPEC__ extern int32_t yices_get_mpq_value(model_t *mdl, term_t t, mpq_t val);
+#endif
+*/
+
+/*
+#ifdef LIBPOLY_VERSION
+__YICES_DLLSPEC__ extern int32_t yices_get_algebraic_number_value(model_t *mdl, term_t t, lp_algebraic_number_t *a);
+#endif
+*/
+
+
+func Get_bv_value(model *Model_t, t Term_t, val []int32) int32 {
+	return int32(C.yices_get_bv_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(&val[0])))
+}
+
+func Get_scalar_value(model *Model_t, t Term_t, val *int32) int32 {
+	return int32(C.yices_get_scalar_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(val)))
+}
+
+/*
+ * GENERIC FORM: VALUE DESCRIPTORS AND NODES
+ */
+
+
+type Yval_t C.yval_t
+
+type Yval_vector_t C.yval_vector_t
+
+func Init_yval_vector(v *Yval_vector_t) {
+	C.yices_init_yval_vector((*C.yval_vector_t)(v))
+}
+
+func Delete_yval_vector(v *Yval_vector_t) {
+	C.yices_delete_yval_vector((*C.yval_vector_t)(v))
+	v = nil
+}
+
+func Reset_yval_vector(v *Yval_vector_t) {
+	C.yices_reset_yval_vector((*C.yval_vector_t)(v))
+}
+
+
+func Get_value(model *Model_t, t Term_t, val *Yval_t) int32 {
+	return int32(C.yices_get_value((* C.model_t)(model), C.term_t(t), (* C.yval_t)(val)))
+}
+
+func Val_is_int32(model *Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_int32((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_is_int64(model *Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_int64((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_is_rational32(model *Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_rational32((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_is_rational64(model *Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_rational64((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_is_integer(model *Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_integer((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_bitsize(model *Model_t, val *Yval_t) uint32 {
+	return uint32(C.yices_val_bitsize((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_tuple_arity(model *Model_t, val *Yval_t) uint32 {
+	return uint32(C.yices_val_tuple_arity((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_mapping_arity(model *Model_t, val *Yval_t) uint32 {
+	return uint32(C.yices_val_mapping_arity((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_function_arity(model *Model_t, val *Yval_t) uint32 {
+	return uint32(C.yices_val_function_arity((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_function_type(model *Model_t, val *Yval_t) Type_t {
+	return Type_t(C.yices_val_function_type((* C.model_t)(model), (* C.yval_t)(val)))
+}
+
+func Val_get_bool(model *Model_t, yval *Yval_t, val *int32) int32 {
+	return int32(C.yices_val_get_bool((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(val)))
+}
+
+func Val_get_int32(model *Model_t, yval *Yval_t, val *int32) int32 {
+	return int32(C.yices_val_get_int32((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(val)))
+}
+
+func Val_get_int64(model *Model_t, yval *Yval_t, val *int64) int32 {
+	return int32(C.yices_val_get_int64((* C.model_t)(model), (* C.yval_t)(yval), (* C.int64_t)(val)))
+}
+
+func Val_get_rational32(model *Model_t, yval *Yval_t, num *int32, den *uint32) int32 {
+	return int32(C.yices_val_get_rational32((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(num), (* C.uint32_t)(den)))
+}
+
+func Val_get_rational64(model *Model_t, yval *Yval_t, num *int64, den *uint64) int32 {
+	return int32(C.yices_val_get_rational64((* C.model_t)(model), (* C.yval_t)(yval), (* C.int64_t)(num), (* C.uint64_t)(den)))
+}
+
+func Val_get_double(model *Model_t, yval *Yval_t, val *float64) int32 {
+	return int32(C.yices_val_get_double((* C.model_t)(model), (* C.yval_t)(yval), (* C.double)(val)))
+}
+
+/*
+#ifdef __GMP_H__
+__YICES_DLLSPEC__ extern int32_t yices_val_get_mpz(model_t *mdl, const yval_t *v, mpz_t val);
+__YICES_DLLSPEC__ extern int32_t yices_val_get_mpq(model_t *mdl, const yval_t *v, mpq_t val);
+#endif
+*/
+
+/*
+#ifdef LIBPOLY_VERSION
+__YICES_DLLSPEC__ extern int32_t yices_val_get_algebraic_number(model_t *mdl, const yval_t *v, lp_algebraic_number_t *a);
+#endif
+*/
+
+
+func Val_get_bv(model *Model_t, yval *Yval_t, val []int32) int32 {
+	return int32(C.yices_val_get_bv((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(&val[0])))
+}
+
+func Val_get_scalar(model *Model_t, yval *Yval_t, val *int32, tau *Type_t) int32 {
+	return int32(C.yices_val_get_scalar((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(val), (*C.type_t)(tau)))
+}
+
+func Val_expand_tuple(model *Model_t, yval *Yval_t, child []Yval_t) int32 {
+	return int32(C.yices_val_expand_tuple((* C.model_t)(model), (* C.yval_t)(yval), (* C.yval_t)(&child[0])))
+}
+
+/* iam: FIXME.
+func Val_expand_function(model *Model_t, yval *Yval_t, def *Yval_t) (vector []Yval_t) {
+	var tv [1]C.yval_vector_t
+	C.yices_init_yval_vector(&tv[0])
+	errcode := int32(C.yices_val_expand_function((* C.model_t)(model), (* C.yval_t)(yval), (* C.yval_t)(def), (*C.yval_vector_t)(&tv[0])))
+	if errcode != -1 {
+		count := int(tv[0].size)
+		vector = make([]Yval_t, count, count)
+		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			// this is probably wrong since go need to know the slice is being set.
+			C.yices_yval_vector_get(&tv[0], C.uint32_t(i), (*C.yval_t)(&vector[i]))
+		}
+	}
+	C.yices_delete_yval_vector(&tv[0])
+	return
+}
+
+__YICES_DLLSPEC__ extern int32_t yices_val_expand_mapping(model_t *mdl, const yval_t *m, yval_t tup[], yval_t *val);
+
+*/
+
+
+func Formula_true_in_model(model *Model_t, t Term_t)  int32 {
+	return int32(C.yices_formula_true_in_model((* C.model_t)(model), C.term_t(t)))
+}
+
+func Formulas_true_in_model(model *Model_t, t []Term_t)  int32 {
+	tcount := C.uint32_t(len(t))
+	return int32(C.yices_formulas_true_in_model((* C.model_t)(model), tcount, (*C.term_t)(&t[0])))
+}
+
+
+/*
+ * CONVERSION OF VALUES TO CONSTANT TERMS
+ */
+
+func Get_value_as_term(model *Model_t, t Term_t)  Term_t {
+	return Term_t(C.yices_get_value_as_term((* C.model_t)(model), C.term_t(t)))
+}
+
+func Term_array_value(model *Model_t, a []Term_t, b []Term_t) int32 {
+	tcount := C.uint32_t(len(a))
+	return int32(C.yices_term_array_value((* C.model_t)(model), tcount, (*C.term_t)(&a[0]), (*C.term_t)(&b[0])))
+}
+
+/*
+ * IMPLICANTS
+ */
+
+func Implicant_for_formula(model *Model_t, t Term_t) (literals []Term_t) {
+	var tv [1]C.term_vector_t
+	C.yices_init_term_vector(&tv[0])
+	errcode := int32(C.yices_implicant_for_formula((* C.model_t)(model), C.term_t(t), (*C.term_vector_t)(&tv[0])))
+	if errcode != -1 {
+		count := int(tv[0].size)
+		literals = make([]Term_t, count, count)
+		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			// this is probably wrong since go need to know the slice is being set.
+			literals[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+		}
+	}
+	C.yices_delete_term_vector(&tv[0])
+	return
+}
+
+func Implicant_for_formulas(model *Model_t, t []Term_t) (literals []Term_t) {
+	var tv [1]C.term_vector_t
+	C.yices_init_term_vector(&tv[0])
+	tcount := C.uint32_t(len(t))
+	errcode := int32(C.yices_implicant_for_formulas((* C.model_t)(model), tcount, (*C.term_t)(&t[0]), (*C.term_vector_t)(&tv[0])))
+	if errcode != -1 {
+		count := int(tv[0].size)
+		literals = make([]Term_t, count, count)
+		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			// this is probably wrong since go need to know the slice is being set.
+			literals[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+		}
+	}
+	C.yices_delete_term_vector(&tv[0])
+	return
+}
+
+
+
+/*
+ * MODEL GENERALIZATION
+ */
+
+type Gen_mode_t int32
+
+const (
+  GEN_DEFAULT Gen_mode_t = iota
+  GEN_BY_SUBST
+  GEN_BY_PROJ
+)
+
+
+func Generalize_model(model *Model_t, t Term_t, elims []Term_t, mode Gen_mode_t) (formulas []Term_t) {
+	var tv [1]C.term_vector_t
+	C.yices_init_term_vector(&tv[0])
+	ecount := C.uint32_t(len(elims))
+	errcode := int32(C.yices_generalize_model((* C.model_t)(model), C.term_t(t), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv[0])))
+	if errcode != -1 {
+		count := int(tv[0].size)
+		formulas = make([]Term_t, count, count)
+		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			// this is probably wrong since go need to know the slice is being set.
+			formulas[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+		}
+	}
+	C.yices_delete_term_vector(&tv[0])
+	return
+}
+
+func Generalize_model_array(model *Model_t, a []Term_t, elims []Term_t, mode Gen_mode_t) (formulas []Term_t) {
+	var tv [1]C.term_vector_t
+	C.yices_init_term_vector(&tv[0])
+	acount := C.uint32_t(len(a))
+	ecount := C.uint32_t(len(elims))
+	errcode := int32(C.yices_generalize_model_array((* C.model_t)(model), acount, (*C.term_t)(&a[0]), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv[0])))
+	if errcode != -1 {
+		count := int(tv[0].size)
+		formulas = make([]Term_t, count, count)
+		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			// this is probably wrong since go need to know the slice is being set.
+			formulas[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+		}
+	}
+	C.yices_delete_term_vector(&tv[0])
+	return
+}
+
+
+/**********************
+ *  PRETTY PRINTING   *
+ *********************/
+
+
+func Pp_type(file *os.File, tau Type_t, width uint32, height uint32, offset uint32) int32 {
+	return int32(C.yices_pp_type_fd(C.int(file.Fd()), C.type_t(tau), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
+}
+
+func Pp_term(file *os.File, t Term_t, width uint32, height uint32, offset uint32) int32 {
+	return int32(C.yices_pp_term_fd(C.int(file.Fd()), C.term_t(t), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
+}
+
+func Pp_term_array(file *os.File, t []Term_t, width uint32, height uint32, offset uint32, horiz int32) int32 {
+	tcount := C.uint32_t(len(t))
+	return int32(C.yices_pp_term_array_fd(C.int(file.Fd()), tcount, (*C.term_t)(&t[0]), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset), C.int32_t(horiz)))
+}
+
+
+func Print_model(file *os.File, model *Model_t) int32 {
+	return int32(C.yices_print_model_fd(C.int(file.Fd()), (* C.model_t)(model)))
+}
+
+func Pp_model(file *os.File, model *Model_t, width uint32, height uint32, offset uint32) int32 {
+	return int32(C.yices_pp_model_fd(C.int(file.Fd()), (* C.model_t)(model), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
+}
+
+func Type_to_string(tau Type_t, width uint32, height uint32, offset uint32) string {
+	cstr := C.yices_type_to_string(C.type_t(tau), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset))
+	defer C.yices_free_string(cstr)
+	return C.GoString(cstr)
+}
+
+func Term_to_string(t Term_t, width uint32, height uint32, offset uint32) string {
+	cstr := C.yices_term_to_string(C.term_t(t), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset))
+	defer C.yices_free_string(cstr)
+	return C.GoString(cstr)
+}
+
+func Model_to_string(model *Model_t, width uint32, height uint32, offset uint32) string {
+	cstr := C.yices_model_to_string((*C.model_t)(model), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset))
+	defer C.yices_free_string(cstr)
+	return C.GoString(cstr)
+}

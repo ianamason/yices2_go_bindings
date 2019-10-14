@@ -1,0 +1,16 @@
+package yices2
+
+type Yval_tag_t int32
+
+
+const (
+	YVAL_UNKNOWN Yval_tag_t = iota
+	YVAL_BOOL
+	YVAL_RATIONAL
+	YVAL_ALGEBRAIC
+	YVAL_BV
+	YVAL_SCALAR
+	YVAL_TUPLE
+	YVAL_FUNCTION
+	YVAL_MAPPING
+)
