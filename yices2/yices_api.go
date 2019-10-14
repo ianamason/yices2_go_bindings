@@ -1191,17 +1191,17 @@ func Garbage_collect(ts []Term_t, taus []Type_t,  keep_named int32) {
  ***************************/
 
 
-type Config C.ctx_config_t
+type Config_t C.ctx_config_t
 
-func New_config() *Config {
-	return (* Config)(C.yices_new_config())
+func New_config() *Config_t {
+	return (* Config_t)(C.yices_new_config())
 }
 
-func Free_config(cfg  *Config) {
+func Free_config(cfg  *Config_t) {
 	C.yices_free_config((*C.ctx_config_t)(cfg))
 }
 
-func Set_config(cfg  *Config, name string, value string) int32 {
+func Set_config(cfg  *Config_t, name string, value string) int32 {
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 	cvalue := C.CString(value)
@@ -1209,9 +1209,92 @@ func Set_config(cfg  *Config, name string, value string) int32 {
 	return int32(C.yices_set_config((*C.ctx_config_t)(cfg), cname, cvalue))
 }
 
-func Default_config_for_logic(cfg  *Config, logic string) int32 {
+func Default_config_for_logic(cfg  *Config_t, logic string) int32 {
 	clogic := C.CString(logic)
 	defer C.free(unsafe.Pointer(clogic))
 	return int32(C.yices_default_config_for_logic((*C.ctx_config_t)(cfg), clogic))
 }
+
+
+/***************
+ *  CONTEXTS   *
+ **************/
+
+
+type Context_t C.context_t
+
+func New_context(cfg *Config_t) *Context_t {
+	return (*Context_t)(C.yices_new_context((*C.ctx_config_t)(cfg)))
+}
+
+func Free_context(ctx  *Context_t) {
+	C.yices_free_context((*C.context_t)(ctx))
+}
+
+
+func Context_status(ctx *Context_t) Smt_status_t {
+	return Smt_status_t(C.yices_context_status((* C.context_t)(ctx)))
+}
+
+func Reset_context(ctx *Context_t) {
+	C.yices_reset_context((* C.context_t)(ctx))
+}
+
+func Push(ctx *Context_t) int32 {
+	return int32(C.yices_push((* C.context_t)(ctx)))
+}
+
+func Pop(ctx *Context_t) int32 {
+	return int32(C.yices_pop((* C.context_t)(ctx)))
+}
+
+func Context_enable_option(ctx *Context_t, option string) int32 {
+	coption := C.CString(option)
+	defer C.free(unsafe.Pointer(coption))
+	return int32(C.yices_context_enable_option((* C.context_t)(ctx), coption))
+}
+
+func Context_disable_option(ctx *Context_t, option string) int32 {
+	coption := C.CString(option)
+	defer C.free(unsafe.Pointer(coption))
+	return int32(C.yices_context_enable_option((* C.context_t)(ctx), coption))
+}
+
+func Assert_formula(ctx *Context_t, t Term_t) int32 {
+	return int32(C.yices_assert_formula((* C.context_t)(ctx), C.term_t(t)))
+
+}
+
+func Assert_formulas(ctx *Context_t, t []Term_t) int32 {
+	tcount := C.uint32_t(len(t))
+	return int32(C.yices_assert_formulas((* C.context_t)(ctx), tcount, (*C.term_t)(&t[0])))
+}
+
+
+func Check_context(ctx *Context_t, params *Param_t) Smt_status_t {
+	return Smt_status_t(C.yices_check_context((* C.context_t)(ctx), (* C.param_t)(params)))
+}
+
+
+func Check_context_with_assumptions(ctx *Context_t, params *Param_t, t []Term_t) Smt_status_t {
+	tcount := C.uint32_t(len(t))
+	return Smt_status_t(C.yices_check_context_with_assumptions((* C.context_t)(ctx), (* C.param_t)(params), tcount, (*C.term_t)(&t[0])))
+}
+
+
+func Assert_blocking_clause(ctx *Context_t) int32 {
+	return int32(C.yices_assert_blocking_clause((* C.context_t)(ctx)))
+
+}
+
+func Stop_search(ctx *Context_t) {
+	C.yices_stop_search((* C.context_t)(ctx))
+}
+
+/*
+ * SEARCH PARAMETERS
+ */
+
+
+type Param_t C.param_t 
 
