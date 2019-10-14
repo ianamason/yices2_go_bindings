@@ -5,7 +5,9 @@ package yices2
 #cgo LDFLAGS:  -lyices -lgmp
 #include <stdlib.h>
 #include <yices.h>
+//iam: avoid ugly pointer arithmetic
 type_t yices_type_vector_get(type_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
+term_t yices_term_vector_get(term_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
 */
 import "C"
 
@@ -1199,6 +1201,7 @@ func New_config() *Config_t {
 
 func Free_config(cfg  *Config_t) {
 	C.yices_free_config((*C.ctx_config_t)(cfg))
+	cfg = nil
 }
 
 func Set_config(cfg  *Config_t, name string, value string) int32 {
@@ -1229,6 +1232,7 @@ func New_context(cfg *Config_t) *Context_t {
 
 func Free_context(ctx  *Context_t) {
 	C.yices_free_context((*C.context_t)(ctx))
+	ctx = nil
 }
 
 
@@ -1298,3 +1302,87 @@ func Stop_search(ctx *Context_t) {
 
 type Param_t C.param_t 
 
+
+func New_param_record() *Param_t {
+	return (* Param_t)(C.yices_new_param_record())
+}
+
+func Default_params_for_context(ctx *Context_t, params *Param_t){
+	C.yices_default_params_for_context((* C.context_t)(ctx), (* C.param_t)(params))
+}
+
+func Set_param(params *Param_t, pname string, value string) int32 {
+	cpname := C.CString(pname)
+	defer C.free(unsafe.Pointer(cpname))
+	cvalue := C.CString(value)
+	defer C.free(unsafe.Pointer(cvalue))
+	return int32(C.yices_set_param((* C.param_t)(params), cpname, cvalue))
+}
+
+func Free_param_record(params *Param_t){
+	C.yices_free_param_record((* C.param_t)(params))
+	params = nil
+}
+
+/****************
+ *  UNSAT CORE  *
+ ***************/
+
+func Get_unsat_core(ctx *Context_t) (unsat_core []Term_t) {
+	var tv [1]C.term_vector_t
+	C.yices_init_term_vector(&tv[0])
+	errcode := int32(C.yices_get_unsat_core((* C.context_t)(ctx), &tv[0]))
+	if errcode != -1 {
+		count := int(tv[0].size)
+		unsat_core = make([]Term_t, count, count)
+		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			unsat_core[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+		}
+	}
+	C.yices_delete_term_vector(&tv[0])
+	return
+}
+
+/**************
+ *   MODELS   *
+ *************/
+
+
+type Model_t C.model_t
+
+func Get_model(ctx *Context_t, keep_subst int32) *Model_t {
+	return (* Model_t)(C.yices_get_model((* C.context_t)(ctx), C.int32_t(keep_subst)))
+}
+
+func Free_model(model *Model_t) {
+	C.yices_free_model((* C.model_t)(model))
+	model = nil
+}
+
+func Model_from_map(vars []Term_t, vals []Term_t) *Model_t {
+	vcount := C.uint32_t(len(vals))
+	return (* Model_t)(C.yices_model_from_map(vcount, (* C.term_t)(&vars[0]), (* C.term_t)(&vals[0])))
+}
+
+func Model_collect_defined_terms(model *Model_t) (terms []Term_t) {
+	var tv [1]C.term_vector_t
+	C.yices_init_term_vector(&tv[0])
+	C.yices_model_collect_defined_terms((* C.model_t)(model), &tv[0])
+	count := int(tv[0].size)
+	terms = make([]Term_t, count, count)
+	for i := 0; i < count; i++ {
+		terms[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+	}
+	C.yices_delete_term_vector(&tv[0])
+	return
+}
+
+
+/***********************
+ *  VALUES IN A MODEL  *
+ **********************/
+
+/*
+ * EVALUATION FOR SIMPLE TYPES
+ */
