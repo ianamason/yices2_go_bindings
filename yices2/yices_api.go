@@ -10,8 +10,9 @@ type_t yices_type_vector_get(type_vector_t* vec, uint32_t elem){ return vec->dat
 term_t yices_term_vector_get(term_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
 void yices_yval_vector_get(yval_vector_t *vec, uint32_t elem, yval_t* val){
       yval_t *v = &vec->data[elem];
-      val->node_id = v->node_id;
-      val->node_tag = v->node_tag;
+      *val = *v;
+      //val->node_id = v->node_id;
+      //val->node_tag = v->node_tag;
 }
 */
 import "C"
@@ -1682,27 +1683,23 @@ func Val_expand_tuple(model *Model_t, yval *Yval_t, child []Yval_t) int32 {
 	return int32(C.yices_val_expand_tuple((* C.model_t)(model), (* C.yval_t)(yval), (* C.yval_t)(&child[0])))
 }
 
-/* iam: FIXME.
 func Val_expand_function(model *Model_t, yval *Yval_t, def *Yval_t) (vector []Yval_t) {
-	var tv [1]C.yval_vector_t
-	C.yices_init_yval_vector(&tv[0])
-	errcode := int32(C.yices_val_expand_function((* C.model_t)(model), (* C.yval_t)(yval), (* C.yval_t)(def), (*C.yval_vector_t)(&tv[0])))
+	var tv C.yval_vector_t
+	C.yices_init_yval_vector(&tv)
+	errcode := int32(C.yices_val_expand_function((* C.model_t)(model), (* C.yval_t)(yval), (* C.yval_t)(def), (*C.yval_vector_t)(&tv)))
 	if errcode != -1 {
-		count := int(tv[0].size)
+		count := int(tv.size)
 		vector = make([]Yval_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
-			// this is probably wrong since go need to know the slice is being set.
-			C.yices_yval_vector_get(&tv[0], C.uint32_t(i), (*C.yval_t)(&vector[i]))
+			var yv C.yval_t
+			C.yices_yval_vector_get(&tv, C.uint32_t(i), (*C.yval_t)(&yv))
+			vector[i] = Yval_t(yv)
 		}
 	}
-	C.yices_delete_yval_vector(&tv[0])
+	C.yices_delete_yval_vector(&tv)
 	return
 }
-
-__YICES_DLLSPEC__ extern int32_t yices_val_expand_mapping(model_t *mdl, const yval_t *m, yval_t tup[], yval_t *val);
-
-*/
 
 
 func Formula_true_in_model(model *Model_t, t Term_t)  int32 {
@@ -1741,7 +1738,6 @@ func Implicant_for_formula(model *Model_t, t Term_t) (literals []Term_t) {
 		literals = make([]Term_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
-			// this is probably wrong since go need to know the slice is being set.
 			literals[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
@@ -1759,7 +1755,6 @@ func Implicant_for_formulas(model *Model_t, t []Term_t) (literals []Term_t) {
 		literals = make([]Term_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
-			// this is probably wrong since go need to know the slice is being set.
 			literals[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
@@ -1792,7 +1787,6 @@ func Generalize_model(model *Model_t, t Term_t, elims []Term_t, mode Gen_mode_t)
 		formulas = make([]Term_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
-			// this is probably wrong since go need to know the slice is being set.
 			formulas[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
@@ -1811,7 +1805,6 @@ func Generalize_model_array(model *Model_t, a []Term_t, elims []Term_t, mode Gen
 		formulas = make([]Term_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
-			// this is probably wrong since go need to know the slice is being set.
 			formulas[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
