@@ -127,7 +127,7 @@ func Error_string() string {
  *  TYPE CONSTRUCTORS  *
  **********************/
 
-//iam: we use a type definition, does it improve readbility?
+//iam: we use a type definition, does it improve readability?
 
 type Type_t int32
 
@@ -160,6 +160,10 @@ func New_uninterpreted_type() Type_t {
 
 func Tuple_type(tau []Type_t) Type_t {
 	tau_len := len(tau)
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if tau_len == 0 {
+		return NULL_TYPE
+	}
 	return Type_t(C.yices_tuple_type(C.uint32_t(tau_len), (*C.type_t)(&tau[0])))
 }
 
@@ -180,6 +184,10 @@ func Tuple_type3(tau1 Type_t, tau2 Type_t, tau3 Type_t) Type_t {
 
 func Function_type(dom []Type_t, rng Type_t) Type_t {
 	dom_len := len(dom)
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if dom_len == 0 {
+		return NULL_TYPE
+	}
 	return Type_t(C.yices_function_type(C.uint32_t(dom_len), (*C.type_t)(&dom[0]), C.type_t(rng)))
 }
 
@@ -263,19 +271,18 @@ func Type_child(tau Type_t, i int32) Type_t {
 }
 
 func Type_children(tau Type_t) (children []Type_t) {
-	//iam: FIXME is there an easier way?
-	var tv [1]C.type_vector_t
-	C.yices_init_type_vector(&tv[0])
-	ycount := int32(C.yices_type_children(C.type_t(tau), &tv[0]))
+	var tv C.type_vector_t
+	C.yices_init_type_vector(&tv)
+	ycount := int32(C.yices_type_children(C.type_t(tau), &tv))
 	if ycount != -1 {
-		count := int(tv[0].size)
+		count := int(tv.size)
 		children = make([]Type_t, count, count)
 		// defined in the preamble yices_type_vector_get(type_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
-			children[i] = Type_t(C.yices_type_vector_get(&tv[0], C.uint32_t(i)))
+			children[i] = Type_t(C.yices_type_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
-	C.yices_delete_type_vector(&tv[0])
+	C.yices_delete_type_vector(&tv)
 	return
 }
 
@@ -309,6 +316,10 @@ func New_variable(tau Type_t) Term_t {
 
 func Application(fun Term_t, argv []Term_t) Term_t {
 	argc := len(argv)
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if argc == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_application(C.term_t(fun), C.uint32_t(argc), (*C.term_t)(&argv[0])))
 }
 
@@ -345,16 +356,28 @@ func Not(arg Term_t) Term_t {
 
 func Or(disjuncts []Term_t) Term_t {
 	count := C.uint32_t(len(disjuncts))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_or(count, (*C.term_t)(&disjuncts[0])))
 }
 
 func And(conjuncts []Term_t) Term_t {
 	count := C.uint32_t(len(conjuncts))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_and(count, (*C.term_t)(&conjuncts[0])))
 }
 
 func Xor(xorjuncts []Term_t) Term_t {
 	count := C.uint32_t(len(xorjuncts))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_xor(count, (*C.term_t)(&xorjuncts[0])))
 }
 
@@ -393,6 +416,10 @@ func Implies(lhs Term_t, rhs Term_t) Term_t {
 
 func Tuple(argv []Term_t) Term_t {
 	count := C.uint32_t(len(argv))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_tuple(count, (*C.term_t)(&argv[0])))
 }
 
@@ -415,6 +442,10 @@ func Tuple_update(tuple Term_t,  index uint32, value Term_t) Term_t {
 
 func Update(fun Term_t, argv []Term_t, value Term_t) Term_t {
 	count := C.uint32_t(len(argv))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return  Term_t(C.yices_update(C.term_t(fun), count, (*C.term_t)(&argv[0]), C.term_t(value)))
 }
 
@@ -433,21 +464,37 @@ func Update3(fun Term_t, arg1 Term_t, arg2 Term_t, arg3 Term_t, value Term_t) Te
 
 func Distinct(argv []Term_t) Term_t {
 	n := C.uint32_t(len(argv))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if n == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_distinct(n, (*C.term_t)(&argv[0])))
 }
 
 func Forall(vars []Term_t, body Term_t) Term_t {
 	n := C.uint32_t(len(vars))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if n == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_forall(n, (*C.term_t)(&vars[0]), C.term_t(body)))
 }
 
 func Exists(vars []Term_t, body Term_t) Term_t {
 	n := C.uint32_t(len(vars))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if n == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_exists(n, (*C.term_t)(&vars[0]), C.term_t(body)))
 }
 
 func Lambda(vars []Term_t, body Term_t) Term_t {
 	n := C.uint32_t(len(vars))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if n == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_lambda(n, (*C.term_t)(&vars[0]), C.term_t(body)))
 }
 
@@ -525,11 +572,19 @@ func Power(t1 Term_t, d uint32) Term_t {
 
 func Sum(argv []Term_t) Term_t {
 	count := C.uint32_t(len(argv))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_sum(count, (*C.term_t)(&argv[0])))
 }
 
 func Product(argv []Term_t) Term_t {
 	count := C.uint32_t(len(argv))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_product(count, (*C.term_t)(&argv[0])))
 }
 
@@ -571,21 +626,41 @@ func Ceil(t1 Term_t) Term_t {
 
 func Poly_int32(a []int32, t []Term_t) Term_t {
 	count := C.uint32_t(len(a))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	// do we want to be nannies here?
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_poly_int32(count, (*C.int32_t)(&a[0]), (*C.term_t)(&t[0])))
 }
 
 func Poly_int64(a []int64, t []Term_t) Term_t {
 	count := C.uint32_t(len(a))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	// do we want to be nannies here?
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_poly_int64(count, (*C.int64_t)(&a[0]), (*C.term_t)(&t[0])))
 }
 
 func Poly_rational32(num []int32, den []uint32, t []Term_t) Term_t {
 	count := C.uint32_t(len(num))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	// do we want to be nannies here?
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_poly_rational32(count, (*C.int32_t)(&num[0]), (*C.uint32_t)(&den[0]), (*C.term_t)(&t[0])))
 }
 
 func Poly_rational64(num []int64, den []uint64, t []Term_t) Term_t {
 	count := C.uint32_t(len(num))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	// do we want to be nannies here?
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_poly_rational64(count, (*C.int64_t)(&num[0]), (*C.uint64_t)(&den[0]), (*C.term_t)(&t[0])))
 }
 
@@ -691,8 +766,12 @@ func Bvconst_minus_one(bits uint32) Term_t {
 }
 
 //iam: FIXME check that bits is restricted to len(a)
-func Bvconstr_from_array(a []int32) Term_t {
+func Bvconst_from_array(a []int32) Term_t {
 	bits := C.uint32_t(len(a))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if bits == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_bvconst_from_array(bits, (*C.int32_t)(&a[0])))
 }
 
@@ -783,16 +862,28 @@ func Bvashr(t1 Term_t, t2 Term_t) Term_t {
 
 func Bvand(t []Term_t) Term_t {
 	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_bvand(count, (*C.term_t)(&t[0])))
 }
 
 func Bvor(t []Term_t) Term_t {
 	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_bvor(count, (*C.term_t)(&t[0])))
 }
 
 func Bvxor(t []Term_t) Term_t {
 	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_bvxor(count, (*C.term_t)(&t[0])))
 }
 
@@ -818,11 +909,19 @@ func Bvor3(t1 Term_t, t2 Term_t, t3 Term_t) Term_t {
 
 func Bvsum(t []Term_t) Term_t {
 	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_bvsum(count, (*C.term_t)(&t[0])))
 }
 
 func Bvproduct(t []Term_t) Term_t {
 	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_bvproduct(count, (*C.term_t)(&t[0])))
 }
 
@@ -864,6 +963,10 @@ func Bvconcat2(t1 Term_t, t2 Term_t) Term_t {
 
 func Bvconcat(t []Term_t) Term_t {
 	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_bvconcat(count, (*C.term_t)(&t[0])))
 }
 
@@ -893,6 +996,10 @@ func Redcomp(t1 Term_t, t2 Term_t) Term_t {
 
 func Bvarray(t []Term_t) Term_t {
 	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_bvarray(count, (*C.term_t)(&t[0])))
 }
 
@@ -962,12 +1069,20 @@ func Parse_term(s string) Term_t {
 
 func Subst_term(vars []Term_t, vals []Term_t, t Term_t) Term_t {
 	count := C.uint32_t(len(vars))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_subst_term(count, (*C.term_t)(&vars[0]), (*C.term_t)(&vals[0]), C.term_t(t)))
 }
 
 func Subst_term_array(vars []Term_t, vals []Term_t, t []Term_t) Term_t {
 	count := C.uint32_t(len(vars))
 	tcount := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 || tcount == 0 {
+		return NULL_TERM
+	}
 	return Term_t(C.yices_subst_term_array(count, (*C.term_t)(&vars[0]), (*C.term_t)(&vals[0]), tcount, (*C.term_t)(&t[0])))
 }
 
@@ -1278,8 +1393,12 @@ func Assert_formula(ctx *Context_t, t Term_t) int32 {
 }
 
 func Assert_formulas(ctx *Context_t, t []Term_t) int32 {
-	tcount := C.uint32_t(len(t))
-	return int32(C.yices_assert_formulas((* C.context_t)(ctx), tcount, (*C.term_t)(&t[0])))
+	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return -1
+	}
+	return int32(C.yices_assert_formulas((* C.context_t)(ctx), count, (*C.term_t)(&t[0])))
 }
 
 
@@ -1289,8 +1408,12 @@ func Check_context(ctx *Context_t, params *Param_t) Smt_status_t {
 
 
 func Check_context_with_assumptions(ctx *Context_t, params *Param_t, t []Term_t) Smt_status_t {
-	tcount := C.uint32_t(len(t))
-	return Smt_status_t(C.yices_check_context_with_assumptions((* C.context_t)(ctx), (* C.param_t)(params), tcount, (*C.term_t)(&t[0])))
+	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return Smt_status_t(STATUS_ERROR)
+	}
+	return Smt_status_t(C.yices_check_context_with_assumptions((* C.context_t)(ctx), (* C.param_t)(params), count, (*C.term_t)(&t[0])))
 }
 
 
@@ -1337,18 +1460,18 @@ func Free_param_record(params *Param_t){
  ***************/
 
 func Get_unsat_core(ctx *Context_t) (unsat_core []Term_t) {
-	var tv [1]C.term_vector_t
-	C.yices_init_term_vector(&tv[0])
-	errcode := int32(C.yices_get_unsat_core((* C.context_t)(ctx), &tv[0]))
+	var tv C.term_vector_t
+	C.yices_init_term_vector(&tv)
+	errcode := int32(C.yices_get_unsat_core((* C.context_t)(ctx), &tv))
 	if errcode != -1 {
-		count := int(tv[0].size)
+		count := int(tv.size)
 		unsat_core = make([]Term_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
-			unsat_core[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+			unsat_core[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
-	C.yices_delete_term_vector(&tv[0])
+	C.yices_delete_term_vector(&tv)
 	return
 }
 
@@ -1374,15 +1497,15 @@ func Model_from_map(vars []Term_t, vals []Term_t) *Model_t {
 }
 
 func Model_collect_defined_terms(model *Model_t) (terms []Term_t) {
-	var tv [1]C.term_vector_t
-	C.yices_init_term_vector(&tv[0])
-	C.yices_model_collect_defined_terms((* C.model_t)(model), &tv[0])
-	count := int(tv[0].size)
+	var tv C.term_vector_t
+	C.yices_init_term_vector(&tv)
+	C.yices_model_collect_defined_terms((* C.model_t)(model), &tv)
+	count := int(tv.size)
 	terms = make([]Term_t, count, count)
 	for i := 0; i < count; i++ {
-		terms[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+		terms[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 	}
-	C.yices_delete_term_vector(&tv[0])
+	C.yices_delete_term_vector(&tv)
 	return
 }
 
@@ -1610,37 +1733,37 @@ func Term_array_value(model *Model_t, a []Term_t, b []Term_t) int32 {
  */
 
 func Implicant_for_formula(model *Model_t, t Term_t) (literals []Term_t) {
-	var tv [1]C.term_vector_t
-	C.yices_init_term_vector(&tv[0])
-	errcode := int32(C.yices_implicant_for_formula((* C.model_t)(model), C.term_t(t), (*C.term_vector_t)(&tv[0])))
+	var tv C.term_vector_t
+	C.yices_init_term_vector(&tv)
+	errcode := int32(C.yices_implicant_for_formula((* C.model_t)(model), C.term_t(t), (*C.term_vector_t)(&tv)))
 	if errcode != -1 {
-		count := int(tv[0].size)
+		count := int(tv.size)
 		literals = make([]Term_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
 			// this is probably wrong since go need to know the slice is being set.
-			literals[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+			literals[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
-	C.yices_delete_term_vector(&tv[0])
+	C.yices_delete_term_vector(&tv)
 	return
 }
 
 func Implicant_for_formulas(model *Model_t, t []Term_t) (literals []Term_t) {
-	var tv [1]C.term_vector_t
-	C.yices_init_term_vector(&tv[0])
+	var tv C.term_vector_t
+	C.yices_init_term_vector(&tv)
 	tcount := C.uint32_t(len(t))
-	errcode := int32(C.yices_implicant_for_formulas((* C.model_t)(model), tcount, (*C.term_t)(&t[0]), (*C.term_vector_t)(&tv[0])))
+	errcode := int32(C.yices_implicant_for_formulas((* C.model_t)(model), tcount, (*C.term_t)(&t[0]), (*C.term_vector_t)(&tv)))
 	if errcode != -1 {
-		count := int(tv[0].size)
+		count := int(tv.size)
 		literals = make([]Term_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
 			// this is probably wrong since go need to know the slice is being set.
-			literals[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+			literals[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
-	C.yices_delete_term_vector(&tv[0])
+	C.yices_delete_term_vector(&tv)
 	return
 }
 
@@ -1660,39 +1783,39 @@ const (
 
 
 func Generalize_model(model *Model_t, t Term_t, elims []Term_t, mode Gen_mode_t) (formulas []Term_t) {
-	var tv [1]C.term_vector_t
-	C.yices_init_term_vector(&tv[0])
+	var tv C.term_vector_t
+	C.yices_init_term_vector(&tv)
 	ecount := C.uint32_t(len(elims))
-	errcode := int32(C.yices_generalize_model((* C.model_t)(model), C.term_t(t), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv[0])))
+	errcode := int32(C.yices_generalize_model((* C.model_t)(model), C.term_t(t), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv)))
 	if errcode != -1 {
-		count := int(tv[0].size)
+		count := int(tv.size)
 		formulas = make([]Term_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
 			// this is probably wrong since go need to know the slice is being set.
-			formulas[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+			formulas[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
-	C.yices_delete_term_vector(&tv[0])
+	C.yices_delete_term_vector(&tv)
 	return
 }
 
 func Generalize_model_array(model *Model_t, a []Term_t, elims []Term_t, mode Gen_mode_t) (formulas []Term_t) {
-	var tv [1]C.term_vector_t
-	C.yices_init_term_vector(&tv[0])
+	var tv C.term_vector_t
+	C.yices_init_term_vector(&tv)
 	acount := C.uint32_t(len(a))
 	ecount := C.uint32_t(len(elims))
-	errcode := int32(C.yices_generalize_model_array((* C.model_t)(model), acount, (*C.term_t)(&a[0]), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv[0])))
+	errcode := int32(C.yices_generalize_model_array((* C.model_t)(model), acount, (*C.term_t)(&a[0]), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv)))
 	if errcode != -1 {
-		count := int(tv[0].size)
+		count := int(tv.size)
 		formulas = make([]Term_t, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
 			// this is probably wrong since go need to know the slice is being set.
-			formulas[i] = Term_t(C.yices_term_vector_get(&tv[0], C.uint32_t(i)))
+			formulas[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
-	C.yices_delete_term_vector(&tv[0])
+	C.yices_delete_term_vector(&tv)
 	return
 }
 
