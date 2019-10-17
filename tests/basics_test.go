@@ -7,19 +7,16 @@ import (
 	"testing"
 )
 
-
-func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}) {
-	if lhs == rhs {
-		t.Errorf("AssertNotEqual: %v = %v\n", lhs, rhs)
-	}
-}
-
 func Test0(t *testing.T) {
 	yices2.Init()
 
 	bvt := yices2.Bool_type()
 	ivt := yices2.Int_type()
 	rvt := yices2.Real_type()
+
+	AssertNotEqual(t, bvt, ivt)
+	AssertNotEqual(t, bvt, rvt)
+	AssertNotEqual(t, ivt, rvt)
 
 	fmt.Printf("Bool_type(): %v %v\n", bvt, yices2.Type_is_bool(bvt))
 	fmt.Printf("Int_type(): %v %v\n", ivt, yices2.Type_is_int(ivt))
@@ -43,7 +40,7 @@ func Test0(t *testing.T) {
 	}
 
 
-	fmt.Println("Exiting")
+	fmt.Println("Exiting...")
 	yices2.Exit()
 
 }
