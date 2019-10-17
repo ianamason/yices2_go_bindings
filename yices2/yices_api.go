@@ -4,6 +4,7 @@ package yices2
 #cgo CFLAGS: -g -fPIC
 #cgo LDFLAGS:  -lyices -lgmp
 #include <stdlib.h>
+#include <gmp.h>
 #include <yices.h>
 //iam: avoid ugly pointer arithmetic
 type_t yices_type_vector_get(type_vector_t* vec, uint32_t elem){ return vec->data[elem]; }
@@ -11,8 +12,6 @@ term_t yices_term_vector_get(term_vector_t* vec, uint32_t elem){ return vec->dat
 void yices_yval_vector_get(yval_vector_t *vec, uint32_t elem, yval_t* val){
       yval_t *v = &vec->data[elem];
       *val = *v;
-      //val->node_id = v->node_id;
-      //val->node_tag = v->node_tag;
 }
 */
 import "C"
@@ -359,7 +358,7 @@ func Or(disjuncts []Term_t) Term_t {
 	count := C.uint32_t(len(disjuncts))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return Term_t(C.yices_false())
 	}
 	return Term_t(C.yices_or(count, (*C.term_t)(&disjuncts[0])))
 }
@@ -368,7 +367,7 @@ func And(conjuncts []Term_t) Term_t {
 	count := C.uint32_t(len(conjuncts))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return Term_t(C.yices_true())
 	}
 	return Term_t(C.yices_and(count, (*C.term_t)(&conjuncts[0])))
 }
@@ -377,7 +376,9 @@ func Xor(xorjuncts []Term_t) Term_t {
 	count := C.uint32_t(len(xorjuncts))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		//FIXME what is xor of an empty array
+		var dummy = C.yices_true()
+		return Term_t(C.yices_xor(count, &dummy))
 	}
 	return Term_t(C.yices_xor(count, (*C.term_t)(&xorjuncts[0])))
 }
@@ -529,6 +530,13 @@ https://github.com/golang/go/blob/master/misc/cgo/gmp/gmp.go
 __YICES_DLLSPEC__ extern term_t yices_mpz(const mpz_t z);
 __YICES_DLLSPEC__ extern term_t yices_mpq(const mpq_t q);
 #endif
+
+// Computer says no:
+// cannot use _cgo0 (type _Ctype_mpz_t) as type *_Ctype_struct___0 in argument to _Cfunc_yices_mpz
+func Mpz(z C.mpz_t) Term_t {
+	return Term_t(C.yices_mpz(z))
+}
+
 */
 
 func Parse_rational(s string) Term_t {
@@ -575,7 +583,7 @@ func Sum(argv []Term_t) Term_t {
 	count := C.uint32_t(len(argv))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return Term_t(C.yices_zero())
 	}
 	return Term_t(C.yices_sum(count, (*C.term_t)(&argv[0])))
 }
@@ -584,7 +592,7 @@ func Product(argv []Term_t) Term_t {
 	count := C.uint32_t(len(argv))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return Term_t(C.yices_int32(1))
 	}
 	return Term_t(C.yices_product(count, (*C.term_t)(&argv[0])))
 }
@@ -630,7 +638,7 @@ func Poly_int32(a []int32, t []Term_t) Term_t {
 	//iam: FIXME need to unify the yices errors and the go errors...
 	// do we want to be nannies here?
 	if count == 0 {
-		return NULL_TERM
+		return Term_t(C.yices_zero())
 	}
 	return Term_t(C.yices_poly_int32(count, (*C.int32_t)(&a[0]), (*C.term_t)(&t[0])))
 }
@@ -640,7 +648,7 @@ func Poly_int64(a []int64, t []Term_t) Term_t {
 	//iam: FIXME need to unify the yices errors and the go errors...
 	// do we want to be nannies here?
 	if count == 0 {
-		return NULL_TERM
+		return Term_t(C.yices_zero())
 	}
 	return Term_t(C.yices_poly_int64(count, (*C.int64_t)(&a[0]), (*C.term_t)(&t[0])))
 }
@@ -650,7 +658,7 @@ func Poly_rational32(num []int32, den []uint32, t []Term_t) Term_t {
 	//iam: FIXME need to unify the yices errors and the go errors...
 	// do we want to be nannies here?
 	if count == 0 {
-		return NULL_TERM
+		return Term_t(C.yices_zero())
 	}
 	return Term_t(C.yices_poly_rational32(count, (*C.int32_t)(&num[0]), (*C.uint32_t)(&den[0]), (*C.term_t)(&t[0])))
 }
@@ -660,7 +668,7 @@ func Poly_rational64(num []int64, den []uint64, t []Term_t) Term_t {
 	//iam: FIXME need to unify the yices errors and the go errors...
 	// do we want to be nannies here?
 	if count == 0 {
-		return NULL_TERM
+		return Term_t(C.yices_zero())
 	}
 	return Term_t(C.yices_poly_rational64(count, (*C.int64_t)(&num[0]), (*C.uint64_t)(&den[0]), (*C.term_t)(&t[0])))
 }
