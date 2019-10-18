@@ -916,6 +916,10 @@ func Bvor3(t1 Term_t, t2 Term_t, t3 Term_t) Term_t {
 	return Term_t(C.yices_bvor3(C.term_t(t1), C.term_t(t2), C.term_t(t3)))
 }
 
+func Bvxor3(t1 Term_t, t2 Term_t, t3 Term_t) Term_t {
+	return Term_t(C.yices_bvxor3(C.term_t(t1), C.term_t(t2), C.term_t(t3)))
+}
+
 func Bvsum(t []Term_t) Term_t {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
@@ -1149,6 +1153,11 @@ func Get_type_name(tau Type_t) string {
 	return C.GoString(C.yices_get_type_name(C.type_t(tau)))
 }
 
+func Get_term_name(t Term_t) string {
+	//FIXME: check if the name needs to be freed
+	return C.GoString(C.yices_get_term_name(C.term_t(t)))
+}
+
 /***********************
  *  TERM EXPLORATION   *
  **********************/
@@ -1159,68 +1168,68 @@ func Type_of_term(t Term_t) Type_t {
 }
 
 
-func Term_is_bool(t Term_t) int32 {
-	return int32(C.yices_term_is_bool(C.term_t(t)))
+func Term_is_bool(t Term_t) bool {
+	return C.yices_term_is_bool(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_int(t Term_t) int32 {
-	return int32(C.yices_term_is_int(C.term_t(t)))
+func Term_is_int(t Term_t) bool {
+	return C.yices_term_is_int(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_real(t Term_t) int32 {
-	return int32(C.yices_term_is_real(C.term_t(t)))
+func Term_is_real(t Term_t) bool {
+	return C.yices_term_is_real(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_arithmetic(t Term_t) int32 {
-	return int32(C.yices_term_is_arithmetic(C.term_t(t)))
+func Term_is_arithmetic(t Term_t) bool {
+	return C.yices_term_is_arithmetic(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_bitvector(t Term_t) int32 {
-	return int32(C.yices_term_is_bitvector(C.term_t(t)))
+func Term_is_bitvector(t Term_t) bool {
+	return C.yices_term_is_bitvector(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_tuple(t Term_t) int32 {
-	return int32(C.yices_term_is_tuple(C.term_t(t)))
+func Term_is_tuple(t Term_t) bool {
+	return C.yices_term_is_tuple(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_function(t Term_t) int32 {
-	return int32(C.yices_term_is_function(C.term_t(t)))
+func Term_is_function(t Term_t) bool {
+	return C.yices_term_is_function(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_scalar(t Term_t) int32 {
-	return int32(C.yices_term_is_scalar(C.term_t(t)))
+func Term_is_scalar(t Term_t) bool {
+	return C.yices_term_is_scalar(C.term_t(t)) == C.int32_t(1)
 }
 
 func Term_bitsize(t Term_t) uint32 {
 	return uint32(C.yices_term_bitsize(C.term_t(t)))
 }
 
-func Term_is_ground(t Term_t) int32 {
-	return int32(C.yices_term_is_ground(C.term_t(t)))
+func Term_is_ground(t Term_t) bool {
+	return C.yices_term_is_ground(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_atomic(t Term_t) int32 {
-	return int32(C.yices_term_is_atomic(C.term_t(t)))
+func Term_is_atomic(t Term_t) bool {
+	return C.yices_term_is_atomic(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_composite(t Term_t) int32 {
-	return int32(C.yices_term_is_composite(C.term_t(t)))
+func Term_is_composite(t Term_t) bool {
+	return C.yices_term_is_composite(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_projection(t Term_t) int32 {
-	return int32(C.yices_term_is_projection(C.term_t(t)))
+func Term_is_projection(t Term_t) bool {
+	return C.yices_term_is_projection(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_sum(t Term_t) int32 {
-	return int32(C.yices_term_is_sum(C.term_t(t)))
+func Term_is_sum(t Term_t) bool {
+	return C.yices_term_is_sum(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_bvsum(t Term_t) int32 {
-	return int32(C.yices_term_is_bvsum(C.term_t(t)))
+func Term_is_bvsum(t Term_t) bool {
+	return C.yices_term_is_bvsum(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_product(t Term_t) int32 {
-	return int32(C.yices_term_is_product(C.term_t(t)))
+func Term_is_product(t Term_t) bool {
+	return C.yices_term_is_product(C.term_t(t)) == C.int32_t(1)
 }
 
 func Term_constructor(t Term_t) Term_constructor_t {
@@ -1288,20 +1297,20 @@ func Num_types() uint32 {
 	return uint32(C.yices_num_types())
 }
 
-func Incref_term(t Term_t) {
-	C.yices_incref_term(C.term_t(t))
+func Incref_term(t Term_t) int32 {
+	return int32(C.yices_incref_term(C.term_t(t)))
 }
 
-func Decref_term(t Term_t) {
-	C.yices_decref_term(C.term_t(t))
+func Decref_term(t Term_t) int32 {
+	return int32(C.yices_decref_term(C.term_t(t)))
 }
 
-func Incref_type(tau Type_t) {
-	C.yices_incref_type(C.type_t(tau))
+func Incref_type(tau Type_t) int32 {
+	return int32(C.yices_incref_type(C.type_t(tau)))
 }
 
-func Decref_type(tau Type_t) {
-	C.yices_decref_type(C.type_t(tau))
+func Decref_type(tau Type_t) int32 {
+	return int32(C.yices_decref_type(C.type_t(tau)))
 }
 
 func Num_posref_terms() uint32 {
