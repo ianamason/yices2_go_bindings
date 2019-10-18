@@ -801,7 +801,7 @@ func Bvadd(t1 Term_t, t2 Term_t) Term_t {
 	return Term_t(C.yices_bvadd(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bsubv(t1 Term_t, t2 Term_t) Term_t {
+func Bvsub(t1 Term_t, t2 Term_t) Term_t {
 	return Term_t(C.yices_bvsub(C.term_t(t1), C.term_t(t2)))
 }
 
