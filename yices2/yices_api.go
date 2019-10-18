@@ -210,48 +210,48 @@ func Function_type3(tau1 Type_t, tau2 Type_t, tau3 Type_t, rng Type_t) Type_t {
  *   TYPE EXPLORATION    *
  ************************/
 
-func Type_is_bool(tau Type_t) int32 {
-	return int32(C.yices_type_is_bool(C.type_t(tau)))
+func Type_is_bool(tau Type_t) bool {
+	return int32(1) == int32(C.yices_type_is_bool(C.type_t(tau)))
 }
 
-func Type_is_int(tau Type_t) int32 {
-	return int32(C.yices_type_is_int(C.type_t(tau)))
+func Type_is_int(tau Type_t) bool {
+	return int32(1) == int32(C.yices_type_is_int(C.type_t(tau)))
 }
 
-func Type_is_real(tau Type_t) int32 {
-	return int32(C.yices_type_is_real(C.type_t(tau)))
+func Type_is_real(tau Type_t) bool {
+	return int32(1) == int32(C.yices_type_is_real(C.type_t(tau)))
 }
 
-func Type_is_arithmetic(tau Type_t) int32 {
-	return int32(C.yices_type_is_arithmetic(C.type_t(tau)))
+func Type_is_arithmetic(tau Type_t) bool {
+	return int32(1) == int32(C.yices_type_is_arithmetic(C.type_t(tau)))
 }
 
-func Type_is_bitvector(tau Type_t) int32 {
-	return int32(C.yices_type_is_bitvector(C.type_t(tau)))
+func Type_is_bitvector(tau Type_t) bool {
+	return int32(1) == int32(C.yices_type_is_bitvector(C.type_t(tau)))
 }
 
-func Type_is_tuple(tau Type_t) int32 {
-	return int32(C.yices_type_is_tuple(C.type_t(tau)))
+func Type_is_tuple(tau Type_t) bool {
+	return int32(1) == int32(C.yices_type_is_tuple(C.type_t(tau)))
 }
 
-func Type_is_function(tau Type_t) int32 {
-	return int32(C.yices_type_is_function(C.type_t(tau)))
+func Type_is_function(tau Type_t) bool {
+	return int32(1) == int32(C.yices_type_is_function(C.type_t(tau)))
 }
 
-func Type_is_scalar(tau Type_t) int32 {
-	return int32(C.yices_type_is_scalar(C.type_t(tau)))
+func Type_is_scalar(tau Type_t) bool {
+	return int32(1) == int32(C.yices_type_is_scalar(C.type_t(tau)))
 }
 
-func Type_is_uninterpreted(tau Type_t) int32 {
-	return int32(C.yices_type_is_uninterpreted(C.type_t(tau)))
+func Type_is_uninterpreted(tau Type_t) bool {
+	return int32(1) == int32(C.yices_type_is_uninterpreted(C.type_t(tau)))
 }
 
-func Test_subtype(tau Type_t, sigma Type_t) int32 {
-	return int32(C.yices_test_subtype(C.type_t(tau), C.type_t(sigma)))
+func Test_subtype(tau Type_t, sigma Type_t) bool {
+	return int32(1) == int32(C.yices_test_subtype(C.type_t(tau), C.type_t(sigma)))
 }
 
-func Compatible_types(tau Type_t, sigma Type_t) int32 {
-	return int32(C.yices_compatible_types(C.type_t(tau), C.type_t(sigma)))
+func Compatible_types(tau Type_t, sigma Type_t) bool {
+	return int32(1) == int32(C.yices_compatible_types(C.type_t(tau), C.type_t(sigma)))
 }
 
 func Bvtype_size(tau Type_t) uint32 {
@@ -311,7 +311,7 @@ func New_uninterpreted_term(tau Type_t) Term_t {
 }
 
 func New_variable(tau Type_t) Term_t {
-	return Term_t(C.yices_new_variable(C.type_t(tau)))	
+	return Term_t(C.yices_new_variable(C.type_t(tau)))
 }
 
 func Application(fun Term_t, argv []Term_t) Term_t {
@@ -682,7 +682,7 @@ __YICES_DLLSPEC__ extern term_t yices_poly_mpq(uint32_t n, const mpq_t q[], cons
 #endif
 */
 
-	
+
 /*
  * ARITHMETIC ATOMS
  */
@@ -1317,7 +1317,7 @@ func Garbage_collect(ts []Term_t, taus []Type_t,  keep_named int32) {
 	t_count := C.uint32_t(len(ts))
 	tau_count := C.uint32_t(len(taus))
 	C.yices_garbage_collect((* C.term_t)(&ts[0]), t_count, (* C.type_t)(&taus[0]), tau_count, C.int32_t(keep_named))
-} 
+}
 
 
 /****************************
@@ -1440,7 +1440,7 @@ func Stop_search(ctx *Context_t) {
  */
 
 
-type Param_t C.param_t 
+type Param_t C.param_t
 
 
 func New_param_record() *Param_t {

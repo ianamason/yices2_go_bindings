@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func Test0(t *testing.T) {
+func TestBasis0(t *testing.T) {
 	yices2.Init()
 
 	bvt := yices2.Bool_type()
@@ -35,9 +35,8 @@ func Test0(t *testing.T) {
 	fmt.Printf("children: %v\n", children)
 
 
-	if len(typs) != len(children) {
-		t.Errorf("typs: %v != children: %v\n", typs, children)
-	}
+	AssertEqual(t, typs, children)
+
 
 
 	fmt.Println("Exiting...")
