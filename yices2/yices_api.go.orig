@@ -1334,35 +1334,29 @@ func Garbage_collect(ts []Term_t, taus []Type_t,  keep_named int32) {
  ***************************/
 
 
-type Config_t struct {
-	raw uintptr // actually *C.ctx_config_t
+type Config_t C.ctx_config_t
+
+func New_config() *Config_t {
+	return (* Config_t)(C.yices_new_config())
 }
 
-func ycfg(cfg Config_t) *C.ctx_config_t {
-	return (*C.ctx_config_t)(unsafe.Pointer(cfg.raw))
+func Free_config(cfg  *Config_t) {
+	C.yices_free_config((*C.ctx_config_t)(cfg))
+	cfg = nil
 }
 
-func Init_config(cfg *Config_t) {
-	cfg.raw = uintptr(unsafe.Pointer(C.yices_new_config()))
-}
-
-func Close_config(cfg  *Config_t) {
-	C.yices_free_config(ycfg(*cfg))
-	cfg.raw = 0
-}
-
-func Set_config(cfg Config_t, name string, value string) int32 {
+func Set_config(cfg  *Config_t, name string, value string) int32 {
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 	cvalue := C.CString(value)
 	defer C.free(unsafe.Pointer(cvalue))
-	return int32(C.yices_set_config(ycfg(cfg), cname, cvalue))
+	return int32(C.yices_set_config((*C.ctx_config_t)(cfg), cname, cvalue))
 }
 
-func Default_config_for_logic(cfg  Config_t, logic string) int32 {
+func Default_config_for_logic(cfg  *Config_t, logic string) int32 {
 	clogic := C.CString(logic)
 	defer C.free(unsafe.Pointer(clogic))
-	return int32(C.yices_default_config_for_logic(ycfg(cfg), clogic))
+	return int32(C.yices_default_config_for_logic((*C.ctx_config_t)(cfg), clogic))
 }
 
 
@@ -1371,88 +1365,83 @@ func Default_config_for_logic(cfg  Config_t, logic string) int32 {
  **************/
 
 
-type Context_t struct {
-	raw uintptr // actually *C.context_t
+type Context_t C.context_t
+
+func New_context(cfg *Config_t) *Context_t {
+	return (*Context_t)(C.yices_new_context((*C.ctx_config_t)(cfg)))
 }
 
-func yctx(ctx Context_t) *C.context_t {
-	return (*C.context_t)(unsafe.Pointer(ctx.raw))
+func Free_context(ctx  *Context_t) {
+	C.yices_free_context((*C.context_t)(ctx))
+	ctx = nil
 }
 
-func Init_context(cfg Config_t, ctx *Context_t) {
-	ctx.raw = uintptr(unsafe.Pointer(C.yices_new_context(ycfg(cfg))))
+
+func Context_status(ctx *Context_t) Smt_status_t {
+	return Smt_status_t(C.yices_context_status((* C.context_t)(ctx)))
 }
 
-func Close_context(ctx  *Context_t) {
-	C.yices_free_context(yctx(*ctx))
-	ctx.raw = 0
+func Reset_context(ctx *Context_t) {
+	C.yices_reset_context((* C.context_t)(ctx))
 }
 
-func Context_status(ctx Context_t) Smt_status_t {
-	return Smt_status_t(C.yices_context_status(yctx(ctx)))
+func Push(ctx *Context_t) int32 {
+	return int32(C.yices_push((* C.context_t)(ctx)))
 }
 
-func Reset_context(ctx Context_t) {
-	C.yices_reset_context(yctx(ctx))
+func Pop(ctx *Context_t) int32 {
+	return int32(C.yices_pop((* C.context_t)(ctx)))
 }
 
-func Push(ctx Context_t) int32 {
-	return int32(C.yices_push(yctx(ctx)))
-}
-
-func Pop(ctx Context_t) int32 {
-	return int32(C.yices_pop(yctx(ctx)))
-}
-
-func Context_enable_option(ctx Context_t, option string) int32 {
+func Context_enable_option(ctx *Context_t, option string) int32 {
 	coption := C.CString(option)
 	defer C.free(unsafe.Pointer(coption))
-	return int32(C.yices_context_enable_option(yctx(ctx), coption))
+	return int32(C.yices_context_enable_option((* C.context_t)(ctx), coption))
 }
 
-func Context_disable_option(ctx Context_t, option string) int32 {
+func Context_disable_option(ctx *Context_t, option string) int32 {
 	coption := C.CString(option)
 	defer C.free(unsafe.Pointer(coption))
-	return int32(C.yices_context_enable_option(yctx(ctx), coption))
+	return int32(C.yices_context_enable_option((* C.context_t)(ctx), coption))
 }
 
-func Assert_formula(ctx Context_t, t Term_t) int32 {
-	return int32(C.yices_assert_formula(yctx(ctx), C.term_t(t)))
+func Assert_formula(ctx *Context_t, t Term_t) int32 {
+	return int32(C.yices_assert_formula((* C.context_t)(ctx), C.term_t(t)))
 
 }
 
-func Assert_formulas(ctx Context_t, t []Term_t) int32 {
+func Assert_formulas(ctx *Context_t, t []Term_t) int32 {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
 		return -1
 	}
-	return int32(C.yices_assert_formulas(yctx(ctx), count, (*C.term_t)(&t[0])))
+	return int32(C.yices_assert_formulas((* C.context_t)(ctx), count, (*C.term_t)(&t[0])))
 }
 
 
-func Check_context(ctx Context_t, params *Param_t) Smt_status_t {
-	return Smt_status_t(C.yices_check_context(yctx(ctx), (* C.param_t)(params)))
+func Check_context(ctx *Context_t, params *Param_t) Smt_status_t {
+	return Smt_status_t(C.yices_check_context((* C.context_t)(ctx), (* C.param_t)(params)))
 }
 
 
-func Check_context_with_assumptions(ctx Context_t, params *Param_t, t []Term_t) Smt_status_t {
+func Check_context_with_assumptions(ctx *Context_t, params *Param_t, t []Term_t) Smt_status_t {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
 		return Smt_status_t(STATUS_ERROR)
 	}
-	return Smt_status_t(C.yices_check_context_with_assumptions(yctx(ctx), (* C.param_t)(params), count, (*C.term_t)(&t[0])))
+	return Smt_status_t(C.yices_check_context_with_assumptions((* C.context_t)(ctx), (* C.param_t)(params), count, (*C.term_t)(&t[0])))
 }
 
 
-func Assert_blocking_clause(ctx Context_t) int32 {
-	return int32(C.yices_assert_blocking_clause(yctx(ctx)))
+func Assert_blocking_clause(ctx *Context_t) int32 {
+	return int32(C.yices_assert_blocking_clause((* C.context_t)(ctx)))
 
 }
 
-func Stop_search(ctx Context_t) {
-	C.yices_stop_search(yctx(ctx))
+func Stop_search(ctx *Context_t) {
+	C.yices_stop_search((* C.context_t)(ctx))
 }
 
 /*
@@ -1467,8 +1456,8 @@ func New_param_record() *Param_t {
 	return (* Param_t)(C.yices_new_param_record())
 }
 
-func Default_params_for_context(ctx Context_t, params *Param_t){
-	C.yices_default_params_for_context(yctx(ctx), (* C.param_t)(params))
+func Default_params_for_context(ctx *Context_t, params *Param_t){
+	C.yices_default_params_for_context((* C.context_t)(ctx), (* C.param_t)(params))
 }
 
 func Set_param(params *Param_t, pname string, value string) int32 {
@@ -1488,10 +1477,10 @@ func Free_param_record(params *Param_t){
  *  UNSAT CORE  *
  ***************/
 
-func Get_unsat_core(ctx Context_t) (unsat_core []Term_t) {
+func Get_unsat_core(ctx *Context_t) (unsat_core []Term_t) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
-	errcode := int32(C.yices_get_unsat_core(yctx(ctx), &tv))
+	errcode := int32(C.yices_get_unsat_core((* C.context_t)(ctx), &tv))
 	if errcode != -1 {
 		count := int(tv.size)
 		unsat_core = make([]Term_t, count, count)
@@ -1511,8 +1500,8 @@ func Get_unsat_core(ctx Context_t) (unsat_core []Term_t) {
 
 type Model_t C.model_t
 
-func Get_model(ctx Context_t, keep_subst int32) *Model_t {
-	return (* Model_t)(C.yices_get_model(yctx(ctx), C.int32_t(keep_subst)))
+func Get_model(ctx *Context_t, keep_subst int32) *Model_t {
+	return (* Model_t)(C.yices_get_model((* C.context_t)(ctx), C.int32_t(keep_subst)))
 }
 
 func Free_model(model *Model_t) {

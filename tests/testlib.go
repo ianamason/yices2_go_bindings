@@ -136,13 +136,14 @@ func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}) {
 func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}) {
 	if Signed(lhs) && Signed(rhs) {
 		if !SignedEqual(lhs, rhs) {
+			panic("here")
 			t.Errorf("AssertEqual of signed integers: %v : %v = %v : %v\n", lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 		} else {
 			return
 		}
 	}
 	if !reflect.DeepEqual(lhs, rhs) {
-		//panic("here")
+		panic("here")
 		t.Errorf("AssertEqual: %v : %v = %v : %v\n", lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 	}
 }
