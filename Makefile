@@ -20,7 +20,7 @@ install:
 develop:
 	go install github.com/ianamason/yices2_go_bindings/cmd/yices_info
 
-check:
+check: develop
 	go test -v ./tests/
 
 format:
