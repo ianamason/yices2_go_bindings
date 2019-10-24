@@ -7,6 +7,7 @@ import (
 
 
 func TestContext0(t *testing.T) {
+
 	yices2.Init()
 
 	var cfg yices2.Config_t
