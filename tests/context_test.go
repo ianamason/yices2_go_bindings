@@ -18,6 +18,8 @@ func TestContext0(t *testing.T) {
 
 	yices2.Init_context(cfg, &ctx)
 
+	yices2.Close_config(&cfg)
+
 	bv_t := yices2.Bv_type(3)
 	bvvar1 := yices2.New_uninterpreted_term(bv_t)
 	yices2.Set_term_name(bvvar1, "x")

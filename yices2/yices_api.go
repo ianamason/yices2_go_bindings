@@ -1072,7 +1072,7 @@ func Parse_type(s string) Type_t {
 
 func Parse_term(s string) Term_t {
 	cs := C.CString(s)
-	defer C.free(unsafe.Pointer(cs))
+	//defer C.free(unsafe.Pointer(cs))
 	return Term_t(C.yices_parse_term(cs))
 }
 
@@ -1112,7 +1112,7 @@ func Set_type_name(tau Type_t, name string) int32 {
 
 func Set_term_name(t Term_t, name string) int32 {
 	cs := C.CString(name)
-	defer C.free(unsafe.Pointer(cs))
+	//defer C.free(unsafe.Pointer(cs))
 	return int32(C.yices_set_term_name(C.term_t(t), cs))
 }
 
