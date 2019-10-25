@@ -2,7 +2,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/ianamason/yices2_go_bindings)](https://goreportcard.com/report/github.com/ianamason/yices2_go_bindings)
 
 # yices2_go_bindings
-Golang bindings for yices2
+Golang bindings for yices2.  
+
+NOT READY FOR PRIME TIME YET!
 
 
 ## Installation
