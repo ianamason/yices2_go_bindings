@@ -32,13 +32,17 @@ func TestContext0(t *testing.T) {
 	fmla3 := yices2.Parse_term("(bv-gt z 0b000)")
 	yices2.Assert_formula(ctx, fmla1)
 	yices2.Assert_formulas(ctx, []yices2.Term_t{fmla1, fmla2, fmla3})
-	smt_stat := yices2.Check_context(ctx, nil)
+	var params yices2.Param_t
+	smt_stat := yices2.Check_context(ctx,params)
 	AssertEqual(t, smt_stat, yices2.STATUS_SAT)
 
-	//param := yices2.New_param_record()
-	//yices2.Default_params_for_context(ctx, param)
-	//yices2.Set_param(param, "dyn-ack", "true")
-	//yices2.Free_param_record(param)
+	yices2.Init_param_record(&params)
+	yices2.Default_params_for_context(ctx, params)
+
+	errcode := yices2.Set_param(params, "dyn-ack", "true")
+	AssertEqual(t, errcode, 0)  //FIXME: is this right?
+	
+	yices2.Close_param_record(&params)
 
 	yices2.Close_context(&ctx)
 
@@ -47,7 +51,6 @@ func TestContext0(t *testing.T) {
 
 }
 
-/*
 func NotATestContext1(t *testing.T) {
 	yices2.Init()
 
@@ -90,22 +93,25 @@ func NotATestContext1(t *testing.T) {
 	fmla3 := yices2.Parse_term("(bv-gt z 0b000)")
 	yices2.Assert_formula(ctx, fmla1)
 	yices2.Assert_formulas(ctx, []yices2.Term_t{fmla1, fmla2, fmla3})
-	smt_stat := yices2.Check_context(ctx, nil)
+
+	var params yices2.Param_t
+	smt_stat := yices2.Check_context(ctx, params)  //same as passing NULL to the C
 	AssertEqual(t, smt_stat, yices2.STATUS_SAT)
 	yices2.Assert_blocking_clause(ctx)
 	yices2.Stop_search(ctx)
-	param := yices2.New_param_record()
-	yices2.Default_params_for_context(ctx, param)
-	yices2.Set_param(param, "dyn-ack", "true")
-	errcode = yices2.Set_param(param, "foo", "bar")
+
+	yices2.Init_param_record(&params)
+	yices2.Default_params_for_context(ctx, params)
+	yices2.Set_param(params, "dyn-ack", "true")
+	errcode = yices2.Set_param(params, "foo", "bar")
 	error_string = yices2.Error_string()
 	AssertEqual(t, errcode, -1)
 	AssertEqual(t, error_string, "invalid parameter")
-	errcode = yices2.Set_param(param, "dyn-ack", "bar")
+	errcode = yices2.Set_param(params, "dyn-ack", "bar")
 	error_string = yices2.Error_string()
 	AssertEqual(t, errcode, -1)
 	AssertEqual(t, error_string, "value not valid for parameter")
-	yices2.Free_param_record(param)
+	yices2.Close_param_record(&params)
 
 	yices2.Close_context(&ctx)
 
@@ -113,4 +119,4 @@ func NotATestContext1(t *testing.T) {
 	yices2.Exit()
 
 }
-*/
+

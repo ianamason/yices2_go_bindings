@@ -1072,7 +1072,7 @@ func Parse_type(s string) Type_t {
 
 func Parse_term(s string) Term_t {
 	cs := C.CString(s)
-	//defer C.free(unsafe.Pointer(cs))
+	defer C.free(unsafe.Pointer(cs))
 	return Term_t(C.yices_parse_term(cs))
 }
 
@@ -1112,7 +1112,8 @@ func Set_type_name(tau Type_t, name string) int32 {
 
 func Set_term_name(t Term_t, name string) int32 {
 	cs := C.CString(name)
-	//defer C.free(unsafe.Pointer(cs))
+	defer C.free(unsafe.Pointer(cs))
+	//yices clones this string, so *not* freeing here makes no sense, and yet...
 	return int32(C.yices_set_term_name(C.term_t(t), cs))
 }
 
@@ -1431,18 +1432,18 @@ func Assert_formulas(ctx Context_t, t []Term_t) int32 {
 }
 
 
-func Check_context(ctx Context_t, params *Param_t) Smt_status_t {
-	return Smt_status_t(C.yices_check_context(yctx(ctx), (* C.param_t)(params)))
+func Check_context(ctx Context_t, params Param_t) Smt_status_t {
+	return Smt_status_t(C.yices_check_context(yctx(ctx), yparam(params)))
 }
 
 
-func Check_context_with_assumptions(ctx Context_t, params *Param_t, t []Term_t) Smt_status_t {
+func Check_context_with_assumptions(ctx Context_t, params Param_t, t []Term_t) Smt_status_t {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
 		return Smt_status_t(STATUS_ERROR)
 	}
-	return Smt_status_t(C.yices_check_context_with_assumptions(yctx(ctx), (* C.param_t)(params), count, (*C.term_t)(&t[0])))
+	return Smt_status_t(C.yices_check_context_with_assumptions(yctx(ctx), yparam(params), count, (*C.term_t)(&t[0])))
 }
 
 
@@ -1460,29 +1461,36 @@ func Stop_search(ctx Context_t) {
  */
 
 
-type Param_t C.param_t
-
-
-func New_param_record() *Param_t {
-	return (* Param_t)(C.yices_new_param_record())
+type Param_t struct {
+	raw uintptr // actually *C.param_t
 }
 
-func Default_params_for_context(ctx Context_t, params *Param_t){
-	C.yices_default_params_for_context(yctx(ctx), (* C.param_t)(params))
+func yparam(params Param_t) *C.param_t {
+	return (*C.param_t)(unsafe.Pointer(params.raw))
 }
 
-func Set_param(params *Param_t, pname string, value string) int32 {
+
+func Init_param_record(params *Param_t) {
+	params.raw = uintptr(unsafe.Pointer(C.yices_new_param_record()))
+}
+
+func Close_param_record(params *Param_t) {
+	C.yices_free_param_record(yparam(*params))
+	params.raw = 0
+}
+
+func Default_params_for_context(ctx Context_t, params Param_t){
+	C.yices_default_params_for_context(yctx(ctx), yparam(params))
+}
+
+func Set_param(params Param_t, pname string, value string) int32 {
 	cpname := C.CString(pname)
 	defer C.free(unsafe.Pointer(cpname))
 	cvalue := C.CString(value)
 	defer C.free(unsafe.Pointer(cvalue))
-	return int32(C.yices_set_param((* C.param_t)(params), cpname, cvalue))
+	return int32(C.yices_set_param(yparam(params), cpname, cvalue))
 }
 
-func Free_param_record(params *Param_t){
-	C.yices_free_param_record((* C.param_t)(params))
-	params = nil
-}
 
 /****************
  *  UNSAT CORE  *
@@ -1509,26 +1517,33 @@ func Get_unsat_core(ctx Context_t) (unsat_core []Term_t) {
  *************/
 
 
-type Model_t C.model_t
-
-func Get_model(ctx Context_t, keep_subst int32) *Model_t {
-	return (* Model_t)(C.yices_get_model(yctx(ctx), C.int32_t(keep_subst)))
+type Model_t struct {
+	raw uintptr // actually *C.model_t
 }
 
-func Free_model(model *Model_t) {
-	C.yices_free_model((* C.model_t)(model))
-	model = nil
+func ymodel(model Model_t) *C.model_t {
+	return (*C.model_t)(unsafe.Pointer(model.raw))
+}
+
+func Get_model(ctx Context_t, keep_subst int32) *Model_t {
+	//yes golang lets you return stuff allocated on the stack
+	return &Model_t{ uintptr(unsafe.Pointer(C.yices_get_model(yctx(ctx), C.int32_t(keep_subst))))  }
+}
+
+func Close_model(model *Model_t) {
+	C.yices_free_model(ymodel(*model))
+	model.raw = 0
 }
 
 func Model_from_map(vars []Term_t, vals []Term_t) *Model_t {
 	vcount := C.uint32_t(len(vals))
-	return (* Model_t)(C.yices_model_from_map(vcount, (* C.term_t)(&vars[0]), (* C.term_t)(&vals[0])))
+	return &Model_t{ uintptr(unsafe.Pointer(C.yices_model_from_map(vcount, (* C.term_t)(&vars[0]), (* C.term_t)(&vals[0])))) }
 }
 
-func Model_collect_defined_terms(model *Model_t) (terms []Term_t) {
+func Model_collect_defined_terms(model Model_t) (terms []Term_t) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
-	C.yices_model_collect_defined_terms((* C.model_t)(model), &tv)
+	C.yices_model_collect_defined_terms(ymodel(model), &tv)
 	count := int(tv.size)
 	terms = make([]Term_t, count, count)
 	for i := 0; i < count; i++ {
@@ -1548,28 +1563,28 @@ func Model_collect_defined_terms(model *Model_t) (terms []Term_t) {
  */
 
 
-func Get_bool_value(model *Model_t, t Term_t, val *int32) int32 {
-	return int32(C.yices_get_bool_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(val)))
+func Get_bool_value(model Model_t, t Term_t, val *int32) int32 {
+	return int32(C.yices_get_bool_value(ymodel(model), C.term_t(t), (* C.int32_t)(val)))
 }
 
-func Get_int32_value(model *Model_t, t Term_t, val *int32) int32 {
-	return int32(C.yices_get_int32_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(val)))
+func Get_int32_value(model Model_t, t Term_t, val *int32) int32 {
+	return int32(C.yices_get_int32_value(ymodel(model), C.term_t(t), (* C.int32_t)(val)))
 }
 
-func Get_int64_value(model *Model_t, t Term_t, val *int64) int32 {
-	return int32(C.yices_get_int64_value((* C.model_t)(model), C.term_t(t), (* C.int64_t)(val)))
+func Get_int64_value(model Model_t, t Term_t, val *int64) int32 {
+	return int32(C.yices_get_int64_value(ymodel(model), C.term_t(t), (* C.int64_t)(val)))
 }
 
-func Get_rational32_value(model *Model_t, t Term_t, num *int32, den *uint32) int32 {
-	return int32(C.yices_get_rational32_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(num), (* C.uint32_t)(den)))
+func Get_rational32_value(model Model_t, t Term_t, num *int32, den *uint32) int32 {
+	return int32(C.yices_get_rational32_value(ymodel(model), C.term_t(t), (* C.int32_t)(num), (* C.uint32_t)(den)))
 }
 
-func Get_rational64_value(model *Model_t, t Term_t, num *int64, den *uint64) int32 {
-	return int32(C.yices_get_rational64_value((* C.model_t)(model), C.term_t(t), (* C.int64_t)(num), (* C.uint64_t)(den)))
+func Get_rational64_value(model Model_t, t Term_t, num *int64, den *uint64) int32 {
+	return int32(C.yices_get_rational64_value(ymodel(model), C.term_t(t), (* C.int64_t)(num), (* C.uint64_t)(den)))
 }
 
-func Get_double_value(model *Model_t, t Term_t, val *float64) int32 {
-	return int32(C.yices_get_double_value((* C.model_t)(model), C.term_t(t), (* C.double)(val)))
+func Get_double_value(model Model_t, t Term_t, val *float64) int32 {
+	return int32(C.yices_get_double_value(ymodel(model), C.term_t(t), (* C.double)(val)))
 }
 
 /*
@@ -1586,12 +1601,12 @@ __YICES_DLLSPEC__ extern int32_t yices_get_algebraic_number_value(model_t *mdl, 
 */
 
 
-func Get_bv_value(model *Model_t, t Term_t, val []int32) int32 {
-	return int32(C.yices_get_bv_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(&val[0])))
+func Get_bv_value(model Model_t, t Term_t, val []int32) int32 {
+	return int32(C.yices_get_bv_value(ymodel(model), C.term_t(t), (* C.int32_t)(&val[0])))
 }
 
-func Get_scalar_value(model *Model_t, t Term_t, val *int32) int32 {
-	return int32(C.yices_get_scalar_value((* C.model_t)(model), C.term_t(t), (* C.int32_t)(val)))
+func Get_scalar_value(model Model_t, t Term_t, val *int32) int32 {
+	return int32(C.yices_get_scalar_value(ymodel(model), C.term_t(t), (* C.int32_t)(val)))
 }
 
 /*
@@ -1617,72 +1632,72 @@ func Reset_yval_vector(v *Yval_vector_t) {
 }
 
 
-func Get_value(model *Model_t, t Term_t, val *Yval_t) int32 {
-	return int32(C.yices_get_value((* C.model_t)(model), C.term_t(t), (* C.yval_t)(val)))
+func Get_value(model Model_t, t Term_t, val *Yval_t) int32 {
+	return int32(C.yices_get_value(ymodel(model), C.term_t(t), (* C.yval_t)(val)))
 }
 
-func Val_is_int32(model *Model_t, val *Yval_t) int32 {
-	return int32(C.yices_val_is_int32((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_is_int32(model Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_int32(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_is_int64(model *Model_t, val *Yval_t) int32 {
-	return int32(C.yices_val_is_int64((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_is_int64(model Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_int64(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_is_rational32(model *Model_t, val *Yval_t) int32 {
-	return int32(C.yices_val_is_rational32((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_is_rational32(model Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_rational32(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_is_rational64(model *Model_t, val *Yval_t) int32 {
-	return int32(C.yices_val_is_rational64((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_is_rational64(model Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_rational64(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_is_integer(model *Model_t, val *Yval_t) int32 {
-	return int32(C.yices_val_is_integer((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_is_integer(model Model_t, val *Yval_t) int32 {
+	return int32(C.yices_val_is_integer(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_bitsize(model *Model_t, val *Yval_t) uint32 {
-	return uint32(C.yices_val_bitsize((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_bitsize(model Model_t, val *Yval_t) uint32 {
+	return uint32(C.yices_val_bitsize(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_tuple_arity(model *Model_t, val *Yval_t) uint32 {
-	return uint32(C.yices_val_tuple_arity((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_tuple_arity(model Model_t, val *Yval_t) uint32 {
+	return uint32(C.yices_val_tuple_arity(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_mapping_arity(model *Model_t, val *Yval_t) uint32 {
-	return uint32(C.yices_val_mapping_arity((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_mapping_arity(model Model_t, val *Yval_t) uint32 {
+	return uint32(C.yices_val_mapping_arity(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_function_arity(model *Model_t, val *Yval_t) uint32 {
-	return uint32(C.yices_val_function_arity((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_function_arity(model Model_t, val *Yval_t) uint32 {
+	return uint32(C.yices_val_function_arity(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_function_type(model *Model_t, val *Yval_t) Type_t {
-	return Type_t(C.yices_val_function_type((* C.model_t)(model), (* C.yval_t)(val)))
+func Val_function_type(model Model_t, val *Yval_t) Type_t {
+	return Type_t(C.yices_val_function_type(ymodel(model), (* C.yval_t)(val)))
 }
 
-func Val_get_bool(model *Model_t, yval *Yval_t, val *int32) int32 {
-	return int32(C.yices_val_get_bool((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(val)))
+func Val_get_bool(model Model_t, yval *Yval_t, val *int32) int32 {
+	return int32(C.yices_val_get_bool(ymodel(model), (* C.yval_t)(yval), (* C.int32_t)(val)))
 }
 
-func Val_get_int32(model *Model_t, yval *Yval_t, val *int32) int32 {
-	return int32(C.yices_val_get_int32((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(val)))
+func Val_get_int32(model Model_t, yval *Yval_t, val *int32) int32 {
+	return int32(C.yices_val_get_int32(ymodel(model), (* C.yval_t)(yval), (* C.int32_t)(val)))
 }
 
-func Val_get_int64(model *Model_t, yval *Yval_t, val *int64) int32 {
-	return int32(C.yices_val_get_int64((* C.model_t)(model), (* C.yval_t)(yval), (* C.int64_t)(val)))
+func Val_get_int64(model Model_t, yval *Yval_t, val *int64) int32 {
+	return int32(C.yices_val_get_int64(ymodel(model), (* C.yval_t)(yval), (* C.int64_t)(val)))
 }
 
-func Val_get_rational32(model *Model_t, yval *Yval_t, num *int32, den *uint32) int32 {
-	return int32(C.yices_val_get_rational32((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(num), (* C.uint32_t)(den)))
+func Val_get_rational32(model Model_t, yval *Yval_t, num *int32, den *uint32) int32 {
+	return int32(C.yices_val_get_rational32(ymodel(model), (* C.yval_t)(yval), (* C.int32_t)(num), (* C.uint32_t)(den)))
 }
 
-func Val_get_rational64(model *Model_t, yval *Yval_t, num *int64, den *uint64) int32 {
-	return int32(C.yices_val_get_rational64((* C.model_t)(model), (* C.yval_t)(yval), (* C.int64_t)(num), (* C.uint64_t)(den)))
+func Val_get_rational64(model Model_t, yval *Yval_t, num *int64, den *uint64) int32 {
+	return int32(C.yices_val_get_rational64(ymodel(model), (* C.yval_t)(yval), (* C.int64_t)(num), (* C.uint64_t)(den)))
 }
 
-func Val_get_double(model *Model_t, yval *Yval_t, val *float64) int32 {
-	return int32(C.yices_val_get_double((* C.model_t)(model), (* C.yval_t)(yval), (* C.double)(val)))
+func Val_get_double(model Model_t, yval *Yval_t, val *float64) int32 {
+	return int32(C.yices_val_get_double(ymodel(model), (* C.yval_t)(yval), (* C.double)(val)))
 }
 
 /*
@@ -1699,22 +1714,22 @@ __YICES_DLLSPEC__ extern int32_t yices_val_get_algebraic_number(model_t *mdl, co
 */
 
 
-func Val_get_bv(model *Model_t, yval *Yval_t, val []int32) int32 {
-	return int32(C.yices_val_get_bv((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(&val[0])))
+func Val_get_bv(model Model_t, yval *Yval_t, val []int32) int32 {
+	return int32(C.yices_val_get_bv(ymodel(model), (* C.yval_t)(yval), (* C.int32_t)(&val[0])))
 }
 
-func Val_get_scalar(model *Model_t, yval *Yval_t, val *int32, tau *Type_t) int32 {
-	return int32(C.yices_val_get_scalar((* C.model_t)(model), (* C.yval_t)(yval), (* C.int32_t)(val), (*C.type_t)(tau)))
+func Val_get_scalar(model Model_t, yval *Yval_t, val *int32, tau *Type_t) int32 {
+	return int32(C.yices_val_get_scalar(ymodel(model), (* C.yval_t)(yval), (* C.int32_t)(val), (*C.type_t)(tau)))
 }
 
-func Val_expand_tuple(model *Model_t, yval *Yval_t, child []Yval_t) int32 {
-	return int32(C.yices_val_expand_tuple((* C.model_t)(model), (* C.yval_t)(yval), (* C.yval_t)(&child[0])))
+func Val_expand_tuple(model Model_t, yval *Yval_t, child []Yval_t) int32 {
+	return int32(C.yices_val_expand_tuple(ymodel(model), (* C.yval_t)(yval), (* C.yval_t)(&child[0])))
 }
 
-func Val_expand_function(model *Model_t, yval *Yval_t, def *Yval_t) (vector []Yval_t) {
+func Val_expand_function(model Model_t, yval *Yval_t, def *Yval_t) (vector []Yval_t) {
 	var tv C.yval_vector_t
 	C.yices_init_yval_vector(&tv)
-	errcode := int32(C.yices_val_expand_function((* C.model_t)(model), (* C.yval_t)(yval), (* C.yval_t)(def), (*C.yval_vector_t)(&tv)))
+	errcode := int32(C.yices_val_expand_function(ymodel(model), (* C.yval_t)(yval), (* C.yval_t)(def), (*C.yval_vector_t)(&tv)))
 	if errcode != -1 {
 		count := int(tv.size)
 		vector = make([]Yval_t, count, count)
@@ -1730,13 +1745,13 @@ func Val_expand_function(model *Model_t, yval *Yval_t, def *Yval_t) (vector []Yv
 }
 
 
-func Formula_true_in_model(model *Model_t, t Term_t)  int32 {
-	return int32(C.yices_formula_true_in_model((* C.model_t)(model), C.term_t(t)))
+func Formula_true_in_model(model Model_t, t Term_t)  int32 {
+	return int32(C.yices_formula_true_in_model(ymodel(model), C.term_t(t)))
 }
 
-func Formulas_true_in_model(model *Model_t, t []Term_t)  int32 {
+func Formulas_true_in_model(model Model_t, t []Term_t)  int32 {
 	tcount := C.uint32_t(len(t))
-	return int32(C.yices_formulas_true_in_model((* C.model_t)(model), tcount, (*C.term_t)(&t[0])))
+	return int32(C.yices_formulas_true_in_model(ymodel(model), tcount, (*C.term_t)(&t[0])))
 }
 
 
@@ -1744,23 +1759,23 @@ func Formulas_true_in_model(model *Model_t, t []Term_t)  int32 {
  * CONVERSION OF VALUES TO CONSTANT TERMS
  */
 
-func Get_value_as_term(model *Model_t, t Term_t)  Term_t {
-	return Term_t(C.yices_get_value_as_term((* C.model_t)(model), C.term_t(t)))
+func Get_value_as_term(model Model_t, t Term_t)  Term_t {
+	return Term_t(C.yices_get_value_as_term(ymodel(model), C.term_t(t)))
 }
 
-func Term_array_value(model *Model_t, a []Term_t, b []Term_t) int32 {
+func Term_array_value(model Model_t, a []Term_t, b []Term_t) int32 {
 	tcount := C.uint32_t(len(a))
-	return int32(C.yices_term_array_value((* C.model_t)(model), tcount, (*C.term_t)(&a[0]), (*C.term_t)(&b[0])))
+	return int32(C.yices_term_array_value(ymodel(model), tcount, (*C.term_t)(&a[0]), (*C.term_t)(&b[0])))
 }
 
 /*
  * IMPLICANTS
  */
 
-func Implicant_for_formula(model *Model_t, t Term_t) (literals []Term_t) {
+func Implicant_for_formula(model Model_t, t Term_t) (literals []Term_t) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
-	errcode := int32(C.yices_implicant_for_formula((* C.model_t)(model), C.term_t(t), (*C.term_vector_t)(&tv)))
+	errcode := int32(C.yices_implicant_for_formula(ymodel(model), C.term_t(t), (*C.term_vector_t)(&tv)))
 	if errcode != -1 {
 		count := int(tv.size)
 		literals = make([]Term_t, count, count)
@@ -1773,11 +1788,11 @@ func Implicant_for_formula(model *Model_t, t Term_t) (literals []Term_t) {
 	return
 }
 
-func Implicant_for_formulas(model *Model_t, t []Term_t) (literals []Term_t) {
+func Implicant_for_formulas(model Model_t, t []Term_t) (literals []Term_t) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	tcount := C.uint32_t(len(t))
-	errcode := int32(C.yices_implicant_for_formulas((* C.model_t)(model), tcount, (*C.term_t)(&t[0]), (*C.term_vector_t)(&tv)))
+	errcode := int32(C.yices_implicant_for_formulas(ymodel(model), tcount, (*C.term_t)(&t[0]), (*C.term_vector_t)(&tv)))
 	if errcode != -1 {
 		count := int(tv.size)
 		literals = make([]Term_t, count, count)
@@ -1805,11 +1820,11 @@ const (
 )
 
 
-func Generalize_model(model *Model_t, t Term_t, elims []Term_t, mode Gen_mode_t) (formulas []Term_t) {
+func Generalize_model(model Model_t, t Term_t, elims []Term_t, mode Gen_mode_t) (formulas []Term_t) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	ecount := C.uint32_t(len(elims))
-	errcode := int32(C.yices_generalize_model((* C.model_t)(model), C.term_t(t), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv)))
+	errcode := int32(C.yices_generalize_model(ymodel(model), C.term_t(t), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv)))
 	if errcode != -1 {
 		count := int(tv.size)
 		formulas = make([]Term_t, count, count)
@@ -1822,12 +1837,12 @@ func Generalize_model(model *Model_t, t Term_t, elims []Term_t, mode Gen_mode_t)
 	return
 }
 
-func Generalize_model_array(model *Model_t, a []Term_t, elims []Term_t, mode Gen_mode_t) (formulas []Term_t) {
+func Generalize_model_array(model Model_t, a []Term_t, elims []Term_t, mode Gen_mode_t) (formulas []Term_t) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	acount := C.uint32_t(len(a))
 	ecount := C.uint32_t(len(elims))
-	errcode := int32(C.yices_generalize_model_array((* C.model_t)(model), acount, (*C.term_t)(&a[0]), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv)))
+	errcode := int32(C.yices_generalize_model_array(ymodel(model), acount, (*C.term_t)(&a[0]), ecount, (* C.term_t)(&elims[0]), C.yices_gen_mode_t(mode), (*C.term_vector_t)(&tv)))
 	if errcode != -1 {
 		count := int(tv.size)
 		formulas = make([]Term_t, count, count)
@@ -1860,12 +1875,12 @@ func Pp_term_array(file *os.File, t []Term_t, width uint32, height uint32, offse
 }
 
 
-func Print_model(file *os.File, model *Model_t) int32 {
-	return int32(C.yices_print_model_fd(C.int(file.Fd()), (* C.model_t)(model)))
+func Print_model(file *os.File, model Model_t) int32 {
+	return int32(C.yices_print_model_fd(C.int(file.Fd()), ymodel(model)))
 }
 
-func Pp_model(file *os.File, model *Model_t, width uint32, height uint32, offset uint32) int32 {
-	return int32(C.yices_pp_model_fd(C.int(file.Fd()), (* C.model_t)(model), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
+func Pp_model(file *os.File, model Model_t, width uint32, height uint32, offset uint32) int32 {
+	return int32(C.yices_pp_model_fd(C.int(file.Fd()), ymodel(model), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
 }
 
 func Type_to_string(tau Type_t, width uint32, height uint32, offset uint32) string {
@@ -1880,8 +1895,8 @@ func Term_to_string(t Term_t, width uint32, height uint32, offset uint32) string
 	return C.GoString(cstr)
 }
 
-func Model_to_string(model *Model_t, width uint32, height uint32, offset uint32) string {
-	cstr := C.yices_model_to_string((*C.model_t)(model), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset))
+func Model_to_string(model Model_t, width uint32, height uint32, offset uint32) string {
+	cstr := C.yices_model_to_string(ymodel(model), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset))
 	defer C.yices_free_string(cstr)
 	return C.GoString(cstr)
 }
