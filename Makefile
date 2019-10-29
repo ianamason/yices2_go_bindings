@@ -22,7 +22,7 @@ develop:
 
 # make sure we do not run tests in parallel!
 check: develop
-	go test -v ./tests
+	go test -v -p 1 ./tests
 
 format:
 	gofmt -s -w yices2/*.go cmd/*/*.go tests/*.go
