@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"os"
 	"github.com/ianamason/yices2_go_bindings/yices2"
 	"testing"
 )
@@ -21,8 +22,6 @@ func defineConstant(name string, typ yices2.Type_t) (term yices2.Term_t) {
 
 func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
 	bool_t := yices2.Bool_type()
-	//int_t := yices2.Int_type()
-	//real_t := yices2.Real_type()
 	b1 := defineConstant("b1", bool_t)
 	b2 := defineConstant("b2", bool_t)
 	b3 := defineConstant("b3", bool_t)
@@ -64,12 +63,36 @@ func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t)
 }
 
 func test_int_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+	int_t := yices2.Int_type()
+	//real_t := yices2.Real_type()
+	i1 := defineConstant("i1", int_t)
+	i2 := defineConstant("i2", int_t)
+	parseStringAndAssert("(> i1 3)", ctx)
+	parseStringAndAssert("(< i2 i1)", ctx)
+	stat := yices2.Check_context(ctx, params)
+	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
+	modelp := yices2.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+	var i32v1 int32
+	var i32v2 int32
+	yices2.Get_int32_value(*modelp, i1, &i32v1)
+	yices2.Get_int32_value(*modelp, i2, &i32v2)
+	AssertEqual(t, i32v1, 4, "i32v1 == 4")
+	AssertEqual(t, i32v2, 3, "i32v2 == 3")
+	var i64v1 int64
+	var i64v2 int64
+	yices2.Get_int64_value(*modelp, i1, &i64v1)
+	yices2.Get_int64_value(*modelp, i2, &i64v2)
+	AssertEqual(t, i64v1, 4, "i64v1 == 4")
+	AssertEqual(t, i64v2, 3, "i64v2 == 3")
+	yices2.Print_model(os.Stdout, *modelp)
 
 }
 
 func test_rat_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
 
 }
+
 
 func test_bv_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
 
@@ -94,6 +117,8 @@ func TestModel0(t *testing.T) {
 	yices2.Default_params_for_context(ctx, params)
 
 	test_bool_models(t, ctx, params)
+
+	yices2.Reset_context(ctx)
 
 	test_int_models(t, ctx, params)
 
