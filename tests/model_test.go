@@ -31,6 +31,7 @@ func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t)
 	stat := yices2.Check_context(ctx, params)
 	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
 	modelp := yices2.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
 	var bval1 int32
 	var bval2 int32
 	var bval3 int32
@@ -40,6 +41,25 @@ func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t)
 	AssertEqual(t, bval1, 0, "bval1 == 0")
 	AssertEqual(t, bval2, 0, "bval2 == 0")
 	AssertEqual(t, bval3, 1, "bval3 == 1")
+	b_fmla2 := yices2.Parse_term("(not b3)")
+	yices2.Assert_formula(ctx, b_fmla2)
+	stat = yices2.Check_context(ctx, params)
+	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
+	modelp = yices2.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+	yices2.Get_bool_value(*modelp, b1, &bval1)
+	yices2.Get_bool_value(*modelp, b2, &bval2)
+	yices2.Get_bool_value(*modelp, b3, &bval3)
+	AssertEqual(t, bval1, 0, "bval1 == 0")
+	AssertEqual(t, bval2, 1, "bval2 == 1")
+	AssertEqual(t, bval3, 0, "bval3 == 0")
+
+	var yval yices2.Yval_t
+
+	yices2.Get_value(*modelp, b1, &yval)
+	AssertEqual(t, yices2.Get_tag(yval), yices2.YVAL_BOOL)
+	yices2.Val_get_bool(*modelp, &yval, &bval1)
+	AssertEqual(t, bval1, 0, "bval1 == 0")
 
 }
 
