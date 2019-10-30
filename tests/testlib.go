@@ -127,35 +127,33 @@ func UnsignedEqual(x interface{}, y interface{}) bool {
 }
 
 
-func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}) {
+func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ... string) {
 	if reflect.DeepEqual(lhs, rhs) {
 		t.Errorf("AssertNotEqual: %v = %v\n", lhs, rhs)
 	}
 }
 
-func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}) {
+func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ... string) {
 	if Signed(lhs) && Signed(rhs) {
 		if !SignedEqual(lhs, rhs) {
-			//panic("here")
-			t.Errorf("AssertEqual of signed integers: %v : %v = %v : %v\n", lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+			t.Errorf("%s : AssertEqual of signed integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 		} else {
 			return
 		}
 	}
 	if !reflect.DeepEqual(lhs, rhs) {
-		//panic("here")
-		t.Errorf("AssertEqual: %v : %v = %v : %v\n", lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+		t.Errorf("%s : AssertEqual %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 	}
 }
 
-func AssertTrue(t *testing.T, cond interface{}) {
+func AssertTrue(t *testing.T, cond interface{}, where ... string) {
 	if cond != true {
-		t.Errorf("AssertTrue: %v : %v\n", cond, reflect.TypeOf(cond))
+		t.Errorf("%s AssertTrue %v : %v\n", where, cond, reflect.TypeOf(cond))
 	}
 }
 
-func AssertFalse(t *testing.T, cond interface{}) {
+func AssertFalse(t *testing.T, cond interface{}, where ... string) {
 	if cond != false {
-		t.Errorf("AssertFalse: %v : %v\n", cond, reflect.TypeOf(cond))
+		t.Errorf("%s AssertFalse %v : %v\n", where, cond, reflect.TypeOf(cond))
 	}
 }

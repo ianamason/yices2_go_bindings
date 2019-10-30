@@ -29,7 +29,7 @@ func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t)
 	b_fml1 := yices2.Parse_term("(or b1 b2 b3)")
 	yices2.Assert_formula(ctx, b_fml1)
 	stat := yices2.Check_context(ctx, params)
-	AssertEqual(t, stat, yices2.STATUS_SAT)
+	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
 	modelp := yices2.Get_model(ctx, 1)
 	var bval1 int32
 	var bval2 int32
@@ -37,6 +37,9 @@ func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t)
 	yices2.Get_bool_value(*modelp, b1, &bval1)
 	yices2.Get_bool_value(*modelp, b2, &bval2)
 	yices2.Get_bool_value(*modelp, b3, &bval3)
+	AssertEqual(t, bval1, 0, "bval1 == 0")
+	AssertEqual(t, bval2, 0, "bval2 == 0")
+	AssertEqual(t, bval3, 1, "bval3 == 1")
 
 }
 
