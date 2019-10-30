@@ -9,5 +9,5 @@ func TestVector0(t *testing.T) {
 	yices2.Init()
 
 
-	defer yices2.Exit()
+	yices2.Exit()
 }

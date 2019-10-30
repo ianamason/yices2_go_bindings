@@ -143,7 +143,7 @@ func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}) {
 		}
 	}
 	if !reflect.DeepEqual(lhs, rhs) {
-		panic("here")
+		//panic("here")
 		t.Errorf("AssertEqual: %v : %v = %v : %v\n", lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 	}
 }

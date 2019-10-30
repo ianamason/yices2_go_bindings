@@ -41,7 +41,7 @@ func TestContext0(t *testing.T) {
 
 	errcode := yices2.Set_param(params, "dyn-ack", "true")
 	AssertEqual(t, errcode, 0)  //FIXME: is this right?
-	
+
 	yices2.Close_param_record(&params)
 
 	yices2.Close_context(&ctx)
@@ -51,7 +51,7 @@ func TestContext0(t *testing.T) {
 
 }
 
-func NotATestContext1(t *testing.T) {
+func TestContext1(t *testing.T) {
 	yices2.Init()
 
 	var cfg yices2.Config_t
@@ -119,4 +119,3 @@ func NotATestContext1(t *testing.T) {
 	yices2.Exit()
 
 }
-

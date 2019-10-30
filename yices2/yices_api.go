@@ -23,8 +23,10 @@ import "unsafe"
  *  See yices.h for comments.
  *
  *  Naming convention:   yices_foo  becomes yices2.Foo  (will probably ditch the 2 at some stage)
+ *  The exception to this rule is the new and free routines for contexts configs and params; that have
+ *  Init_<kind> and Close_<kind> routines.
  *
- *  This layer (yices_api.go) is a thin wrapper to the yices_api. A more go-like layer will sit atop
+ *  This layer (yices_api.go) is a thin wrapper to the yices_api. Maybe a more go-like layer will sit atop this
  *  much like the python version of the API.
  *
  *  bd: - free the strings returned by yices.
