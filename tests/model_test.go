@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"os"
 	"github.com/ianamason/yices2_go_bindings/yices2"
 	"testing"
@@ -149,10 +150,39 @@ func test_rat_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 
 
 func test_bv_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+	bv_t := yices2.Bv_type(3)
+	bv1 := defineConstant("bv1", bv_t)
+	bv2 := defineConstant("bv2", bv_t)
+	bv3 := defineConstant("bv3", bv_t)
+	parseStringAndAssert("(= bv1 (bv-add bv2 bv3))", ctx)
+	parseStringAndAssert("(bv-gt bv2 0b000)", ctx)
+	parseStringAndAssert("(bv-gt bv3 0b000)", ctx)
+
+	stat := yices2.Check_context(ctx, params)
+	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
+	modelp := yices2.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+
+	bval1 := []int32{0, 0, 0}
+	bval2 := []int32{0, 0, 0}
+	bval3 := []int32{0, 0, 0}
+
+	errcode := yices2.Get_bv_value(*modelp, bv1, bval1)
+	AssertEqual(t, errcode, 0, "errcode == 0")
+	fmt.Printf("bval1 = %v\n", bval1)
+
+	errcode = yices2.Get_bv_value(*modelp, bv2, bval2)
+	AssertEqual(t, errcode, 0, "errcode == 0")
+	fmt.Printf("bval2 = %v\n", bval2)
+
+	errcode = yices2.Get_bv_value(*modelp, bv3, bval3)
+	AssertEqual(t, errcode, 0, "errcode == 0")
+	fmt.Printf("bval3 = %v\n", bval3)
+
 
 }
 
-func TestModel0(t *testing.T) {
+func TestSimpleModels(t *testing.T) {
 
 	yices2.Init()
 
@@ -181,6 +211,57 @@ func TestModel0(t *testing.T) {
 	yices2.Close_config(&cfg)
 
 	yices2.Close_param_record(&params)
+
+	yices2.Close_context(&ctx)
+
+	yices2.Exit()
+
+
+
+}
+
+func TestAlgebraicModels(t *testing.T) {
+
+	yices2.Init()
+
+	if yices2.Has_mcsat() == int32(0) {
+		fmt.Println("TestAlgebraicModels skipped because no mcsat.")
+		return
+	}
+
+	real_t := yices2.Real_type()
+
+	var cfg yices2.Config_t
+
+	var ctx yices2.Context_t
+
+	var params yices2.Param_t
+
+	yices2.Init_config(&cfg)
+
+	yices2.Default_config_for_logic(cfg, "QF_NRA")
+    yices2.Set_config(cfg, "mode", "one-shot")
+
+	yices2.Init_context(cfg, &ctx)
+
+	x := defineConstant("x", real_t)
+
+	parseStringAndAssert("(= (* x x) 2)", ctx)
+
+	stat := yices2.Check_context(ctx, params)  //params == NULL in the C
+
+	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
+	modelp := yices2.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+
+	yices2.Print_model(os.Stdout, *modelp)
+
+	var xf float64
+	yices2.Get_double_value(*modelp, x, &xf)
+
+	AssertEqual(t, xf, -1.414213562373095, "xf == -1.414213562373095")
+
+	yices2.Close_config(&cfg)
 
 	yices2.Close_context(&ctx)
 
