@@ -186,6 +186,28 @@ func UnsignedEqual(x interface{}, y interface{}) bool {
 
 
 func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ... string) {
+	if Signed(lhs) && Signed(rhs) {
+		if SignedEqual(lhs, rhs) {
+			t.Errorf("%s : AssertNotEqual of signed integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+		} else {
+			return
+		}
+	}
+	if Signed(lhs) && Unsigned(rhs) {
+		if SignedUnsignedEqual(lhs, rhs) {
+			t.Errorf("%s : AssertNotEqual of signed/unsigned integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+		} else {
+			return
+		}
+	}
+	if Signed(rhs) && Unsigned(lhs) {
+		if SignedUnsignedEqual(rhs, lhs) {
+			t.Errorf("%s : AssertNotEqual of signed/unsigned integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+		} else {
+			return
+		}
+	}
+
 	if reflect.DeepEqual(lhs, rhs) {
 		t.Errorf("AssertNotEqual: %v = %v\n", lhs, rhs)
 	}
