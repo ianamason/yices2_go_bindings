@@ -119,6 +119,32 @@ func test_rat_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 
 	AssertEqual(t, r32v1num, 7, "r32v1num == 7")
 	AssertEqual(t, r32v1den, 2, "r32v1den == 2")
+	AssertEqual(t, r32v2num, 4, "r32v2num == 4")
+	AssertEqual(t, r32v2den, 1, "r32v2den == 1")
+
+	var r64v1num int64
+	var r64v1den uint64
+	var r64v2num int64
+	var r64v2den uint64
+
+	yices2.Get_rational64_value(*modelp, r1, &r64v1num, &r64v1den)
+	yices2.Get_rational64_value(*modelp, r2, &r64v2num, &r64v2den)
+
+	AssertEqual(t, r64v1num, 7, "r64v1num == 7")
+	AssertEqual(t, r64v1den, 2, "r64v1den == 2")
+	AssertEqual(t, r64v2num, 4, "r64v2num == 4")
+	AssertEqual(t, r64v2den, 1, "r64v2den == 1")
+
+	var rdoub1 float64
+	var rdoub2 float64
+
+	yices2.Get_double_value(*modelp, r1, &rdoub1)
+	yices2.Get_double_value(*modelp, r2, &rdoub2)
+
+	AssertEqual(t, rdoub1, 3.5, "rdoub1 == 3.5")
+	AssertEqual(t, rdoub2, 4.0, "rdoub2 == 4.0")
+
+
 }
 
 
