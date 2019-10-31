@@ -63,8 +63,10 @@ func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t)
 }
 
 func test_int_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+
+	yices2.Reset_context(ctx)
+
 	int_t := yices2.Int_type()
-	//real_t := yices2.Real_type()
 	i1 := defineConstant("i1", int_t)
 	i2 := defineConstant("i2", int_t)
 	parseStringAndAssert("(> i1 3)", ctx)
@@ -86,11 +88,37 @@ func test_int_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 	AssertEqual(t, i64v1, 4, "i64v1 == 4")
 	AssertEqual(t, i64v2, 3, "i64v2 == 3")
 	yices2.Print_model(os.Stdout, *modelp)
-
+	yices2.Pp_model(os.Stdout, *modelp, 80, 100, 0)
+	mdlstr := yices2.Model_to_string(*modelp, 80, 100, 0)
+	AssertEqual(t, mdlstr, "(= i1 4)\n(= i2 3)")
 }
 
 func test_rat_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
 
+	yices2.Reset_context(ctx)
+
+	real_t := yices2.Real_type()
+	r1 := defineConstant("r1", real_t)
+	r2 := defineConstant("r2", real_t)
+	parseStringAndAssert("(> r1 3)", ctx)
+	parseStringAndAssert("(< r1 4)", ctx)
+	parseStringAndAssert("(< (- r1 r2) 0)", ctx)
+
+	stat := yices2.Check_context(ctx, params)
+	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
+	modelp := yices2.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+
+	var r32v1num int32
+	var r32v1den uint32
+	var r32v2num int32
+	var r32v2den uint32
+
+	yices2.Get_rational32_value(*modelp, r1, &r32v1num, &r32v1den)
+	yices2.Get_rational32_value(*modelp, r2, &r32v2num, &r32v2den)
+
+	AssertEqual(t, r32v1num, 7, "r32v1num == 7")
+	AssertEqual(t, r32v1den, 2, "r32v1den == 2")
 }
 
 
@@ -117,8 +145,6 @@ func TestModel0(t *testing.T) {
 	yices2.Default_params_for_context(ctx, params)
 
 	test_bool_models(t, ctx, params)
-
-	yices2.Reset_context(ctx)
 
 	test_int_models(t, ctx, params)
 

@@ -3,6 +3,7 @@ package tests
 import (
 	"testing"
 	"reflect"
+	"math"
 )
 
 func Signed(thing interface{}) (retval bool){
@@ -28,6 +29,63 @@ func Unsigned(thing interface{}) (retval bool){
 	return
 }
 
+// x is signed; y is unsigned
+func SignedUnsignedEqual(x interface{}, y interface{}) bool {
+
+	if x == nil || y == nil {
+		return false
+	}
+
+	var xint int64 = 0
+	var yint int64 = 0
+
+	xtyp := reflect.TypeOf(x)
+	switch xtyp.Kind() {
+	case reflect.Int:
+		xint = int64(x.(int))
+	case reflect.Int8:
+		xint = int64(x.(int8))
+	case reflect.Int16:
+		xint = int64(x.(int16))
+	case reflect.Int32:
+		xint = int64(x.(int32))
+	case reflect.Int64:
+		xint = x.(int64)
+	default:
+		return false
+	}
+
+	if xint < 0 {
+		return false
+	}
+
+	ytyp := reflect.TypeOf(y)
+	switch ytyp.Kind() {
+	case reflect.Uint:
+		yint = int64(y.(uint))
+	case reflect.Uint8:
+		yint = int64(y.(uint8))
+	case reflect.Uint16:
+		yint = int64(y.(uint16))
+	case reflect.Uint32:
+		yint = int64(y.(uint32))
+	case reflect.Uint64:
+		yval := y.(uint64)
+		if yval > math.MaxInt64 {
+			return false
+		}
+		yint = int64(y.(uint64))
+	default:
+		return false
+	}
+
+	if xint != yint {
+		return false
+	}
+
+	return true
+
+}
 
 func SignedEqual(x interface{}, y interface{}) bool {
 
@@ -35,21 +93,21 @@ func SignedEqual(x interface{}, y interface{}) bool {
 		return false
 	}
 
-	var xint int = 0
-	var yint int = 0
+	var xint int64 = 0
+	var yint int64 = 0
 
 	xtyp := reflect.TypeOf(x)
 	switch xtyp.Kind() {
 	case reflect.Int:
-		xint = int(x.(int))
+		xint = int64(x.(int))
 	case reflect.Int8:
-		xint = int(x.(int8))
+		xint = int64(x.(int8))
 	case reflect.Int16:
-		xint = int(x.(int16))
+		xint = int64(x.(int16))
 	case reflect.Int32:
-		xint = int(x.(int32))
+		xint = int64(x.(int32))
 	case reflect.Int64:
-		xint = int(x.(int64))
+		xint = x.(int64)
 	default:
 		return false
 	}
@@ -58,15 +116,15 @@ func SignedEqual(x interface{}, y interface{}) bool {
 	ytyp := reflect.TypeOf(y)
 	switch ytyp.Kind() {
 	case reflect.Int:
-		yint = int(y.(int))
+		yint = int64(y.(int))
 	case reflect.Int8:
-		yint = int(y.(int8))
+		yint = int64(y.(int8))
 	case reflect.Int16:
-		yint = int(y.(int16))
+		yint = int64(y.(int16))
 	case reflect.Int32:
-		yint = int(y.(int32))
+		yint = int64(y.(int32))
 	case reflect.Int64:
-		yint = int(y.(int64))
+		yint = y.(int64)
 	default:
 		return false
 	}
@@ -137,6 +195,20 @@ func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ... strin
 	if Signed(lhs) && Signed(rhs) {
 		if !SignedEqual(lhs, rhs) {
 			t.Errorf("%s : AssertEqual of signed integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+		} else {
+			return
+		}
+	}
+	if Signed(lhs) && Unsigned(rhs) {
+		if !SignedUnsignedEqual(lhs, rhs) {
+			t.Errorf("%s : AssertEqual of signed/unsigned integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+		} else {
+			return
+		}
+	}
+	if Signed(rhs) && Unsigned(lhs) {
+		if !SignedUnsignedEqual(rhs, lhs) {
+			t.Errorf("%s : AssertEqual of signed/unsigned integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 		} else {
 			return
 		}
