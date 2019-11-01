@@ -170,14 +170,17 @@ func test_bv_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
 	errcode := yices2.Get_bv_value(*modelp, bv1, bval1)
 	AssertEqual(t, errcode, 0, "errcode == 0")
 	fmt.Printf("bval1 = %v\n", bval1)
+	AssertEqual(t, bval1, []int32{0, 0, 0}, "bval1 == []int32{0, 0, 0}")
 
 	errcode = yices2.Get_bv_value(*modelp, bv2, bval2)
 	AssertEqual(t, errcode, 0, "errcode == 0")
 	fmt.Printf("bval2 = %v\n", bval2)
+	AssertEqual(t, bval2, []int32{0, 0, 1}, "bval2 == []int32{0, 0, 1}")
 
 	errcode = yices2.Get_bv_value(*modelp, bv3, bval3)
 	AssertEqual(t, errcode, 0, "errcode == 0")
 	fmt.Printf("bval3 = %v\n", bval3)
+	AssertEqual(t, bval3, []int32{0, 0, 1}, "bval1 == []int32{0, 0, 1}")
 
 
 }

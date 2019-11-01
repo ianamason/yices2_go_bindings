@@ -93,11 +93,11 @@ func Reset() {
 
 //__YICES_DLLSPEC__ extern error_code_t yices_error_code(void);
 
-func Error_code() int32 {
-	return int32(C.yices_error_code())
-} //iam: FIXME error_code_t should (associated with a) be a go type
+func Error_code() Error_code_t {
+	return Error_code_t(C.yices_error_code())
+}
 
-//__YICES_DLLSPEC__ extern error_report_t *yices_error_report(void); //iam: FIXME seem to recall this has unions in it?
+//__YICES_DLLSPEC__ extern error_report_t *yices_error_report(void); //iam: FIXME
 
 func Clear_error() {
 	C.yices_clear_error()
@@ -538,8 +538,9 @@ __YICES_DLLSPEC__ extern term_t yices_mpq(const mpq_t q);
 func Mpz(z C.mpz_t) Term_t {
 	return Term_t(C.yices_mpz(z))
 }
-
 */
+
+
 
 func Parse_rational(s string) Term_t {
 	cs := C.CString(s)
