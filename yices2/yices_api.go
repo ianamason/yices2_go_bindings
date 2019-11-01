@@ -13,6 +13,15 @@ void yices_yval_vector_get(yval_vector_t *vec, uint32_t elem, yval_t* val){
       yval_t *v = &vec->data[elem];
       *val = *v;
 }
+uintptr_t copy_error_record(void){
+  error_report_t* ptr = malloc(sizeof(error_report_t));
+  *ptr = *yices_error_report();
+  return (uintptr_t)ptr;
+}
+void delete_error_record(uintptr_t ptr){
+  free((void *)ptr);
+}
+//FIXME: need to write getters for the slots in the error_report_t
 */
 import "C"
 
@@ -90,6 +99,46 @@ func Reset() {
 /*********************
  *  ERROR REPORTING  *
  ********************/
+
+type Error_code_t int32
+
+type Error_report_t struct {
+	raw uintptr // actually *C.error_report_t
+}
+
+
+type YicesError struct {
+	error_string string
+	error_code Error_code_t
+	error_report *Error_report_t
+}
+
+
+func (yerror *YicesError) Error() string {
+	return yerror.error_string
+}
+
+func NewYicesError() (yerror *YicesError) {
+	errcode := Error_code()
+	if errcode != NO_ERROR {
+		yerror = &YicesError {
+			Error_string(),
+				errcode,
+				&Error_report_t {
+				uintptr(C.copy_error_record()),
+			},
+			}
+		Clear_error() //not sure about this.
+	}
+	return
+}
+
+
+func Close_YicesError(yerror *YicesError){
+	if yerror == nil || yerror.error_report == nil ||  yerror.error_report.raw == 0 { return }
+	C.delete_error_record(C.uintptr_t(yerror.error_report.raw))
+	yerror.error_report.raw = 0
+}
 
 //__YICES_DLLSPEC__ extern error_code_t yices_error_code(void);
 
