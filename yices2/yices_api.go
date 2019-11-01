@@ -13,6 +13,7 @@ void yices_yval_vector_get(yval_vector_t *vec, uint32_t elem, yval_t* val){
       yval_t *v = &vec->data[elem];
       *val = *v;
 }
+//FIXME: need to write getters for the slots in the error_report_t
 uintptr_t copy_error_record(void){
   error_report_t* ptr = malloc(sizeof(error_report_t));
   *ptr = *yices_error_report();
@@ -21,7 +22,14 @@ uintptr_t copy_error_record(void){
 void delete_error_record(uintptr_t ptr){
   free((void *)ptr);
 }
-//FIXME: need to write getters for the slots in the error_report_t
+// hack to get around weird cgo complaints
+term_t ympz(uintptr_t ptr){
+   return yices_mpz(*((mpz_t *)((void *)ptr)));
+}
+// hack to get around weird cgo complaints
+term_t ympq(uintptr_t ptr){
+   return yices_mpq(*((mpq_t *)((void *)ptr)));
+}
 */
 import "C"
 
@@ -118,6 +126,9 @@ func (yerror *YicesError) Error() string {
 	return yerror.error_string
 }
 
+// NewYicesError() returns a copy of the current error state
+// should be closed after the caller has finished with
+// it.
 func NewYicesError() (yerror *YicesError) {
 	errcode := Error_code()
 	if errcode != NO_ERROR {
@@ -575,20 +586,15 @@ func Rational64(num int64, den uint64) Term_t {
 	return Term_t(C.yices_rational64(C.int64_t(num), C.uint64_t(den)))
 }
 
-/* iam: FIXME in the too hard basket for now.
-https://github.com/golang/go/blob/master/misc/cgo/gmp/gmp.go
-#ifdef __GMP_H__
-__YICES_DLLSPEC__ extern term_t yices_mpz(const mpz_t z);
-__YICES_DLLSPEC__ extern term_t yices_mpq(const mpq_t q);
-#endif
-
-// Computer says no:
-// cannot use _cgo0 (type _Ctype_mpz_t) as type *_Ctype_struct___0 in argument to _Cfunc_yices_mpz
-func Mpz(z C.mpz_t) Term_t {
-	return Term_t(C.yices_mpz(z))
+func Mpz(z *C.mpz_t) Term_t {
+	// some contortions needed here to do the simplest of things
+	return Term_t(C.ympz(C.uintptr_t(uintptr(unsafe.Pointer(z)))))
 }
-*/
 
+func Mpq(q *C.mpq_t) Term_t {
+	// some contortions needed here to do the simplest of things
+	return Term_t(C.ympq(C.uintptr_t(uintptr(unsafe.Pointer(q)))))
+}
 
 
 func Parse_rational(s string) Term_t {
