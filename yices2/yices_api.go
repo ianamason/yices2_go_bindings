@@ -108,6 +108,8 @@ func Reset() {
  *  ERROR REPORTING  *
  ********************/
 
+//iam: FIXME we should have a go version of the yices error_report_t struct and fetch that.
+// not this nonsense.
 type Error_code_t int32
 
 type Error_report_t struct {
@@ -586,12 +588,16 @@ func Rational64(num int64, den uint64) Term_t {
 	return Term_t(C.yices_rational64(C.int64_t(num), C.uint64_t(den)))
 }
 
-func Mpz(z *C.mpz_t) Term_t {
+type Mpz_t C.mpz_t
+
+func Mpz(z *Mpz_t) Term_t {
 	// some contortions needed here to do the simplest of things
 	return Term_t(C.ympz(C.uintptr_t(uintptr(unsafe.Pointer(z)))))
 }
 
-func Mpq(q *C.mpq_t) Term_t {
+type Mpq_t C.mpq_t
+
+func Mpq(q *Mpq_t) Term_t {
 	// some contortions needed here to do the simplest of things
 	return Term_t(C.ympq(C.uintptr_t(uintptr(unsafe.Pointer(q)))))
 }
