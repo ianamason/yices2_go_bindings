@@ -1812,15 +1812,6 @@ func Val_get_mpq(model Model_t, yval *Yval_t, val Mpq_t) int32 {
 	return int32(C.yices_val_get_mpqp(ymodel(model), (* C.yval_t)(yval), (* C.mpq_t)(unsafe.Pointer(&val))))
 }
 
-//(* C.mpz_t)(unsafe.Pointer(&z))))
-
-/*
-#ifdef __GMP_H__
-__YICES_DLLSPEC__ extern int32_t yices_val_get_mpz(model_t *mdl, const yval_t *v, mpz_t val);
-__YICES_DLLSPEC__ extern int32_t yices_val_get_mpq(model_t *mdl, const yval_t *v, mpq_t val);
-#endif
-*/
-
 /*
 #ifdef LIBPOLY_VERSION
 __YICES_DLLSPEC__ extern int32_t yices_val_get_algebraic_number(model_t *mdl, const yval_t *v, lp_algebraic_number_t *a);
