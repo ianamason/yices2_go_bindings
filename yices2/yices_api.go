@@ -30,6 +30,26 @@ term_t ympz(uintptr_t ptr){
 term_t ympq(uintptr_t ptr){
    return yices_mpq(*((mpq_t *)((void *)ptr)));
 }
+// passing a mpz_t thru cgo seems too hard
+term_t yices_bvconst_mpzp(uint32_t n, mpz_t *x){
+   return yices_bvconst_mpz(n, *x);
+}
+// passing a mpz_t thru cgo seems too hard
+int32_t yices_get_mpz_valuep(model_t *mdl, term_t t, mpz_t *val){
+   return yices_get_mpz_value(mdl, t, *val);
+}
+// passing a mpq_t thru cgo seems too hard
+int32_t yices_get_mpq_valuep(model_t *mdl, term_t t, mpq_t *val){
+   return yices_get_mpq_value(mdl, t, *val);
+}
+// passing a mpz_t thru cgo seems too hard
+int32_t yices_val_get_mpzp(model_t *mdl, const yval_t *v, mpz_t *val){
+   return yices_val_get_mpz(mdl, v, *val);
+}
+// passing a mpq_t thru cgo seems too hard
+int32_t yices_val_get_mpqp(model_t *mdl, const yval_t *v, mpq_t *val){
+   return yices_val_get_mpq(mdl, v, *val);
+}
 */
 import "C"
 
@@ -588,13 +608,17 @@ func Rational64(num int64, den uint64) Term_t {
 	return Term_t(C.yices_rational64(C.int64_t(num), C.uint64_t(den)))
 }
 
+// need to name these to use them outside this package
 type Mpz_t C.mpz_t
 
 func Mpz(z *Mpz_t) Term_t {
 	// some contortions needed here to do the simplest of things
+	// similar contortions are needed to "identify" yices2._Ctype_mpz_t
+	// with gmp._Ctype_mpz_t
 	return Term_t(C.ympz(C.uintptr_t(uintptr(unsafe.Pointer(z)))))
 }
 
+// need to name these to use them outside this package
 type Mpq_t C.mpq_t
 
 func Mpq(q *Mpq_t) Term_t {
@@ -738,13 +762,22 @@ func Poly_rational64(num []int64, den []uint64, t []Term_t) Term_t {
 }
 
 
-/* iam: FIXME in the too hard basket for now.
-https://github.com/golang/go/blob/master/misc/cgo/gmp/gmp.go
-#ifdef __GMP_H__
-__YICES_DLLSPEC__ extern term_t yices_poly_mpz(uint32_t n, const mpz_t z[], const term_t t[]);
-__YICES_DLLSPEC__ extern term_t yices_poly_mpq(uint32_t n, const mpq_t q[], const term_t t[]);
-#endif
-*/
+
+func Poly_mpz(z []Mpz_t, t []Term_t) Term_t {
+	count := C.uint32_t(len(z))
+	if count == 0 {
+		return Term_t(C.yices_zero())
+	}
+	return Term_t(C.yices_poly_mpz(count, (* C.mpz_t)(&z[0]), (*C.term_t)(&t[0])))
+}
+
+func Poly_mpq(q []Mpq_t, t []Term_t) Term_t {
+	count := C.uint32_t(len(q))
+	if count == 0 {
+		return Term_t(C.yices_zero())
+	}
+	return Term_t(C.yices_poly_mpq(count, (* C.mpq_t)(&q[0]), (*C.term_t)(&t[0])))
+}
 
 
 /*
@@ -820,11 +853,10 @@ func Bvconst_int64(bits uint32,  x int64) Term_t {
 	return Term_t(C.yices_bvconst_int64(C.uint32_t(bits), C.int64_t(x)))
 }
 
-/* iam: FIXME
-#ifdef __GMP_H__
-__YICES_DLLSPEC__ extern term_t yices_bvconst_mpz(uint32_t n, const mpz_t x);
-#endif
-*/
+
+func Bvconst_mpz(bits uint32, z Mpz_t) Term_t {
+	return Term_t(C.yices_bvconst_mpzp(C.uint32_t(bits), (* C.mpz_t)(unsafe.Pointer(&z))))
+}
 
 func Bvconst_zero(bits uint32) Term_t {
 	return Term_t(C.yices_bvconst_zero(C.uint32_t(bits)))
@@ -1651,12 +1683,16 @@ func Get_double_value(model Model_t, t Term_t, val *float64) int32 {
 	return int32(C.yices_get_double_value(ymodel(model), C.term_t(t), (* C.double)(val)))
 }
 
-/*
-#ifdef __GMP_H__
-__YICES_DLLSPEC__ extern int32_t yices_get_mpz_value(model_t *mdl, term_t t, mpz_t val);
-__YICES_DLLSPEC__ extern int32_t yices_get_mpq_value(model_t *mdl, term_t t, mpq_t val);
-#endif
-*/
+
+func Get_mpz_value(model Model_t, t Term_t, val Mpz_t) int32 {
+	return int32(C.yices_get_mpz_valuep(ymodel(model), C.term_t(t), (* C.mpz_t)(unsafe.Pointer(&val))))
+}
+
+
+func Get_mpq_value(model Model_t, t Term_t, val Mpq_t) int32 {
+	return int32(C.yices_get_mpq_valuep(ymodel(model), C.term_t(t), (* C.mpq_t)(unsafe.Pointer(&val))))
+}
+
 
 /*
 #ifdef LIBPOLY_VERSION
@@ -1767,6 +1803,16 @@ func Val_get_rational64(model Model_t, yval *Yval_t, num *int64, den *uint64) in
 func Val_get_double(model Model_t, yval *Yval_t, val *float64) int32 {
 	return int32(C.yices_val_get_double(ymodel(model), (* C.yval_t)(yval), (* C.double)(val)))
 }
+
+func Val_get_mpz(model Model_t, yval *Yval_t, val Mpz_t) int32 {
+	return int32(C.yices_val_get_mpzp(ymodel(model), (* C.yval_t)(yval), (* C.mpz_t)(unsafe.Pointer(&val))))
+}
+
+func Val_get_mpq(model Model_t, yval *Yval_t, val Mpq_t) int32 {
+	return int32(C.yices_val_get_mpqp(ymodel(model), (* C.yval_t)(yval), (* C.mpq_t)(unsafe.Pointer(&val))))
+}
+
+//(* C.mpz_t)(unsafe.Pointer(&z))))
 
 /*
 #ifdef __GMP_H__
