@@ -50,6 +50,17 @@ int32_t yices_val_get_mpzp(model_t *mdl, const yval_t *v, mpz_t *val){
 int32_t yices_val_get_mpqp(model_t *mdl, const yval_t *v, mpq_t *val){
    return yices_val_get_mpq(mdl, v, *val);
 }
+void fetchReport(error_code_t *code, uint32_t *line, uint32_t *column, term_t *term1, type_t *type1, term_t *term2, type_t *type2, int64_t *badval){
+   error_report_t *report = yices_error_report();
+   *code = report->code;
+   *line = report->line;
+   *column = report->column;
+   *term1 = report->term1;
+   *type1 = report->type1;
+   *term2 = report->term2;
+   *type2 = report->type2;
+   *badval = report->badval;
+}
 */
 import "C"
 
@@ -128,58 +139,63 @@ func Reset() {
  *  ERROR REPORTING  *
  ********************/
 
-//iam: FIXME we should have a go version of the yices error_report_t struct and fetch that.
-// not this nonsense.
 type Error_code_t int32
-
-type Error_report_t struct {
-	raw uintptr // actually *C.error_report_t
-}
-
 
 type YicesError struct {
 	error_string string
-	error_code Error_code_t
-	error_report *Error_report_t
+	code Error_code_t
+	line uint32
+	column uint32
+	term1 Term_t
+	type1 Type_t
+	term2 Term_t
+	type2 Type_t
+	badval int64
 }
 
-
+// the all important error interface
 func (yerror *YicesError) Error() string {
 	return yerror.error_string
 }
 
+func fetchErrorReport(yerror *YicesError) {
+	var code C.error_code_t
+	var line C.uint32_t
+	var column C.uint32_t
+	var term1 C.term_t
+	var type1 C.type_t
+	var term2 C.term_t
+	var type2 C.type_t
+	var badval C.int64_t
+	C.fetchReport(&code, &line, &column, &term1, &type1, &term2, &type2, &badval)
+	yerror.code = Error_code_t(code)
+	yerror.line = uint32(line)
+	yerror.column = uint32(column)
+	yerror.term1 = Term_t(term1)
+	yerror.type1 = Type_t(type1)
+	yerror.term2 = Term_t(term2)
+	yerror.type2 = Type_t(type2)
+	yerror.badval = int64(badval)
+	return
+}
+
+
 // NewYicesError() returns a copy of the current error state
-// should be closed after the caller has finished with
-// it.
 func NewYicesError() (yerror *YicesError) {
 	errcode := Error_code()
 	if errcode != NO_ERROR {
-		yerror = &YicesError {
-			Error_string(),
-				errcode,
-				&Error_report_t {
-				uintptr(C.copy_error_record()),
-			},
-			}
-		Clear_error() //not sure about this.
+		yerror = new(YicesError)
+		yerror.error_string = Error_string()
+		fetchErrorReport(yerror)
 	}
 	return
 }
 
 
-func Close_YicesError(yerror *YicesError){
-	if yerror == nil || yerror.error_report == nil ||  yerror.error_report.raw == 0 { return }
-	C.delete_error_record(C.uintptr_t(yerror.error_report.raw))
-	yerror.error_report.raw = 0
-}
-
-//__YICES_DLLSPEC__ extern error_code_t yices_error_code(void);
-
 func Error_code() Error_code_t {
 	return Error_code_t(C.yices_error_code())
 }
 
-//__YICES_DLLSPEC__ extern error_report_t *yices_error_report(void); //iam: FIXME
 
 func Clear_error() {
 	C.yices_clear_error()
