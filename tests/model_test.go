@@ -8,14 +8,14 @@ import (
 )
 
 
-func parseStringAndAssert(fmla_str string, ctx yices2.Context_t) {
+func parse_assert(fmla_str string, ctx yices2.Context_t) {
 	fmla := yices2.Parse_term(fmla_str)
 	if fmla != yices2.NULL_TERM {
 		yices2.Assert_formula(ctx, fmla)
 	}
 }
 
-func defineConstant(name string, typ yices2.Type_t) (term yices2.Term_t) {
+func define_const(name string, typ yices2.Type_t) (term yices2.Term_t) {
 	term = yices2.New_uninterpreted_term(typ)
 	yices2.Set_term_name(term, name)
 	return
@@ -23,9 +23,9 @@ func defineConstant(name string, typ yices2.Type_t) (term yices2.Term_t) {
 
 func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
 	bool_t := yices2.Bool_type()
-	b1 := defineConstant("b1", bool_t)
-	b2 := defineConstant("b2", bool_t)
-	b3 := defineConstant("b3", bool_t)
+	b1 := define_const("b1", bool_t)
+	b2 := define_const("b2", bool_t)
+	b3 := define_const("b3", bool_t)
 	b_fml1 := yices2.Parse_term("(or b1 b2 b3)")
 	yices2.Assert_formula(ctx, b_fml1)
 	stat := yices2.Check_context(ctx, params)
@@ -68,10 +68,10 @@ func test_int_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 	yices2.Reset_context(ctx)
 
 	int_t := yices2.Int_type()
-	i1 := defineConstant("i1", int_t)
-	i2 := defineConstant("i2", int_t)
-	parseStringAndAssert("(> i1 3)", ctx)
-	parseStringAndAssert("(< i2 i1)", ctx)
+	i1 := define_const("i1", int_t)
+	i2 := define_const("i2", int_t)
+	parse_assert("(> i1 3)", ctx)
+	parse_assert("(< i2 i1)", ctx)
 	stat := yices2.Check_context(ctx, params)
 	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
 	modelp := yices2.Get_model(ctx, 1)
@@ -99,11 +99,11 @@ func test_rat_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 	yices2.Reset_context(ctx)
 
 	real_t := yices2.Real_type()
-	r1 := defineConstant("r1", real_t)
-	r2 := defineConstant("r2", real_t)
-	parseStringAndAssert("(> r1 3)", ctx)
-	parseStringAndAssert("(< r1 4)", ctx)
-	parseStringAndAssert("(< (- r1 r2) 0)", ctx)
+	r1 := define_const("r1", real_t)
+	r2 := define_const("r2", real_t)
+	parse_assert("(> r1 3)", ctx)
+	parse_assert("(< r1 4)", ctx)
+	parse_assert("(< (- r1 r2) 0)", ctx)
 
 	stat := yices2.Check_context(ctx, params)
 	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
@@ -150,13 +150,16 @@ func test_rat_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 
 
 func test_bv_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+
+	yices2.Reset_context(ctx)
+
 	bv_t := yices2.Bv_type(3)
-	bv1 := defineConstant("bv1", bv_t)
-	bv2 := defineConstant("bv2", bv_t)
-	bv3 := defineConstant("bv3", bv_t)
-	parseStringAndAssert("(= bv1 (bv-add bv2 bv3))", ctx)
-	parseStringAndAssert("(bv-gt bv2 0b000)", ctx)
-	parseStringAndAssert("(bv-gt bv3 0b000)", ctx)
+	bv1 := define_const("bv1", bv_t)
+	bv2 := define_const("bv2", bv_t)
+	bv3 := define_const("bv3", bv_t)
+	parse_assert("(= bv1 (bv-add bv2 bv3))", ctx)
+	parse_assert("(bv-gt bv2 0b000)", ctx)
+	parse_assert("(bv-gt bv3 0b000)", ctx)
 
 	stat := yices2.Check_context(ctx, params)
 	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
@@ -185,6 +188,41 @@ func test_bv_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
 
 }
 
+func test_tuple_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+
+	yices2.Reset_context(ctx)
+
+	bool_t := yices2.Bool_type()
+	int_t := yices2.Int_type()
+	real_t := yices2.Real_type()
+	tup_t := yices2.Tuple_type3(bool_t, real_t, int_t)
+	t1 := define_const("t1", tup_t)
+	parse_assert("(ite (select t1 1) (< (select t1 2) (select t1 3)) (> (select t1 2) (select t1 3)))", ctx)
+	stat := yices2.Check_context(ctx, params)
+	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
+	modelp := yices2.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+	mstr := yices2.Model_to_string(*modelp, 80, 100, 0)
+	AssertEqual(t, mstr, "(= t1 (mk-tuple false 1 0))")
+	var yval yices2.Yval_t
+	yices2.Get_value(*modelp, t1, &yval)
+	AssertEqual(t, yices2.Get_tag(yval), yices2.YVAL_TUPLE)
+	AssertEqual(t, yices2.Val_tuple_arity(*modelp, &yval), 3)
+
+	yvec := make([]yices2.Yval_t, 3)
+
+
+	yices2.Val_expand_tuple(*modelp, &yval, yvec)
+	AssertEqual(t, yices2.Get_tag(yvec[0]), yices2.YVAL_BOOL)
+	var bval int32
+	var ival int32
+	yices2.Val_get_bool(*modelp, &yvec[0], &bval)
+	yices2.Val_get_int32(*modelp, &yvec[1], &ival)
+	AssertEqual(t, bval, 0)
+	AssertEqual(t, ival, 1)
+
+}
+
 func TestSimpleModels(t *testing.T) {
 
 	yices2.Init()
@@ -210,6 +248,8 @@ func TestSimpleModels(t *testing.T) {
 	test_rat_models(t, ctx, params)
 
 	test_bv_models(t, ctx, params)
+
+	test_tuple_models(t, ctx, params)
 
 	yices2.Close_config(&cfg)
 
@@ -247,9 +287,9 @@ func TestAlgebraicModels(t *testing.T) {
 
 	yices2.Init_context(cfg, &ctx)
 
-	x := defineConstant("x", real_t)
+	x := define_const("x", real_t)
 
-	parseStringAndAssert("(= (* x x) 2)", ctx)
+	parse_assert("(= (* x x) 2)", ctx)
 
 	stat := yices2.Check_context(ctx, params)  //params == NULL in the C
 
