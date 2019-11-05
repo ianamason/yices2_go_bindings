@@ -1707,13 +1707,13 @@ func Get_double_value(model Model_t, t Term_t, val *float64) int32 {
 }
 
 
-func Get_mpz_value(model Model_t, t Term_t, val Mpz_t) int32 {
-	return int32(C.yices_get_mpz_valuep(ymodel(model), C.term_t(t), (* C.mpz_t)(unsafe.Pointer(&val))))
+func Get_mpz_value(model Model_t, t Term_t, val *Mpz_t) int32 {
+	return int32(C.yices_get_mpz_valuep(ymodel(model), C.term_t(t), (* C.mpz_t)(unsafe.Pointer(val))))
 }
 
 
-func Get_mpq_value(model Model_t, t Term_t, val Mpq_t) int32 {
-	return int32(C.yices_get_mpq_valuep(ymodel(model), C.term_t(t), (* C.mpq_t)(unsafe.Pointer(&val))))
+func Get_mpq_value(model Model_t, t Term_t, val *Mpq_t) int32 {
+	return int32(C.yices_get_mpq_valuep(ymodel(model), C.term_t(t), (* C.mpq_t)(unsafe.Pointer(val))))
 }
 
 
@@ -1827,12 +1827,12 @@ func Val_get_double(model Model_t, yval *Yval_t, val *float64) int32 {
 	return int32(C.yices_val_get_double(ymodel(model), (* C.yval_t)(yval), (* C.double)(val)))
 }
 
-func Val_get_mpz(model Model_t, yval *Yval_t, val Mpz_t) int32 {
-	return int32(C.yices_val_get_mpzp(ymodel(model), (* C.yval_t)(yval), (* C.mpz_t)(unsafe.Pointer(&val))))
+func Val_get_mpz(model Model_t, yval *Yval_t, val *Mpz_t) int32 {
+	return int32(C.yices_val_get_mpzp(ymodel(model), (* C.yval_t)(yval), (* C.mpz_t)(unsafe.Pointer(val))))
 }
 
-func Val_get_mpq(model Model_t, yval *Yval_t, val Mpq_t) int32 {
-	return int32(C.yices_val_get_mpqp(ymodel(model), (* C.yval_t)(yval), (* C.mpq_t)(unsafe.Pointer(&val))))
+func Val_get_mpq(model Model_t, yval *Yval_t, val *Mpq_t) int32 {
+	return int32(C.yices_val_get_mpqp(ymodel(model), (* C.yval_t)(yval), (* C.mpq_t)(unsafe.Pointer(val))))
 }
 
 /*

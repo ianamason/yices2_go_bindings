@@ -148,6 +148,58 @@ func test_rat_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 
 }
 
+func test_mpz_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+
+	yices2.Reset_context(ctx)
+
+	int_t := yices2.Int_type()
+
+	i1 := define_const("i1", int_t)
+	i2 := define_const("i2", int_t)
+
+	parse_assert("(> i1 987654321987654321987654321)", ctx)
+	parse_assert("(< i2 i1)", ctx)
+
+	stat := yices2.Check_context(ctx, params)
+	AssertEqual(t, stat, yices2.STATUS_SAT, "stat == yices2.STATUS_SAT")
+	modelp := yices2.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+
+	mstr := yices2.Model_to_string(*modelp, 80, 100, 0)
+	AssertEqual(t, mstr, "(= i1 987654321987654321987654322)\n(= i2 987654321987654321987654321)")
+
+	var i32val1 int32
+	errcode := yices2.Get_int32_value(*modelp, i1, &i32val1)
+	AssertEqual(t, errcode, -1)
+	AssertEqual(t, yices2.Error_string(), "eval error: the term value does not fit the expected type")
+	yerror1 := yices2.NewYicesError()
+
+	yices2.Clear_error()
+
+	var i32val2 int32
+	errcode = yices2.Get_int32_value(*modelp, i2, &i32val2)
+	AssertEqual(t, errcode, -1)
+	AssertEqual(t, yices2.Error_string(), "eval error: the term value does not fit the expected type")
+	yerror2 := yices2.NewYicesError()
+
+	AssertEqual(t, yerror1, yerror2)
+
+	var mpzval1 yices2.Mpz_t
+	errcode = yices2.Get_mpz_value(*modelp, i1, &mpzval1)
+	AssertEqual(t, errcode, 0)
+
+	mpz1 := yices2.Mpz(&mpzval1)
+	AssertEqual(t, yices2.Term_to_string(mpz1, 200, 10, 0), "987654321987654321987654322")
+
+	var mpzval2 yices2.Mpz_t
+	errcode = yices2.Get_mpz_value(*modelp, i2, &mpzval2)
+	AssertEqual(t, errcode, 0)
+
+	mpz2 := yices2.Mpz(&mpzval2)
+	AssertEqual(t, yices2.Term_to_string(mpz2, 200, 10, 0), "987654321987654321987654321")
+
+}
+
 
 func test_bv_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
 
@@ -210,8 +262,6 @@ func test_tuple_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t
 	AssertEqual(t, yices2.Val_tuple_arity(*modelp, &yval), 3)
 
 	yvec := make([]yices2.Yval_t, 3)
-
-
 	yices2.Val_expand_tuple(*modelp, &yval, yvec)
 	AssertEqual(t, yices2.Get_tag(yvec[0]), yices2.YVAL_BOOL)
 	var bval int32
@@ -246,6 +296,8 @@ func TestSimpleModels(t *testing.T) {
 	test_int_models(t, ctx, params)
 
 	test_rat_models(t, ctx, params)
+
+	test_mpz_models(t, ctx, params)
 
 	test_bv_models(t, ctx, params)
 
