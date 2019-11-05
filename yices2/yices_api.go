@@ -50,6 +50,7 @@ int32_t yices_val_get_mpzp(model_t *mdl, const yval_t *v, mpz_t *val){
 int32_t yices_val_get_mpqp(model_t *mdl, const yval_t *v, mpq_t *val){
    return yices_val_get_mpq(mdl, v, *val);
 }
+// is there a better way than this?
 void fetchReport(error_code_t *code, uint32_t *line, uint32_t *column, term_t *term1, type_t *type1, term_t *term2, type_t *type2, int64_t *badval){
    error_report_t *report = yices_error_report();
    *code = report->code;
@@ -65,6 +66,7 @@ void fetchReport(error_code_t *code, uint32_t *line, uint32_t *column, term_t *t
 import "C"
 
 import "os"
+import "fmt"
 import "unsafe"
 
 /*
@@ -187,10 +189,15 @@ func NewYicesError() (yerror *YicesError) {
 		yerror = new(YicesError)
 		yerror.error_string = Error_string()
 		fetchErrorReport(yerror)
+		Clear_error()
 	}
 	return
 }
 
+func (yerror *YicesError) String() string {
+	return fmt.Sprintf("code = %d line = %d column = %d term1 = %d type1 = %d term2 = %d type2 = %d badval = %d",
+		yerror.code, yerror.line, yerror.column, yerror.term1, yerror.type1, yerror.term2, yerror.type2, yerror.badval)
+}
 
 func Error_code() Error_code_t {
 	return Error_code_t(C.yices_error_code())

@@ -25,6 +25,11 @@ func TestErrors(t *testing.T) {
 	error_string := yices2.Error_string()
 	AssertEqual(t, const1, yices2.NULL_TERM, "const1 == yices2.NULL_TERM")
 	AssertEqual(t, error_string, "invalid type in constant creation", "error_string == 'invalid type in constant creation'")
+
+	yerror := yices2.NewYicesError()
+
+	println(yerror.String())
+
 	yices2.Clear_error()
 	AssertEqual(t, yices2.Error_code(), yices2.NO_ERROR, "yices2.Error_code() == yices2.NO_ERROR")
 	errstr = yices2.Error_string()
