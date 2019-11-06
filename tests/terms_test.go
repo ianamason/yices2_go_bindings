@@ -2,10 +2,7 @@ package tests
 
 import (
 	"github.com/ianamason/yices2_go_bindings/yices2"
-	"github.com/ianamason/gmp"
-	"unsafe"
 	"testing"
-	"os"
 )
 
 func TestTerms0(t *testing.T) {
@@ -461,20 +458,6 @@ func TestTerms0(t *testing.T) {
 	yices2.Garbage_collect(int4, ta4, 0)
 	AssertEqual(t, yices2.Num_terms(), uint32(7))
 	AssertEqual(t, yices2.Num_types(), uint32(3))
-
-
-	z := gmp.NewInt(42)
-	yz := yices2.Mpz((*yices2.Mpz_t)(unsafe.Pointer(gmp.Get_mpz(z)))) //iam: kinda ugly
-
-	yices2.Pp_term(os.Stdout, yz, 80, 10, 0)
-
-	q:= gmp.NewRat(123456789, 9876543210)
-
-	yq := yices2.Mpq((*yices2.Mpq_t)(unsafe.Pointer(gmp.Get_mpq(q)))) //iam: kinda ugly
-
-	yices2.Pp_term(os.Stdout, yq, 80, 10, 0)
-
-
 
 	yices2.Exit()
 
