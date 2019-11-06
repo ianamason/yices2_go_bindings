@@ -2,16 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/ianamason/yices2_go_bindings/yices2"
+	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
 )
 
 func main() {
 
-	fmt.Printf("Yices version no:     %s\n", yices2.Version())
-	fmt.Printf("Yices build arch:     %s\n", yices2.Build_arch())
-	fmt.Printf("Yices build mode:     %s\n", yices2.Build_mode())
-	fmt.Printf("Yices build date:     %s\n", yices2.Build_date())
-	fmt.Printf("Yices has mcsat:      %d\n", yices2.Has_mcsat())
-	fmt.Printf("Yices is thread safe: %d\n", yices2.Is_thread_safe())
+	fmt.Printf("Yices version no:     %s\n", yapi.Version())
+	fmt.Printf("Yices build arch:     %s\n", yapi.Build_arch())
+	fmt.Printf("Yices build mode:     %s\n", yapi.Build_mode())
+	fmt.Printf("Yices build date:     %s\n", yapi.Build_date())
+	fmt.Printf("Yices has mcsat:      %d\n", yapi.Has_mcsat())
+	fmt.Printf("Yices is thread safe: %d\n", yapi.Is_thread_safe())
 
 }
