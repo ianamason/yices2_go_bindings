@@ -1,14 +1,13 @@
 package tests
 
 import (
-	"os"
 	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
+	"os"
 	"testing"
 )
 
 func TestErrors(t *testing.T) {
 	yapi.Init()
-
 
 	//First with no error
 	errcode := yapi.Error_code()

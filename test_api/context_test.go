@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-
 func TestContext0(t *testing.T) {
 
 	yapi.Init()
@@ -33,19 +32,18 @@ func TestContext0(t *testing.T) {
 	yapi.Assert_formula(ctx, fmla1)
 	yapi.Assert_formulas(ctx, []yapi.Term_t{fmla1, fmla2, fmla3})
 	var params yapi.Param_t
-	smt_stat := yapi.Check_context(ctx,params)
+	smt_stat := yapi.Check_context(ctx, params)
 	AssertEqual(t, smt_stat, yapi.STATUS_SAT, "smt_stat == yapi.STATUS_SAT")
 
 	yapi.Init_param_record(&params)
 	yapi.Default_params_for_context(ctx, params)
 
 	errcode := yapi.Set_param(params, "dyn-ack", "true")
-	AssertEqual(t, errcode, 0, "errcode == 0")  //FIXME: is this right?
+	AssertEqual(t, errcode, 0, "errcode == 0") //FIXME: is this right?
 
 	yapi.Close_param_record(&params)
 
 	yapi.Close_context(&ctx)
-
 
 	yapi.Exit()
 
@@ -95,7 +93,7 @@ func TestContext1(t *testing.T) {
 	yapi.Assert_formulas(ctx, []yapi.Term_t{fmla1, fmla2, fmla3})
 
 	var params yapi.Param_t
-	smt_stat := yapi.Check_context(ctx, params)  //same as passing NULL to the C
+	smt_stat := yapi.Check_context(ctx, params) //same as passing NULL to the C
 	AssertEqual(t, smt_stat, yapi.STATUS_SAT, "smt_stat == yapi.STATUS_SAT")
 	yapi.Assert_blocking_clause(ctx)
 	yapi.Stop_search(ctx)
@@ -114,7 +112,6 @@ func TestContext1(t *testing.T) {
 	yapi.Close_param_record(&params)
 
 	yapi.Close_context(&ctx)
-
 
 	yapi.Exit()
 

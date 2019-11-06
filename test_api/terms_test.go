@@ -8,7 +8,6 @@ import (
 func TestTerms0(t *testing.T) {
 	yapi.Init()
 
-
 	true_ := yapi.True()
 	false_ := yapi.False()
 	bool_t := yapi.Bool_type()
@@ -311,7 +310,7 @@ func TestTerms0(t *testing.T) {
 	bvarray1 := yapi.Bvarray([]yapi.Term_t{true_, false_, true_, false_})
 	AssertNotEqual(t, bvarray1, yapi.NULL_TERM)
 	bitextract1 := yapi.Bitextract(bvbin1, 3)
-	AssertNotEqual(t,bitextract1 , yapi.NULL_TERM)
+	AssertNotEqual(t, bitextract1, yapi.NULL_TERM)
 	bveqatom1 := yapi.Bveq_atom(bvbin1, bvbin1)
 	AssertNotEqual(t, bveqatom1, yapi.NULL_TERM)
 	bvneqatom1 := yapi.Bvneq_atom(bvbin1, bvbin1)
@@ -336,7 +335,7 @@ func TestTerms0(t *testing.T) {
 	AssertEqual(t, ptype1, yapi.Int_type())
 	pterm1 := yapi.Parse_term("42")
 	AssertEqual(t, pterm1, yapi.Int32(42))
-	subst1 := yapi.Subst_term([]yapi.Term_t{yapi.New_variable(ptype1),yapi.New_variable(ptype1)},
+	subst1 := yapi.Subst_term([]yapi.Term_t{yapi.New_variable(ptype1), yapi.New_variable(ptype1)},
 		[]yapi.Term_t{yapi.Int32(2), yapi.Int32(3)},
 		yapi.Int32(42))
 	AssertNotEqual(t, subst1, yapi.NULL_TERM)
@@ -378,7 +377,7 @@ func TestTerms0(t *testing.T) {
 	AssertTrue(t, yapi.Term_is_function(fun1))
 	AssertFalse(t, yapi.Term_is_scalar(false_))
 	AssertFalse(t, yapi.Term_is_scalar(fun1))
-	AssertEqual(t, yapi.Term_bitsize(bvbin1), uint32(6))  //yuk
+	AssertEqual(t, yapi.Term_bitsize(bvbin1), uint32(6)) //yuk
 	AssertTrue(t, yapi.Term_is_ground(false_))
 	AssertFalse(t, yapi.Term_is_ground(var1))
 	AssertTrue(t, yapi.Term_is_atomic(false_))
@@ -400,8 +399,8 @@ func TestTerms0(t *testing.T) {
 	AssertFalse(t, yapi.Term_is_product(ite1))
 	AssertFalse(t, yapi.Term_is_product(product1))
 	AssertTrue(t, yapi.Term_is_product(product2))
-	AssertEqual(t, yapi.Term_constructor(true_), yapi.Term_constructor_t(0)) //yuk
-	AssertEqual(t, yapi.Term_constructor(int1), yapi.Term_constructor_t(1)) //yuk
+	AssertEqual(t, yapi.Term_constructor(true_), yapi.Term_constructor_t(0))       //yuk
+	AssertEqual(t, yapi.Term_constructor(int1), yapi.Term_constructor_t(1))        //yuk
 	AssertEqual(t, yapi.Term_constructor(bvconst32_1), yapi.Term_constructor_t(2)) //yuk
 	AssertEqual(t, yapi.Term_num_children(bvconst32_1), 0)
 	AssertEqual(t, yapi.Term_num_children(select2), 1)
@@ -422,7 +421,7 @@ func TestTerms0(t *testing.T) {
 	scalar_c := yapi.Constant(scalar_t, 13)
 	AssertEqual(t, yapi.Scalar_const_value(scalar_c, &val), 0)
 	AssertEqual(t, val, 13)
-	AssertEqual(t, yapi.Type_of_term(bvsum2), yapi.Type_t(13))  //BD: not very robust
+	AssertEqual(t, yapi.Type_of_term(bvsum2), yapi.Type_t(13)) //BD: not very robust
 	// val must be an array of eight integers since bvsum has type (bitvector 8)
 	var term yapi.Term_t
 	dodgy := yapi.Bvsum_component(bvsum2, 1, bval, &term)

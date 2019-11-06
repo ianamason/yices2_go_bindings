@@ -12,7 +12,6 @@ func TestConfig0(t *testing.T) {
 
 	yapi.Init_config(&cfg)
 
-
 	// Valid call
 	yapi.Set_config(cfg, "mode", "push-pop")
 	// Invalid name

@@ -1,29 +1,33 @@
 package tests
 
 import (
-	"testing"
-	"reflect"
 	"math"
+	"reflect"
+	"testing"
 )
 
-func Signed(thing interface{}) (retval bool){
-	if thing == nil { return }
+func Signed(thing interface{}) (retval bool) {
+	if thing == nil {
+		return
+	}
 
 	tau := reflect.TypeOf(thing).String()
 
 	switch tau {
-		case "int", "int8", "int16", "int32", "int64":
+	case "int", "int8", "int16", "int32", "int64":
 		retval = true
 	}
 
 	return
 }
 
-func Unsigned(thing interface{}) (retval bool){
-	if thing == nil { return }
+func Unsigned(thing interface{}) (retval bool) {
+	if thing == nil {
+		return
+	}
 
 	switch reflect.TypeOf(thing).String() {
-		case "uint", "uint8", "uint16", "uint32", "uint64":
+	case "uint", "uint8", "uint16", "uint32", "uint64":
 		retval = true
 	}
 	return
@@ -112,7 +116,6 @@ func SignedEqual(x interface{}, y interface{}) bool {
 		return false
 	}
 
-
 	ytyp := reflect.TypeOf(y)
 	switch ytyp.Kind() {
 	case reflect.Int:
@@ -184,8 +187,7 @@ func UnsignedEqual(x interface{}, y interface{}) bool {
 	return true
 }
 
-
-func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ... string) {
+func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...string) {
 	if Signed(lhs) && Signed(rhs) {
 		if SignedEqual(lhs, rhs) {
 			t.Errorf("%s : AssertNotEqual of signed integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
@@ -213,7 +215,7 @@ func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ... st
 	}
 }
 
-func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ... string) {
+func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...string) {
 	if Signed(lhs) && Signed(rhs) {
 		if !SignedEqual(lhs, rhs) {
 			t.Errorf("%s : AssertEqual of signed integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
@@ -240,13 +242,13 @@ func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ... strin
 	}
 }
 
-func AssertTrue(t *testing.T, cond interface{}, where ... string) {
+func AssertTrue(t *testing.T, cond interface{}, where ...string) {
 	if cond != true {
 		t.Errorf("%s AssertTrue %v : %v\n", where, cond, reflect.TypeOf(cond))
 	}
 }
 
-func AssertFalse(t *testing.T, cond interface{}, where ... string) {
+func AssertFalse(t *testing.T, cond interface{}, where ...string) {
 	if cond != false {
 		t.Errorf("%s AssertFalse %v : %v\n", where, cond, reflect.TypeOf(cond))
 	}

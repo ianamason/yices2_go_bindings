@@ -2,8 +2,8 @@ package tests
 
 import (
 	"fmt"
-	"os"
 	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
+	"os"
 	"testing"
 )
 
@@ -18,7 +18,7 @@ func setup() (cfg yapi.Config_t, ctx yapi.Context_t, params yapi.Param_t) {
 }
 
 // clean up a generic startup
-func cleanup(cfg *yapi.Config_t, ctx *yapi.Context_t, params *yapi.Param_t){
+func cleanup(cfg *yapi.Config_t, ctx *yapi.Context_t, params *yapi.Param_t) {
 	yapi.Close_config(cfg)
 	yapi.Close_param_record(params)
 	yapi.Close_context(ctx)
@@ -229,7 +229,6 @@ func Test_mpz_models(t *testing.T) {
 
 }
 
-
 func Test_bv_models(t *testing.T) {
 
 	cfg, ctx, params := setup()
@@ -274,7 +273,6 @@ func Test_tuple_models(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-
 	bool_t := yapi.Bool_type()
 	int_t := yapi.Int_type()
 	real_t := yapi.Real_type()
@@ -304,7 +302,6 @@ func Test_tuple_models(t *testing.T) {
 
 	cleanup(&cfg, &ctx, &params)
 
-
 }
 
 func TestAlgebraicModels(t *testing.T) {
@@ -327,7 +324,7 @@ func TestAlgebraicModels(t *testing.T) {
 	yapi.Init_config(&cfg)
 
 	yapi.Default_config_for_logic(cfg, "QF_NRA")
-    yapi.Set_config(cfg, "mode", "one-shot")
+	yapi.Set_config(cfg, "mode", "one-shot")
 
 	yapi.Init_context(cfg, &ctx)
 
@@ -335,7 +332,7 @@ func TestAlgebraicModels(t *testing.T) {
 
 	parse_assert("(= (* x x) 2)", ctx)
 
-	stat := yapi.Check_context(ctx, params)  //params == NULL in the C
+	stat := yapi.Check_context(ctx, params) //params == NULL in the C
 
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
 	modelp := yapi.Get_model(ctx, 1)
@@ -353,7 +350,5 @@ func TestAlgebraicModels(t *testing.T) {
 	yapi.Close_context(&ctx)
 
 	yapi.Exit()
-
-
 
 }

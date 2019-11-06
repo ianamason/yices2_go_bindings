@@ -2,7 +2,6 @@ package yices2
 
 type Yval_tag_t int32
 
-
 const (
 	YVAL_UNKNOWN Yval_tag_t = iota
 	YVAL_BOOL
