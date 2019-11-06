@@ -7,7 +7,25 @@ import (
 	"testing"
 )
 
+// generic start up
+func setup() (cfg yices2.Config_t, ctx yices2.Context_t, params yices2.Param_t) {
+	yices2.Init()
+	yices2.Init_config(&cfg)
+	yices2.Init_context(cfg, &ctx)
+	yices2.Init_param_record(&params)
+	yices2.Default_params_for_context(ctx, params)
+	return
+}
 
+// clean up a generic startup
+func cleanup(cfg *yices2.Config_t, ctx *yices2.Context_t, params *yices2.Param_t){
+	yices2.Close_config(cfg)
+	yices2.Close_param_record(params)
+	yices2.Close_context(ctx)
+	yices2.Exit()
+}
+
+// sam's helper functions
 func parse_assert(fmla_str string, ctx yices2.Context_t) {
 	fmla := yices2.Parse_term(fmla_str)
 	if fmla != yices2.NULL_TERM {
@@ -15,13 +33,17 @@ func parse_assert(fmla_str string, ctx yices2.Context_t) {
 	}
 }
 
+// sam's helper functions
 func define_const(name string, typ yices2.Type_t) (term yices2.Term_t) {
 	term = yices2.New_uninterpreted_term(typ)
 	yices2.Set_term_name(term, name)
 	return
 }
 
-func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+func Test_bool_models(t *testing.T) {
+
+	cfg, ctx, params := setup()
+
 	bool_t := yices2.Bool_type()
 	b1 := define_const("b1", bool_t)
 	b2 := define_const("b2", bool_t)
@@ -61,11 +83,12 @@ func test_bool_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t)
 	yices2.Val_get_bool(*modelp, &yval, &bval1)
 	AssertEqual(t, bval1, 0, "bval1 == 0")
 
+	cleanup(&cfg, &ctx, &params)
 }
 
-func test_int_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+func Test_int_models(t *testing.T) {
 
-	yices2.Reset_context(ctx)
+	cfg, ctx, params := setup()
 
 	int_t := yices2.Int_type()
 	i1 := define_const("i1", int_t)
@@ -92,11 +115,14 @@ func test_int_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 	yices2.Pp_model(os.Stdout, *modelp, 80, 100, 0)
 	mdlstr := yices2.Model_to_string(*modelp, 80, 100, 0)
 	AssertEqual(t, mdlstr, "(= i1 4)\n(= i2 3)")
+
+	cleanup(&cfg, &ctx, &params)
+
 }
 
-func test_rat_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+func Test_rat_models(t *testing.T) {
 
-	yices2.Reset_context(ctx)
+	cfg, ctx, params := setup()
 
 	real_t := yices2.Real_type()
 	r1 := define_const("r1", real_t)
@@ -145,12 +171,13 @@ func test_rat_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 	AssertEqual(t, rdoub1, 3.5, "rdoub1 == 3.5")
 	AssertEqual(t, rdoub2, 4.0, "rdoub2 == 4.0")
 
+	cleanup(&cfg, &ctx, &params)
 
 }
 
-func test_mpz_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+func Test_mpz_models(t *testing.T) {
 
-	yices2.Reset_context(ctx)
+	cfg, ctx, params := setup()
 
 	int_t := yices2.Int_type()
 
@@ -198,12 +225,14 @@ func test_mpz_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) 
 	mpz2 := yices2.Mpz(&mpzval2)
 	AssertEqual(t, yices2.Term_to_string(mpz2, 200, 10, 0), "987654321987654321987654321")
 
+	cleanup(&cfg, &ctx, &params)
+
 }
 
 
-func test_bv_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+func Test_bv_models(t *testing.T) {
 
-	yices2.Reset_context(ctx)
+	cfg, ctx, params := setup()
 
 	bv_t := yices2.Bv_type(3)
 	bv1 := define_const("bv1", bv_t)
@@ -237,12 +266,14 @@ func test_bv_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
 	fmt.Printf("bval3 = %v\n", bval3)
 	AssertEqual(t, bval3, []int32{0, 0, 1}, "bval1 == []int32{0, 0, 1}")
 
+	cleanup(&cfg, &ctx, &params)
 
 }
 
-func test_tuple_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t) {
+func Test_tuple_models(t *testing.T) {
 
-	yices2.Reset_context(ctx)
+	cfg, ctx, params := setup()
+
 
 	bool_t := yices2.Bool_type()
 	int_t := yices2.Int_type()
@@ -271,46 +302,7 @@ func test_tuple_models(t *testing.T, ctx yices2.Context_t, params yices2.Param_t
 	AssertEqual(t, bval, 0)
 	AssertEqual(t, ival, 1)
 
-}
-
-func TestSimpleModels(t *testing.T) {
-
-	yices2.Init()
-
-	var cfg yices2.Config_t
-
-	var ctx yices2.Context_t
-
-	var params yices2.Param_t
-
-	yices2.Init_config(&cfg)
-
-	yices2.Init_context(cfg, &ctx)
-
-	yices2.Init_param_record(&params)
-
-	yices2.Default_params_for_context(ctx, params)
-
-	test_bool_models(t, ctx, params)
-
-	test_int_models(t, ctx, params)
-
-	test_rat_models(t, ctx, params)
-
-	test_mpz_models(t, ctx, params)
-
-	test_bv_models(t, ctx, params)
-
-	test_tuple_models(t, ctx, params)
-
-	yices2.Close_config(&cfg)
-
-	yices2.Close_param_record(&params)
-
-	yices2.Close_context(&ctx)
-
-	yices2.Exit()
-
+	cleanup(&cfg, &ctx, &params)
 
 
 }
