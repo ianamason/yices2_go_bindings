@@ -2,41 +2,41 @@ package tests
 
 import (
 	"os"
-	"github.com/ianamason/yices2_go_bindings/yices2"
+	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
 	"testing"
 )
 
 func TestErrors(t *testing.T) {
-	yices2.Init()
+	yapi.Init()
 
 
 	//First with no error
-	errcode := yices2.Error_code()
-	AssertEqual(t, errcode, yices2.NO_ERROR, "errcode == yices.NO_ERROR")
-	yices2.Clear_error()
-	errstr := yices2.Error_string()
+	errcode := yapi.Error_code()
+	AssertEqual(t, errcode, yapi.NO_ERROR, "errcode == yices.NO_ERROR")
+	yapi.Clear_error()
+	errstr := yapi.Error_string()
 	AssertEqual(t, errstr, "no error", "errstr == 'no error'")
-	yices2.Print_error(os.Stderr)
+	yapi.Print_error(os.Stderr)
 
 	// Illegal - only scalar or uninterpreted types allowed
-	bool_t := yices2.Bool_type()
-	AssertTrue(t, yices2.Type_is_bool(bool_t), "yices2.Type_is_bool(bool_t)")
-	const1 := yices2.Constant(bool_t, 0)
-	error_string := yices2.Error_string()
-	AssertEqual(t, const1, yices2.NULL_TERM, "const1 == yices2.NULL_TERM")
+	bool_t := yapi.Bool_type()
+	AssertTrue(t, yapi.Type_is_bool(bool_t), "yapi.Type_is_bool(bool_t)")
+	const1 := yapi.Constant(bool_t, 0)
+	error_string := yapi.Error_string()
+	AssertEqual(t, const1, yapi.NULL_TERM, "const1 == yapi.NULL_TERM")
 	AssertEqual(t, error_string, "invalid type in constant creation", "error_string == 'invalid type in constant creation'")
 
-	yerror := yices2.GetYicesError()
+	yerror := yapi.GetYicesError()
 
 	println(yerror.String())
 
-	yices2.Clear_error()
-	AssertEqual(t, yices2.Error_code(), yices2.NO_ERROR, "yices2.Error_code() == yices2.NO_ERROR")
-	errstr = yices2.Error_string()
+	yapi.Clear_error()
+	AssertEqual(t, yapi.Error_code(), yapi.NO_ERROR, "yapi.Error_code() == yapi.NO_ERROR")
+	errstr = yapi.Error_string()
 	AssertEqual(t, errstr, "no error", "errstr == 'no error'")
-	yices2.Print_error(os.Stderr)
-	yices2.Clear_error()
-	AssertEqual(t, yices2.Error_code(), yices2.NO_ERROR, "yices2.Error_code() == yices2.NO_ERROR")
+	yapi.Print_error(os.Stderr)
+	yapi.Clear_error()
+	AssertEqual(t, yapi.Error_code(), yapi.NO_ERROR, "yapi.Error_code() == yapi.NO_ERROR")
 
-	yices2.Exit()
+	yapi.Exit()
 }

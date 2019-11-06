@@ -2,35 +2,35 @@ package tests
 
 import (
 	"fmt"
-	"github.com/ianamason/yices2_go_bindings/yices2"
+	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
 	"os"
 	"testing"
 )
 
 func TestBasis0(t *testing.T) {
-	yices2.Init()
+	yapi.Init()
 
-	bvt := yices2.Bool_type()
-	ivt := yices2.Int_type()
-	rvt := yices2.Real_type()
+	bvt := yapi.Bool_type()
+	ivt := yapi.Int_type()
+	rvt := yapi.Real_type()
 
 	AssertNotEqual(t, bvt, ivt, "bvt != ivt")
 	AssertNotEqual(t, bvt, rvt, "bvt != rvt")
 	AssertNotEqual(t, ivt, rvt, "ivt != ivt")
 
-	fmt.Printf("Bool_type(): %v %v\n", bvt, yices2.Type_is_bool(bvt))
-	fmt.Printf("Int_type(): %v %v\n", ivt, yices2.Type_is_int(ivt))
-	fmt.Printf("Real_type(): %v %v\n", rvt, yices2.Type_is_real(rvt))
+	fmt.Printf("Bool_type(): %v %v\n", bvt, yapi.Type_is_bool(bvt))
+	fmt.Printf("Int_type(): %v %v\n", ivt, yapi.Type_is_int(ivt))
+	fmt.Printf("Real_type(): %v %v\n", rvt, yapi.Type_is_real(rvt))
 
-	typs := []yices2.Type_t { bvt, ivt, rvt }
+	typs := []yapi.Type_t { bvt, ivt, rvt }
 
-	tupt := yices2.Tuple_type(typs)
+	tupt := yapi.Tuple_type(typs)
 
-	fmt.Printf("Tuple type(): %v %v\n", tupt, yices2.Type_is_tuple(tupt))
+	fmt.Printf("Tuple type(): %v %v\n", tupt, yapi.Type_is_tuple(tupt))
 
-	yices2.Pp_type(os.Stdout, tupt, 80, 80, 10)
+	yapi.Pp_type(os.Stdout, tupt, 80, 80, 10)
 
-	children := yices2.Type_children(tupt)
+	children := yapi.Type_children(tupt)
 
 	fmt.Printf("children: %v\n", children)
 
@@ -40,6 +40,6 @@ func TestBasis0(t *testing.T) {
 
 
 	fmt.Println("Exiting...")
-	yices2.Exit()
+	yapi.Exit()
 
 }

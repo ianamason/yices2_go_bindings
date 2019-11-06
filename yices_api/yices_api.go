@@ -1712,6 +1712,7 @@ func Get_mpq_value(model Model_t, t Term_t, val *Mpq_t) int32 {
 
 
 /*
+//iam: not gonna assume mcsat
 #ifdef LIBPOLY_VERSION
 __YICES_DLLSPEC__ extern int32_t yices_get_algebraic_number_value(model_t *mdl, term_t t, lp_algebraic_number_t *a);
 #endif
@@ -1830,6 +1831,7 @@ func Val_get_mpq(model Model_t, yval *Yval_t, val *Mpq_t) int32 {
 }
 
 /*
+//iam: not gonna assume mcsat
 #ifdef LIBPOLY_VERSION
 __YICES_DLLSPEC__ extern int32_t yices_val_get_algebraic_number(model_t *mdl, const yval_t *v, lp_algebraic_number_t *a);
 #endif
