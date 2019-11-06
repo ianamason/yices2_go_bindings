@@ -25,6 +25,14 @@ term_t ympq(uintptr_t ptr){
 term_t yices_bvconst_mpzp(uint32_t n, mpz_t *x){
    return yices_bvconst_mpz(n, *x);
 }
+//iam: passing a mpq_t thru cgo seems too hard
+int32_t yices_rational_const_valuep(term_t t, mpq_t *q){
+   return yices_rational_const_value(t, *q);
+}
+//iam: passing a mpq_t thru cgo seems too hard
+int32_t yices_sum_componentp(term_t t, int32_t i, mpq_t *coeff, term_t *term){
+   return yices_sum_component(t, i, *coeff, term);
+}
 //iam: passing a mpz_t thru cgo seems too hard
 int32_t yices_get_mpz_valuep(model_t *mdl, term_t t, mpz_t *val){
    return yices_get_mpz_value(mdl, t, *val);
@@ -222,6 +230,7 @@ func Error_string() string {
  **********************/
 
 //iam: we use a type definition, does it improve readability?
+// does it make life harder? Lots of casting necessary now.
 
 type Type_t int32
 
@@ -624,7 +633,7 @@ type Mpz_t C.mpz_t
 func Mpz(z *Mpz_t) Term_t {
 	// some contortions needed here to do the simplest of things
 	// similar contortions are needed to "identify" yices2._Ctype_mpz_t
-	// with gmp._Ctype_mpz_t
+	// with gmp._Ctype_mpz_t, which seems a little odd.
 	return Term_t(C.ympz(C.uintptr_t(uintptr(unsafe.Pointer(z)))))
 }
 
@@ -1219,7 +1228,6 @@ func Set_type_name(tau Type_t, name string) int32 {
 func Set_term_name(t Term_t, name string) int32 {
 	cs := C.CString(name)
 	defer C.free(unsafe.Pointer(cs))
-	//yices clones this string, so *not* freeing here makes no sense, and yet...
 	return int32(C.yices_set_term_name(C.term_t(t), cs))
 }
 
@@ -1372,17 +1380,16 @@ func Scalar_const_value(t Term_t, val *int32) int32  {
 	return int32(C.yices_scalar_const_value(C.term_t(t), (* C.int32_t)(val)))
 }
 
-/* iam: FIXME
-#ifdef __GMP_H__
-__YICES_DLLSPEC__ extern int32_t yices_rational_const_value(term_t t, mpq_t q);
-#endif
-*/
 
-/* iam: FIXME
-#ifdef __GMP_H__
-__YICES_DLLSPEC__ extern int32_t yices_sum_component(term_t t, int32_t i, mpq_t coeff, term_t *term);
-#endif
-*/
+
+func Rational_const_value(t Term_t, q *Mpq_t) int32 {
+	return int32(C.yices_rational_const_valuep(C.term_t(t), (* C.mpq_t)(unsafe.Pointer(q))))
+}
+
+
+func Sum_component(t Term_t, i int32, coeff *Mpq_t, term *Term_t) int32 {
+	return int32(C.yices_sum_componentp(C.term_t(t), C.int32_t(i), (* C.mpq_t)(unsafe.Pointer(coeff)), (*C.term_t)(term)))
+}
 
 func Bvsum_component(t Term_t, i int32, val []int32, term *Term_t) int32 {
 	return int32(C.yices_bvsum_component(C.term_t(t), C.int32_t(i), (* C.int32_t)(&val[0]), (*C.term_t)(term)))
