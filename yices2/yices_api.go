@@ -13,44 +13,35 @@ void yices_yval_vector_get(yval_vector_t *vec, uint32_t elem, yval_t* val){
       yval_t *v = &vec->data[elem];
       *val = *v;
 }
-//FIXME: need to write getters for the slots in the error_report_t
-uintptr_t copy_error_record(void){
-  error_report_t* ptr = malloc(sizeof(error_report_t));
-  *ptr = *yices_error_report();
-  return (uintptr_t)ptr;
-}
-void delete_error_record(uintptr_t ptr){
-  free((void *)ptr);
-}
-// hack to get around weird cgo complaints
+//iam: hack to get around weird cgo complaints
 term_t ympz(uintptr_t ptr){
    return yices_mpz(*((mpz_t *)((void *)ptr)));
 }
-// hack to get around weird cgo complaints
+//iam: hack to get around weird cgo complaints
 term_t ympq(uintptr_t ptr){
    return yices_mpq(*((mpq_t *)((void *)ptr)));
 }
-// passing a mpz_t thru cgo seems too hard
+//iam: passing a mpz_t thru cgo seems too hard
 term_t yices_bvconst_mpzp(uint32_t n, mpz_t *x){
    return yices_bvconst_mpz(n, *x);
 }
-// passing a mpz_t thru cgo seems too hard
+//iam: passing a mpz_t thru cgo seems too hard
 int32_t yices_get_mpz_valuep(model_t *mdl, term_t t, mpz_t *val){
    return yices_get_mpz_value(mdl, t, *val);
 }
-// passing a mpq_t thru cgo seems too hard
+//iam: passing a mpq_t thru cgo seems too hard
 int32_t yices_get_mpq_valuep(model_t *mdl, term_t t, mpq_t *val){
    return yices_get_mpq_value(mdl, t, *val);
 }
-// passing a mpz_t thru cgo seems too hard
+//iam: passing a mpz_t thru cgo seems too hard
 int32_t yices_val_get_mpzp(model_t *mdl, const yval_t *v, mpz_t *val){
    return yices_val_get_mpz(mdl, v, *val);
 }
-// passing a mpq_t thru cgo seems too hard
+//iam: passing a mpq_t thru cgo seems too hard
 int32_t yices_val_get_mpqp(model_t *mdl, const yval_t *v, mpq_t *val){
    return yices_val_get_mpq(mdl, v, *val);
 }
-// is there a better way than this?
+//iam: is there a better way than this?
 void fetchReport(error_code_t *code, uint32_t *line, uint32_t *column, term_t *term1, type_t *type1, term_t *term2, type_t *type2, int64_t *badval){
    error_report_t *report = yices_error_report();
    *code = report->code;
@@ -79,10 +70,6 @@ import "unsafe"
  *  This layer (yices_api.go) is a thin wrapper to the yices_api. Maybe a more go-like layer will sit atop this
  *  much like the python version of the API.
  *
- *  bd: - free the strings returned by yices.
- *      - check that some int32 retvals could be bool
- *
- * iam: - free the result of C.CString using C.free (maybe wrapped with unsafe.Pointer?)
  */
 
 /*********************
@@ -182,8 +169,8 @@ func fetchErrorReport(yerror *YicesError) {
 }
 
 
-// NewYicesError() returns a copy of the current error state
-func NewYicesError() (yerror *YicesError) {
+// GetYicesError() returns a copy of the current error state
+func GetYicesError() (yerror *YicesError) {
 	errcode := Error_code()
 	if errcode != NO_ERROR {
 		yerror = new(YicesError)

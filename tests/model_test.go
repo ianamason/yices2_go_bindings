@@ -199,7 +199,7 @@ func Test_mpz_models(t *testing.T) {
 	errcode := yices2.Get_int32_value(*modelp, i1, &i32val1)
 	AssertEqual(t, errcode, -1)
 	AssertEqual(t, yices2.Error_string(), "eval error: the term value does not fit the expected type")
-	yerror1 := yices2.NewYicesError()
+	yerror1 := yices2.GetYicesError()
 
 	yices2.Clear_error()
 
@@ -207,7 +207,7 @@ func Test_mpz_models(t *testing.T) {
 	errcode = yices2.Get_int32_value(*modelp, i2, &i32val2)
 	AssertEqual(t, errcode, -1)
 	AssertEqual(t, yices2.Error_string(), "eval error: the term value does not fit the expected type")
-	yerror2 := yices2.NewYicesError()
+	yerror2 := yices2.GetYicesError()
 
 	AssertEqual(t, yerror1, yerror2)
 
