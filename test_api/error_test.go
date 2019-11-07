@@ -25,7 +25,7 @@ func TestErrors(t *testing.T) {
 	AssertEqual(t, const1, yapi.NULL_TERM, "const1 == yapi.NULL_TERM")
 	AssertEqual(t, error_string, "invalid type in constant creation", "error_string == 'invalid type in constant creation'")
 
-	yerror := yapi.GetYicesError()
+	yerror := yapi.YicesError()
 
 	println(yerror.String())
 

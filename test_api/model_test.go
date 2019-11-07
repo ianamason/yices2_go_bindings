@@ -199,7 +199,7 @@ func Test_mpz_models(t *testing.T) {
 	errcode := yapi.Get_int32_value(*modelp, i1, &i32val1)
 	AssertEqual(t, errcode, -1)
 	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
-	yerror1 := yapi.GetYicesError()
+	yerror1 := yapi.YicesError()
 
 	yapi.Clear_error()
 
@@ -207,7 +207,7 @@ func Test_mpz_models(t *testing.T) {
 	errcode = yapi.Get_int32_value(*modelp, i2, &i32val2)
 	AssertEqual(t, errcode, -1)
 	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
-	yerror2 := yapi.GetYicesError()
+	yerror2 := yapi.YicesError()
 
 	AssertEqual(t, yerror1, yerror2)
 
@@ -254,14 +254,14 @@ func Test_mpq_models(t *testing.T) {
 	errcode := yapi.Get_rational32_value(*modelp, r1, &r32num1, &r32den1)
 	AssertEqual(t, errcode, -1)
 	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
-	yerror1 := yapi.GetYicesError()
+	yerror1 := yapi.YicesError()
 
 	var r64num2 int64
 	var r64den2 uint64
 	errcode = yapi.Get_rational64_value(*modelp, r2, &r64num2, &r64den2)
 	AssertEqual(t, errcode, -1)
 	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
-	yerror2 := yapi.GetYicesError()
+	yerror2 := yapi.YicesError()
 
 	AssertEqual(t, yerror1, yerror2)
 

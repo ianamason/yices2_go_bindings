@@ -138,7 +138,7 @@ func Reset() {
 
 type Error_code_t int32
 
-type YicesError struct {
+type YicesError_t struct {
 	error_string string
 	code         Error_code_t
 	line         uint32
@@ -151,11 +151,11 @@ type YicesError struct {
 }
 
 // the all important error interface
-func (yerror *YicesError) Error() string {
+func (yerror *YicesError_t) Error() string {
 	return yerror.error_string
 }
 
-func fetchErrorReport(yerror *YicesError) {
+func fetchErrorReport(yerror *YicesError_t) {
 	var code C.error_code_t
 	var line C.uint32_t
 	var column C.uint32_t
@@ -176,11 +176,11 @@ func fetchErrorReport(yerror *YicesError) {
 	return
 }
 
-// GetYicesError() returns a copy of the current error state
-func GetYicesError() (yerror *YicesError) {
+// YicesError() returns a copy of the current error state
+func YicesError() (yerror *YicesError_t) {
 	errcode := Error_code()
 	if errcode != NO_ERROR {
-		yerror = new(YicesError)
+		yerror = new(YicesError_t)
 		yerror.error_string = Error_string()
 		fetchErrorReport(yerror)
 		Clear_error()
@@ -188,7 +188,7 @@ func GetYicesError() (yerror *YicesError) {
 	return
 }
 
-func (yerror *YicesError) String() string {
+func (yerror *YicesError_t) String() string {
 	return fmt.Sprintf("code = %d line = %d column = %d term1 = %d type1 = %d term2 = %d type2 = %d badval = %d",
 		yerror.code, yerror.line, yerror.column, yerror.term1, yerror.type1, yerror.term2, yerror.type2, yerror.badval)
 }
