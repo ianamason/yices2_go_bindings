@@ -2,8 +2,8 @@ package tests
 
 import (
 	"fmt"
-	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
 	"os"
+	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
 	"testing"
 )
 
@@ -18,7 +18,7 @@ func setup() (cfg yapi.Config_t, ctx yapi.Context_t, params yapi.Param_t) {
 }
 
 // clean up a generic startup
-func cleanup(cfg *yapi.Config_t, ctx *yapi.Context_t, params *yapi.Param_t) {
+func cleanup(cfg *yapi.Config_t, ctx *yapi.Context_t, params *yapi.Param_t){
 	yapi.Close_config(cfg)
 	yapi.Close_param_record(params)
 	yapi.Close_context(ctx)
@@ -229,6 +229,92 @@ func Test_mpz_models(t *testing.T) {
 
 }
 
+func Test_mpq_models(t *testing.T) {
+
+	cfg, ctx, params := setup()
+
+	real_t := yapi.Real_type()
+
+	r1 := define_const("r1", real_t)
+	r2 := define_const("r2", real_t)
+
+	parse_assert("(> (* r1 3456666334217777794) 987654321987654321987654321)", ctx)
+	parse_assert("(< r2 r1)", ctx)
+
+	stat := yapi.Check_context(ctx, params)
+	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	modelp := yapi.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+
+	mstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	AssertEqual(t, mstr, "(= r1 987654325444320656205432115/3456666334217777794)\n(= r2 987654321987654321987654321/3456666334217777794)")
+
+	var r32num1 int32
+	var r32den1 uint32
+	errcode := yapi.Get_rational32_value(*modelp, r1, &r32num1, &r32den1)
+	AssertEqual(t, errcode, -1)
+	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
+	yerror1 := yapi.GetYicesError()
+
+	var r64num2 int64
+	var r64den2 uint64
+	errcode = yapi.Get_rational64_value(*modelp, r2, &r64num2, &r64den2)
+	AssertEqual(t, errcode, -1)
+	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
+	yerror2 := yapi.GetYicesError()
+
+	AssertEqual(t, yerror1, yerror2)
+
+	var mpqval1 yapi.Mpq_t
+	errcode = yapi.Get_mpq_value(*modelp, r1, &mpqval1)
+	AssertEqual(t, errcode, 0)
+
+	mpq1 := yapi.Mpq(&mpqval1)
+	AssertEqual(t, yapi.Term_to_string(mpq1, 200, 10, 0), "987654325444320656205432115/3456666334217777794")
+
+	var mpqval2 yapi.Mpq_t
+	errcode = yapi.Get_mpq_value(*modelp, r2, &mpqval2)
+	AssertEqual(t, errcode, 0)
+
+	mpq2 := yapi.Mpq(&mpqval2)
+	AssertEqual(t, yapi.Term_to_string(mpq2, 200, 10, 0), "987654321987654321987654321/3456666334217777794")
+
+
+	cleanup(&cfg, &ctx, &params)
+
+}
+
+
+func Test_algebraic_models(t *testing.T) {
+	yapi.Init()
+	if yapi.Has_mcsat() == int32(0) {
+		fmt.Println("TestAlgebraicModels skipped because no mcsat.")
+		return
+	}
+	real_t := yapi.Real_type()
+	var cfg yapi.Config_t
+	var ctx yapi.Context_t
+	var params yapi.Param_t
+	yapi.Init_config(&cfg)
+	yapi.Default_config_for_logic(cfg, "QF_NRA")
+    yapi.Set_config(cfg, "mode", "one-shot")
+	yapi.Init_context(cfg, &ctx)
+	x := define_const("x", real_t)
+	parse_assert("(= (* x x) 2)", ctx)
+	stat := yapi.Check_context(ctx, params)  //params == NULL in the C
+	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	modelp := yapi.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+	yapi.Print_model(os.Stdout, *modelp)
+	var xf float64
+	yapi.Get_double_value(*modelp, x, &xf)
+	AssertEqual(t, xf, -1.414213562373095, "xf == -1.414213562373095")
+	yapi.Close_config(&cfg)
+	yapi.Close_context(&ctx)
+	yapi.Exit()
+}
+
+
 func Test_bv_models(t *testing.T) {
 
 	cfg, ctx, params := setup()
@@ -273,6 +359,7 @@ func Test_tuple_models(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
+
 	bool_t := yapi.Bool_type()
 	int_t := yapi.Int_type()
 	real_t := yapi.Real_type()
@@ -302,53 +389,95 @@ func Test_tuple_models(t *testing.T) {
 
 	cleanup(&cfg, &ctx, &params)
 
+
 }
 
-func TestAlgebraicModels(t *testing.T) {
+func Test_function_models(t *testing.T) {
 
-	yapi.Init()
+	cfg, ctx, params := setup()
 
-	if yapi.Has_mcsat() == int32(0) {
-		fmt.Println("TestAlgebraicModels skipped because no mcsat.")
-		return
-	}
-
+	bool_t := yapi.Bool_type()
+	int_t := yapi.Int_type()
 	real_t := yapi.Real_type()
+	fun_t := yapi.Function_type3(int_t, bool_t, real_t, real_t)
 
-	var cfg yapi.Config_t
+	fstr := yapi.Type_to_string(fun_t, 100, 80, 0)
 
-	var ctx yapi.Context_t
+	AssertEqual(t, fstr, "(-> int bool real real)")
 
-	var params yapi.Param_t
+	fn := define_const("fn", fun_t)
+	//i1 :=
+	define_const("i1", int_t)
+	//b1 :=
+	define_const("b1", bool_t)
+	//r1 :=
+	define_const("r1", real_t)
 
-	yapi.Init_config(&cfg)
+	parse_assert("(> (fn i1 b1 r1) (fn (+ i1 1) (not b1) (- r1 i1)))", ctx)
 
-	yapi.Default_config_for_logic(cfg, "QF_NRA")
-	yapi.Set_config(cfg, "mode", "one-shot")
-
-	yapi.Init_context(cfg, &ctx)
-
-	x := define_const("x", real_t)
-
-	parse_assert("(= (* x x) 2)", ctx)
-
-	stat := yapi.Check_context(ctx, params) //params == NULL in the C
-
+	stat := yapi.Check_context(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
 	modelp := yapi.Get_model(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
-	yapi.Print_model(os.Stdout, *modelp)
+	mstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	AssertEqual(t, mstr, "(= b1 false)\n(= i1 1463)\n(= r1 -579)\n(function fn\n (type (-> int bool real real))\n (= (fn 1463 false -579) 1)\n (= (fn 1464 true -2042) 0)\n (default 2))")
 
-	var xf float64
-	yapi.Get_double_value(*modelp, x, &xf)
+	var yval yapi.Yval_t
+	yapi.Get_value(*modelp, fn, &yval)
+	AssertEqual(t, yapi.Get_tag(yval), yapi.YVAL_FUNCTION)
+	AssertEqual(t, yapi.Val_function_arity(*modelp, &yval), 3)
 
-	AssertEqual(t, xf, -1.414213562373095, "xf == -1.414213562373095")
+	var ydef yapi.Yval_t
 
-	yapi.Close_config(&cfg)
+	yvec := yapi.Val_expand_function(*modelp, &yval, &ydef)
+	AssertNotEqual(t, yvec, nil)
+	AssertEqual(t, yapi.Get_tag(ydef), yapi.YVAL_RATIONAL)
 
-	yapi.Close_context(&ctx)
+	var def32val int32
+	yapi.Val_get_int32(*modelp, &ydef, &def32val)
+	AssertEqual(t, def32val, 2)
+	AssertEqual(t, len(yvec), 2)
+	map1 := yvec[0]
+	map2 := yvec[1]
+	AssertEqual(t, yapi.Get_tag(map1), yapi.YVAL_MAPPING)
+	AssertEqual(t, yapi.Get_tag(map2), yapi.YVAL_MAPPING)
+	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map1), 3)
+	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map2), 3)
 
-	yapi.Exit()
+
+	cleanup(&cfg, &ctx, &params)
+
+}
+
+func Test_scalar_models(t *testing.T) {
+
+	cfg, ctx, params := setup()
+
+	cleanup(&cfg, &ctx, &params)
+
+}
+
+func Test_yval_numeric_models(t *testing.T) {
+
+	cfg, ctx, params := setup()
+
+	cleanup(&cfg, &ctx, &params)
+
+}
+
+func Test_model_from_map(t *testing.T) {
+
+	cfg, ctx, params := setup()
+
+	cleanup(&cfg, &ctx, &params)
+
+}
+
+func Test_implicant(t *testing.T) {
+
+	cfg, ctx, params := setup()
+
+	cleanup(&cfg, &ctx, &params)
 
 }
