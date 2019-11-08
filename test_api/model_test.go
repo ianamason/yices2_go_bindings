@@ -406,12 +406,10 @@ func Test_function_models(t *testing.T) {
 	AssertEqual(t, fstr, "(-> int bool real real)")
 
 	fn := define_const("fn", fun_t)
-	//i1 :=
-	define_const("i1", int_t)
+	i1 := define_const("i1", int_t)
 	//b1 :=
 	define_const("b1", bool_t)
-	//r1 :=
-	define_const("r1", real_t)
+	r1 := define_const("r1", real_t)
 
 	parse_assert("(> (fn i1 b1 r1) (fn (+ i1 1) (not b1) (- r1 i1)))", ctx)
 
@@ -456,6 +454,53 @@ func Test_function_models(t *testing.T) {
 
 	AssertEqual(t, len(vec1), 3)
 	AssertEqual(t, len(vec2), 3)
+
+	var val1 int32
+	var val2 int32
+
+	yapi.Val_get_int32(*modelp, &yval1, &val1)
+	yapi.Val_get_int32(*modelp, &yval2, &val2)
+
+	AssertEqual(t, val1, 1)
+	AssertEqual(t, val2, 0)
+
+	var arg_1_0 int32
+	var arg_2_0 int32
+	yapi.Val_get_int32(*modelp, &vec1[0], &arg_1_0)
+	yapi.Val_get_int32(*modelp, &vec2[0], &arg_2_0)
+	AssertEqual(t, arg_1_0, 1463)
+	AssertEqual(t, arg_2_0, 1464)
+
+	var arg_1_1 int32
+	var arg_2_1 int32
+	yapi.Val_get_bool(*modelp, &vec1[1], &arg_1_1)
+	yapi.Val_get_bool(*modelp, &vec2[1], &arg_2_1)
+	AssertEqual(t, arg_1_1, 0)
+	AssertEqual(t, arg_2_1, 1)
+
+	var arg_1_2 int32
+	var arg_2_2 int32
+	yapi.Val_get_int32(*modelp, &vec1[2], &arg_1_2)
+	yapi.Val_get_int32(*modelp, &vec2[2], &arg_2_2)
+	AssertEqual(t, arg_1_2, -579)
+	AssertEqual(t, arg_2_2, -2042)
+
+	fmla := yapi.Parse_term("(> i1 r1)")
+
+	AssertEqual(t, yapi.Formula_true_in_model(*modelp, fmla), 1)
+
+	a_arr := []yapi.Term_t{i1, fmla, r1}
+	b_arr := make([]yapi.Term_t, 3)
+
+	errcode := yapi.Term_array_value(*modelp, a_arr, b_arr)
+
+	AssertEqual(t, errcode, 0)
+
+	AssertEqual(t, b_arr[0], yapi.Int32(1463))
+	AssertEqual(t, b_arr[1], yapi.True())
+	AssertEqual(t, b_arr[2], yapi.Int32(-579))
+
+
 
 	cleanup(&cfg, &ctx, &params)
 
