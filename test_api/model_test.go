@@ -445,6 +445,17 @@ func Test_function_models(t *testing.T) {
 	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map1), 3)
 	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map2), 3)
 
+	var yval1 yapi.Yval_t
+	var yval2 yapi.Yval_t
+
+	vec1 := yapi.Val_expand_mapping(*modelp, &map1, &yval1)
+	vec2 := yapi.Val_expand_mapping(*modelp, &map2, &yval2)
+
+	AssertEqual(t, yapi.Get_tag(yval1), yapi.YVAL_RATIONAL)
+	AssertEqual(t, yapi.Get_tag(yval2), yapi.YVAL_RATIONAL)
+
+	AssertEqual(t, len(vec1), 3)
+	AssertEqual(t, len(vec2), 3)
 
 	cleanup(&cfg, &ctx, &params)
 

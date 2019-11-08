@@ -1831,7 +1831,7 @@ func Val_expand_mapping(model Model_t, m *Yval_t, val *Yval_t) (vector []Yval_t)
 	arity := int(C.yices_val_mapping_arity(ymodel(model), (*C.yval_t)(m)))
 	if arity > 0 {
 		vec := make([]Yval_t, arity, arity)
-		errcode := int32(C.yices_val_expand_mapping(ymodel(model), (*C.yval_t)(m), (*C.yval_t)(&vector[0]), (*C.yval_t)(val)))
+		errcode := int32(C.yices_val_expand_mapping(ymodel(model), (*C.yval_t)(m), (*C.yval_t)(&vec[0]), (*C.yval_t)(val)))
 		if errcode != -1 {
 			vector = vec
 		}
