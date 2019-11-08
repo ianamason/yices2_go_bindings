@@ -500,8 +500,6 @@ func Test_function_models(t *testing.T) {
 	AssertEqual(t, b_arr[1], yapi.True())
 	AssertEqual(t, b_arr[2], yapi.Int32(-579))
 
-
-
 	cleanup(&cfg, &ctx, &params)
 
 }
@@ -509,6 +507,60 @@ func Test_function_models(t *testing.T) {
 func Test_scalar_models(t *testing.T) {
 
 	cfg, ctx, params := setup()
+
+	scalar_t := yapi.New_scalar_type(10)
+
+	sc1 := define_const("sc1", scalar_t)
+	sc2 := define_const("sc2", scalar_t)
+	sc3 := define_const("sc3", scalar_t)
+
+	parse_assert("(/= sc1 sc2)", ctx)
+	parse_assert("(/= sc1 sc3)", ctx)
+
+	stat := yapi.Check_context(ctx, params)
+	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	modelp := yapi.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+
+	var val1 int32
+	var val2 int32
+	var val3 int32
+
+	yapi.Get_scalar_value(*modelp, sc1, &val1)
+	yapi.Get_scalar_value(*modelp, sc2, &val2)
+	yapi.Get_scalar_value(*modelp, sc3, &val3)
+
+	AssertEqual(t, sc1, yapi.Term_t(6))
+	AssertEqual(t, sc2, yapi.Term_t(8))
+	AssertEqual(t, sc3, yapi.Term_t(10))
+
+	AssertEqual(t, yapi.Term_is_scalar(sc1), true)
+	AssertEqual(t, yapi.Term_is_scalar(sc2), true)
+	AssertEqual(t, yapi.Term_is_scalar(sc3), true)
+
+	var yval1 yapi.Yval_t
+	var yval2 yapi.Yval_t
+	var yval3 yapi.Yval_t
+
+	AssertEqual(t, yapi.Get_value(*modelp, sc1, &yval1), 0)
+	AssertEqual(t, yapi.Get_value(*modelp, sc2, &yval2), 0)
+	AssertEqual(t, yapi.Get_value(*modelp, sc3, &yval3), 0)
+
+	AssertEqual(t, yapi.Get_tag(yval1), yapi.YVAL_SCALAR)
+	AssertEqual(t, yapi.Get_tag(yval2), yapi.YVAL_SCALAR)
+	AssertEqual(t, yapi.Get_tag(yval3), yapi.YVAL_SCALAR)
+
+	var tau1 yapi.Type_t
+	var tau2 yapi.Type_t
+	var tau3 yapi.Type_t
+
+	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval1, &val1, &tau1), 0)
+	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval2, &val2, &tau2), 0)
+	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval3, &val3, &tau3), 0)
+
+	AssertEqual(t, val1, 9)
+	AssertEqual(t, val2, 8)
+	AssertEqual(t, val3, 8)
 
 	cleanup(&cfg, &ctx, &params)
 
