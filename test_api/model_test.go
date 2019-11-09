@@ -64,6 +64,9 @@ func Test_bool_models(t *testing.T) {
 	AssertEqual(t, bval2, 0, "bval2 == 0")
 	AssertEqual(t, bval3, 1, "bval3 == 1")
 	b_fmla2 := yapi.Parse_term("(not b3)")
+
+	yapi.Close_model(modelp)
+
 	yapi.Assert_formula(ctx, b_fmla2)
 	stat = yapi.Check_context(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
@@ -82,6 +85,8 @@ func Test_bool_models(t *testing.T) {
 	AssertEqual(t, yapi.Get_tag(yval), yapi.YVAL_BOOL)
 	yapi.Val_get_bool(*modelp, &yval, &bval1)
 	AssertEqual(t, bval1, 0, "bval1 == 0")
+
+	yapi.Close_model(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 }
@@ -115,6 +120,8 @@ func Test_int_models(t *testing.T) {
 	yapi.Pp_model(os.Stdout, *modelp, 80, 100, 0)
 	mdlstr := yapi.Model_to_string(*modelp, 80, 100, 0)
 	AssertEqual(t, mdlstr, "(= i1 4)\n(= i2 3)")
+
+	yapi.Close_model(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
@@ -171,6 +178,8 @@ func Test_rat_models(t *testing.T) {
 	AssertEqual(t, rdoub1, 3.5, "rdoub1 == 3.5")
 	AssertEqual(t, rdoub2, 4.0, "rdoub2 == 4.0")
 
+	yapi.Close_model(modelp)
+
 	cleanup(&cfg, &ctx, &params)
 
 }
@@ -224,6 +233,8 @@ func Test_mpz_models(t *testing.T) {
 
 	mpz2 := yapi.Mpz(&mpzval2)
 	AssertEqual(t, yapi.Term_to_string(mpz2, 200, 10, 0), "987654321987654321987654321")
+
+	yapi.Close_model(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
@@ -279,6 +290,8 @@ func Test_mpq_models(t *testing.T) {
 	mpq2 := yapi.Mpq(&mpqval2)
 	AssertEqual(t, yapi.Term_to_string(mpq2, 200, 10, 0), "987654321987654321987654321/3456666334217777794")
 
+	yapi.Close_model(modelp)
+
 
 	cleanup(&cfg, &ctx, &params)
 
@@ -309,6 +322,7 @@ func Test_algebraic_models(t *testing.T) {
 	var xf float64
 	yapi.Get_double_value(*modelp, x, &xf)
 	AssertEqual(t, xf, -1.414213562373095, "xf == -1.414213562373095")
+	yapi.Close_model(modelp)
 	yapi.Close_config(&cfg)
 	yapi.Close_context(&ctx)
 	yapi.Exit()
@@ -351,6 +365,8 @@ func Test_bv_models(t *testing.T) {
 	fmt.Printf("bval3 = %v\n", bval3)
 	AssertEqual(t, bval3, []int32{0, 0, 1}, "bval1 == []int32{0, 0, 1}")
 
+	yapi.Close_model(modelp)
+
 	cleanup(&cfg, &ctx, &params)
 
 }
@@ -386,6 +402,8 @@ func Test_tuple_models(t *testing.T) {
 	yapi.Val_get_int32(*modelp, &yvec[1], &ival)
 	AssertEqual(t, bval, 0)
 	AssertEqual(t, ival, 1)
+
+	yapi.Close_model(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
@@ -498,6 +516,8 @@ func Test_function_models(t *testing.T) {
 	AssertEqual(t, b_arr[1], yapi.True())
 	AssertEqual(t, b_arr[2], yapi.Int32(-579))
 
+	yapi.Close_model(modelp)
+
 	cleanup(&cfg, &ctx, &params)
 
 }
@@ -554,6 +574,8 @@ func Test_scalar_models(t *testing.T) {
 	AssertEqual(t, val2, 8)
 	AssertEqual(t, val3, 8)
 
+	yapi.Close_model(modelp)
+
 	cleanup(&cfg, &ctx, &params)
 
 }
@@ -594,8 +616,6 @@ func Test_model_from_map(t *testing.T) {
 
 	yapi.Close_model(modelp)
 
-
-
 	cleanup(&cfg, &ctx, &params)
 
 }
@@ -603,6 +623,8 @@ func Test_model_from_map(t *testing.T) {
 func Test_implicant(t *testing.T) {
 
 	cfg, ctx, params := setup()
+
+	//int_t := yapi.Int_type()
 
 	cleanup(&cfg, &ctx, &params)
 
