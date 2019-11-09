@@ -443,8 +443,7 @@ func Test_function_models(t *testing.T) {
 	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map1), 3)
 	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map2), 3)
 
-	var yval1 yapi.Yval_t
-	var yval2 yapi.Yval_t
+	var yval1, yval2 yapi.Yval_t
 
 	vec1 := yapi.Val_expand_mapping(*modelp, &map1, &yval1)
 	vec2 := yapi.Val_expand_mapping(*modelp, &map2, &yval2)
@@ -455,8 +454,7 @@ func Test_function_models(t *testing.T) {
 	AssertEqual(t, len(vec1), 3)
 	AssertEqual(t, len(vec2), 3)
 
-	var val1 int32
-	var val2 int32
+	var val1, val2 int32
 
 	yapi.Val_get_int32(*modelp, &yval1, &val1)
 	yapi.Val_get_int32(*modelp, &yval2, &val2)
@@ -464,22 +462,22 @@ func Test_function_models(t *testing.T) {
 	AssertEqual(t, val1, 1)
 	AssertEqual(t, val2, 0)
 
-	var arg_1_0 int32
-	var arg_2_0 int32
+	var arg_1_0, arg_2_0 int32
+
 	yapi.Val_get_int32(*modelp, &vec1[0], &arg_1_0)
 	yapi.Val_get_int32(*modelp, &vec2[0], &arg_2_0)
 	AssertEqual(t, arg_1_0, 1463)
 	AssertEqual(t, arg_2_0, 1464)
 
-	var arg_1_1 int32
-	var arg_2_1 int32
+	var arg_1_1, arg_2_1 int32
+
 	yapi.Val_get_bool(*modelp, &vec1[1], &arg_1_1)
 	yapi.Val_get_bool(*modelp, &vec2[1], &arg_2_1)
 	AssertEqual(t, arg_1_1, 0)
 	AssertEqual(t, arg_2_1, 1)
 
-	var arg_1_2 int32
-	var arg_2_2 int32
+	var arg_1_2, arg_2_2 int32
+
 	yapi.Val_get_int32(*modelp, &vec1[2], &arg_1_2)
 	yapi.Val_get_int32(*modelp, &vec2[2], &arg_2_2)
 	AssertEqual(t, arg_1_2, -579)
@@ -522,9 +520,7 @@ func Test_scalar_models(t *testing.T) {
 	modelp := yapi.Get_model(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
-	var val1 int32
-	var val2 int32
-	var val3 int32
+	var val1, val2, val3 int32
 
 	yapi.Get_scalar_value(*modelp, sc1, &val1)
 	yapi.Get_scalar_value(*modelp, sc2, &val2)
@@ -538,9 +534,7 @@ func Test_scalar_models(t *testing.T) {
 	AssertEqual(t, yapi.Term_is_scalar(sc2), true)
 	AssertEqual(t, yapi.Term_is_scalar(sc3), true)
 
-	var yval1 yapi.Yval_t
-	var yval2 yapi.Yval_t
-	var yval3 yapi.Yval_t
+	var yval1, yval2, yval3  yapi.Yval_t
 
 	AssertEqual(t, yapi.Get_value(*modelp, sc1, &yval1), 0)
 	AssertEqual(t, yapi.Get_value(*modelp, sc2, &yval2), 0)
@@ -550,9 +544,7 @@ func Test_scalar_models(t *testing.T) {
 	AssertEqual(t, yapi.Get_tag(yval2), yapi.YVAL_SCALAR)
 	AssertEqual(t, yapi.Get_tag(yval3), yapi.YVAL_SCALAR)
 
-	var tau1 yapi.Type_t
-	var tau2 yapi.Type_t
-	var tau3 yapi.Type_t
+	var tau1, tau2, tau3 yapi.Type_t
 
 	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval1, &val1, &tau1), 0)
 	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval2, &val2, &tau2), 0)
@@ -577,6 +569,32 @@ func Test_yval_numeric_models(t *testing.T) {
 func Test_model_from_map(t *testing.T) {
 
 	cfg, ctx, params := setup()
+
+	bv_t := yapi.Bv_type(8)
+	int_t := yapi.Int_type()
+	real_t := yapi.Real_type()
+
+	i1 := define_const("i1", int_t)
+	r1 := define_const("r1", real_t)
+	bv1 := define_const("bv1", bv_t)
+
+	iconst1 := yapi.Int32(42)
+	rconst1 := yapi.Rational32(13, 131)
+	bvconst1 := yapi.Bvconst_int32(8, 134)
+
+	vars := []yapi.Term_t{i1, r1, bv1}
+	vals := []yapi.Term_t{iconst1, rconst1, bvconst1}
+
+	modelp := yapi.Model_from_map(vars, vals)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+
+	modelstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+
+	AssertEqual(t, modelstr, "(= i1 42)\n(= r1 13/131)\n(= bv1 0b10000110)")
+
+	yapi.Close_model(modelp)
+
+
 
 	cleanup(&cfg, &ctx, &params)
 
