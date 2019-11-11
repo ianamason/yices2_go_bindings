@@ -580,14 +580,6 @@ func Test_scalar_models(t *testing.T) {
 
 }
 
-func Test_yval_numeric_models(t *testing.T) {
-
-	cfg, ctx, params := setup()
-
-	cleanup(&cfg, &ctx, &params)
-
-}
-
 func Test_model_from_map(t *testing.T) {
 
 	cfg, ctx, params := setup()
@@ -668,6 +660,110 @@ func Test_implicant(t *testing.T) {
 
 
 
+
+	yapi.Close_model(modelp)
+
+	cleanup(&cfg, &ctx, &params)
+
+}
+
+func Test_yval_numeric_models(t *testing.T) {
+
+	cfg, ctx, params := setup()
+
+	int_t := yapi.Int_type()
+
+	i1 := define_const("i1", int_t)
+	i2 := define_const("i2", int_t)
+
+	parse_assert("(> i1 3)", ctx)
+	parse_assert("(< i2 i1)", ctx)
+
+	stat := yapi.Check_context(ctx, params)
+	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	modelp := yapi.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+
+	var y1, y2 yapi.Yval_t
+	errcode := yapi.Get_value(*modelp, i1, &y1)
+	AssertEqual(t, errcode, 0)
+	yerror := yapi.YicesError()
+	AssertEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+
+	errcode = yapi.Get_value(*modelp, i2, &y2)
+	AssertEqual(t, errcode, 0)
+	yerror = yapi.YicesError()
+	AssertEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+
+	AssertEqual(t, yapi.Val_is_int32(*modelp, &y1), 1)
+	AssertEqual(t, yapi.Val_is_int64(*modelp, &y1), 1)
+	AssertEqual(t, yapi.Val_is_rational32(*modelp, &y1), 1)
+	AssertEqual(t, yapi.Val_is_rational64(*modelp, &y1), 1)
+	AssertEqual(t, yapi.Val_is_integer(*modelp, &y1), 1)
+
+	AssertEqual(t, yapi.Val_bitsize(*modelp, &y1), 0)
+	AssertEqual(t, yapi.Val_tuple_arity(*modelp, &y1), 0)
+	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &y1), 0)
+	AssertEqual(t, yapi.Val_function_arity(*modelp, &y1), 0)
+
+	var b1 int32
+
+	errcode = yapi.Val_get_bool(*modelp, &y1, &b1)
+	AssertEqual(t, errcode, -1)
+	yerror = yapi.YicesError()
+	AssertNotEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+	AssertEqual(t, yerror.Error_string, "invalid operation on yval")
+	AssertEqual(t, yerror.Code, yapi.YVAL_INVALID_OP)
+
+	var ival32 int32
+	errcode = yapi.Val_get_int32(*modelp, &y1, &ival32)
+	AssertEqual(t, errcode, 0)
+	yerror = yapi.YicesError()
+	AssertEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+	AssertEqual(t, ival32, 4)
+
+	var ival64 int64
+	errcode = yapi.Val_get_int64(*modelp, &y1, &ival64)
+	AssertEqual(t, errcode, 0)
+	yerror = yapi.YicesError()
+	AssertEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+	AssertEqual(t, ival64, 4)
+
+	var num32 int32
+	var den32 uint32
+	errcode = yapi.Val_get_rational32(*modelp, &y1, &num32, &den32)
+	AssertEqual(t, errcode, 0)
+	AssertEqual(t, num32, 4)
+	AssertEqual(t, den32, 1)
+
+	var num64 int64
+	var den64 uint64
+	errcode = yapi.Val_get_rational64(*modelp, &y1, &num64, &den64)
+	AssertEqual(t, errcode, 0)
+	AssertEqual(t, num64, 4)
+	AssertEqual(t, den64, 1)
+
+
+	var dval float64
+	errcode = yapi.Val_get_double(*modelp, &y1, &dval)
+	AssertEqual(t, errcode, 0)
+	AssertEqual(t, dval, 4.0)
+
+	var mpz yapi.Mpz_t
+	yapi.Init_mpz(&mpz)
+	errcode = yapi.Val_get_mpz(*modelp, &y1, &mpz)
+	AssertEqual(t, errcode, 0)
+	ytz := yapi.Mpz(&mpz)
+	AssertEqual(t, yapi.Term_to_string(ytz, 200, 10, 0), "4")
+	yapi.Close_mpz(&mpz)
+
+	var mpq yapi.Mpq_t
+	yapi.Init_mpq(&mpq)
+	errcode = yapi.Val_get_mpq(*modelp, &y1, &mpq)
+	AssertEqual(t, errcode, 0)
+	ytq := yapi.Mpq(&mpq)
+	AssertEqual(t, yapi.Term_to_string(ytq, 200, 10, 0), "4")
+	yapi.Close_mpq(&mpq)
 
 	yapi.Close_model(modelp)
 

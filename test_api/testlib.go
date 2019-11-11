@@ -216,16 +216,27 @@ func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...str
 }
 
 func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...string) {
+
+	/*
+	if((lhs == nil) && (rhs == nil)){
+		return
+	}
+
+	if((lhs == nil) || (rhs == nil)){
+		t.Errorf("%s : AssertEqual of pointer %v : %v != %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+	}
+    */
+
 	if Signed(lhs) && Signed(rhs) {
 		if !SignedEqual(lhs, rhs) {
-			t.Errorf("%s : AssertEqual of signed integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+			t.Errorf("%s : AssertEqual of signed integers %v : %v != %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 		} else {
 			return
 		}
 	}
 	if Signed(lhs) && Unsigned(rhs) {
 		if !SignedUnsignedEqual(lhs, rhs) {
-			t.Errorf("%s : AssertEqual of signed/unsigned integers %v : %v = %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
+			t.Errorf("%s : AssertEqual of signed/unsigned integers %v : %v != %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 		} else {
 			return
 		}

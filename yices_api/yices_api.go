@@ -21,6 +21,20 @@ term_t ympz(uintptr_t ptr){
 term_t ympq(uintptr_t ptr){
    return yices_mpq(*((mpq_t *)((void *)ptr)));
 }
+//iam: minimal interface to gmp's mpz
+void init_mpzp(uintptr_t ptr){
+   mpz_init(*(mpz_t *)(ptr));
+}
+void close_mpzp(uintptr_t ptr){
+   mpz_clear(*(mpz_t *)(ptr));
+}
+//iam: minimal interface to gmp's mpq
+void init_mpqp(uintptr_t ptr){
+   mpq_init(*(mpq_t *)(ptr));
+}
+void close_mpqp(uintptr_t ptr){
+   mpq_clear(*(mpq_t *)(ptr));
+}
 //iam: passing a mpz_t thru cgo seems too hard
 term_t yices_bvconst_mpzp(uint32_t n, mpz_t *x){
    return yices_bvconst_mpz(n, *x);
@@ -139,20 +153,20 @@ func Reset() {
 type Error_code_t int32
 
 type YicesError_t struct {
-	error_string string
-	code         Error_code_t
-	line         uint32
-	column       uint32
-	term1        Term_t
-	type1        Type_t
-	term2        Term_t
-	type2        Type_t
-	badval       int64
+	Error_string string
+	Code         Error_code_t
+	Line         uint32
+	Column       uint32
+	Term1        Term_t
+	Type1        Type_t
+	Term2        Term_t
+	Type2        Type_t
+	Badval       int64
 }
 
 // the all important error interface
 func (yerror *YicesError_t) Error() string {
-	return yerror.error_string
+	return yerror.Error_string
 }
 
 func fetchErrorReport(yerror *YicesError_t) {
@@ -165,14 +179,14 @@ func fetchErrorReport(yerror *YicesError_t) {
 	var type2 C.type_t
 	var badval C.int64_t
 	C.fetchReport(&code, &line, &column, &term1, &type1, &term2, &type2, &badval)
-	yerror.code = Error_code_t(code)
-	yerror.line = uint32(line)
-	yerror.column = uint32(column)
-	yerror.term1 = Term_t(term1)
-	yerror.type1 = Type_t(type1)
-	yerror.term2 = Term_t(term2)
-	yerror.type2 = Type_t(type2)
-	yerror.badval = int64(badval)
+	yerror.Code = Error_code_t(code)
+	yerror.Line = uint32(line)
+	yerror.Column = uint32(column)
+	yerror.Term1 = Term_t(term1)
+	yerror.Type1 = Type_t(type1)
+	yerror.Term2 = Term_t(term2)
+	yerror.Type2 = Type_t(type2)
+	yerror.Badval = int64(badval)
 	return
 }
 
@@ -181,7 +195,7 @@ func YicesError() (yerror *YicesError_t) {
 	errcode := Error_code()
 	if errcode != NO_ERROR {
 		yerror = new(YicesError_t)
-		yerror.error_string = Error_string()
+		yerror.Error_string = Error_string()
 		fetchErrorReport(yerror)
 		Clear_error()
 	}
@@ -189,8 +203,11 @@ func YicesError() (yerror *YicesError_t) {
 }
 
 func (yerror *YicesError_t) String() string {
-	return fmt.Sprintf("code = %d line = %d column = %d term1 = %d type1 = %d term2 = %d type2 = %d badval = %d",
-		yerror.code, yerror.line, yerror.column, yerror.term1, yerror.type1, yerror.term2, yerror.type2, yerror.badval)
+	return fmt.Sprintf("string = %s code = %d line = %d column = %d term1 = %d type1 = %d term2 = %d type2 = %d badval = %d",
+		yerror.Error_string, yerror.Code, yerror.Line, yerror.Column,
+		yerror.Term1, yerror.Type1,
+		yerror.Term2, yerror.Type2,
+		yerror.Badval)
 }
 
 func Error_code() Error_code_t {
@@ -624,6 +641,14 @@ func Rational64(num int64, den uint64) Term_t {
 // need to name these to use them outside this package
 type Mpz_t C.mpz_t
 
+func Init_mpz(mpz *Mpz_t) {
+	C.init_mpzp(C.uintptr_t(uintptr(unsafe.Pointer(mpz))))
+}
+
+func Close_mpz(mpz *Mpz_t) {
+	C.close_mpzp(C.uintptr_t(uintptr(unsafe.Pointer(mpz))))
+}
+
 func Mpz(z *Mpz_t) Term_t {
 	// some contortions needed here to do the simplest of things
 	// similar contortions are needed to "identify" yices2._Ctype_mpz_t
@@ -633,6 +658,14 @@ func Mpz(z *Mpz_t) Term_t {
 
 // need to name these to use them outside this package
 type Mpq_t C.mpq_t
+
+func Init_mpq(mpq *Mpq_t) {
+	C.init_mpqp(C.uintptr_t(uintptr(unsafe.Pointer(mpq))))
+}
+
+func Close_mpq(mpq *Mpq_t) {
+	C.close_mpqp(C.uintptr_t(uintptr(unsafe.Pointer(mpq))))
+}
 
 func Mpq(q *Mpq_t) Term_t {
 	// some contortions needed here to do the simplest of things
