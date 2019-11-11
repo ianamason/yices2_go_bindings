@@ -624,7 +624,52 @@ func Test_implicant(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	//int_t := yapi.Int_type()
+	int_t := yapi.Int_type()
+
+	i1 := define_const("i1", int_t)
+
+	parse_assert("(and (> i1 2) (< i1 8) (/= i1 4))", ctx)
+
+	stat := yapi.Check_context(ctx, params)
+	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	modelp := yapi.Get_model(ctx, 1)
+	AssertNotEqual(t, modelp, nil, "modelp != nil")
+
+	fmla0 := yapi.Parse_term("(>= i1 3)")
+
+	terms :=  yapi.Implicant_for_formula(*modelp, fmla0)
+
+	AssertEqual(t, len(terms), 1)
+
+	mdlstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	AssertEqual(t, mdlstr, "(= i1 7)")
+
+	implstr := yapi.Term_to_string(terms[0], 200, 10, 0)
+	AssertEqual(t, implstr, "(>= (+ -3 i1) 0)")
+
+	fmla1 := yapi.Parse_term("(<= i1 9)")
+	fmlas := []yapi.Term_t{fmla0, fmla1}
+
+	terms = yapi.Implicant_for_formulas(*modelp, fmlas)
+	AssertEqual(t, len(terms), 2)
+
+	implstr2 := yapi.Term_to_string(terms[0], 200, 10, 0)
+	AssertEqual(t, implstr2, "(>= (+ -3 i1) 0)")
+	implstr3 := yapi.Term_to_string(terms[1], 200, 10, 0)
+	AssertEqual(t, implstr3, "(>= (+ 9 (* -1 i1)) 0)")
+
+
+	fmlas = yapi.Generalize_model_array(*modelp, fmlas, []yapi.Term_t{i1}, 0)
+	AssertEqual(t, len(fmlas), 2)
+	tstr0 := yapi.Term_to_string(fmlas[0], 200, 10, 0)
+	AssertEqual(t, tstr0, "true")
+	tstr1 := yapi.Term_to_string(fmlas[1], 200, 10, 0)
+	AssertEqual(t, tstr1, "true")
+
+
+
+
+	yapi.Close_model(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
