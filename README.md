@@ -4,9 +4,6 @@
 # yices2_go_bindings
 Golang bindings for yices2.
 
-NOT READY FOR PRIME TIME YET!
-
-
 ## Installation
 
 To install, simply do
@@ -14,3 +11,11 @@ To install, simply do
 go get github.com/ianamason/yices2_go_bindings/cmd/yices_info
 
 ```
+
+Coming soon(ish):
+
+* A more go-ish layer atop the cgo interface.
+
+* Documentation.
+
+* Examples

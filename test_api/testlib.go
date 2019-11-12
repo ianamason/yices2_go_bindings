@@ -6,6 +6,10 @@ import (
 	"testing"
 )
 
+func isNil(x interface{}) bool {
+	return x == nil || (reflect.ValueOf(x).Kind() == reflect.Ptr && reflect.ValueOf(x).IsNil())
+}
+
 func Signed(thing interface{}) (retval bool) {
 	if thing == nil {
 		return
@@ -217,15 +221,13 @@ func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...str
 
 func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...string) {
 
-	/*
-	if((lhs == nil) && (rhs == nil)){
+	if(isNil(lhs) && isNil(rhs)) {
 		return
 	}
 
-	if((lhs == nil) || (rhs == nil)){
+	if(isNil(lhs) || isNil(rhs)){
 		t.Errorf("%s : AssertEqual of pointer %v : %v != %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 	}
-    */
 
 	if Signed(lhs) && Signed(rhs) {
 		if !SignedEqual(lhs, rhs) {

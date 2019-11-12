@@ -13,5 +13,4 @@ func main() {
 	fmt.Printf("Yices build date:     %s\n", yices.Build_date)
 	fmt.Printf("Yices has mcsat:      %d\n", yices.Has_mcsat)
 	fmt.Printf("Yices is thread safe: %d\n", yices.Is_thread_safe)
-
 }

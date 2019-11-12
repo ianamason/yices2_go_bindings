@@ -25,4 +25,4 @@ check: develop
 	go test -v -p 1 ./test_api
 
 format:
-	gofmt -s -w yices_api/*.go cmd/*/*.go test_api/*.go
+	gofmt -s -w yices_api/*.go yices/*.go cmd/*/*.go test_api/*.go

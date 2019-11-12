@@ -2,8 +2,8 @@ package tests
 
 import (
 	"fmt"
-	"os"
 	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
+	"os"
 	"testing"
 )
 
@@ -18,7 +18,7 @@ func setup() (cfg yapi.Config_t, ctx yapi.Context_t, params yapi.Param_t) {
 }
 
 // clean up a generic startup
-func cleanup(cfg *yapi.Config_t, ctx *yapi.Context_t, params *yapi.Param_t){
+func cleanup(cfg *yapi.Config_t, ctx *yapi.Context_t, params *yapi.Param_t) {
 	yapi.Close_config(cfg)
 	yapi.Close_param_record(params)
 	yapi.Close_context(ctx)
@@ -292,11 +292,9 @@ func Test_mpq_models(t *testing.T) {
 
 	yapi.Close_model(modelp)
 
-
 	cleanup(&cfg, &ctx, &params)
 
 }
-
 
 func Test_algebraic_models(t *testing.T) {
 	yapi.Init()
@@ -310,11 +308,11 @@ func Test_algebraic_models(t *testing.T) {
 	var params yapi.Param_t
 	yapi.Init_config(&cfg)
 	yapi.Default_config_for_logic(cfg, "QF_NRA")
-    yapi.Set_config(cfg, "mode", "one-shot")
+	yapi.Set_config(cfg, "mode", "one-shot")
 	yapi.Init_context(cfg, &ctx)
 	x := define_const("x", real_t)
 	parse_assert("(= (* x x) 2)", ctx)
-	stat := yapi.Check_context(ctx, params)  //params == NULL in the C
+	stat := yapi.Check_context(ctx, params) //params == NULL in the C
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
 	modelp := yapi.Get_model(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
@@ -327,7 +325,6 @@ func Test_algebraic_models(t *testing.T) {
 	yapi.Close_context(&ctx)
 	yapi.Exit()
 }
-
 
 func Test_bv_models(t *testing.T) {
 
@@ -375,7 +372,6 @@ func Test_tuple_models(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-
 	bool_t := yapi.Bool_type()
 	int_t := yapi.Int_type()
 	real_t := yapi.Real_type()
@@ -406,7 +402,6 @@ func Test_tuple_models(t *testing.T) {
 	yapi.Close_model(modelp)
 
 	cleanup(&cfg, &ctx, &params)
-
 
 }
 
@@ -554,7 +549,7 @@ func Test_scalar_models(t *testing.T) {
 	AssertEqual(t, yapi.Term_is_scalar(sc2), true)
 	AssertEqual(t, yapi.Term_is_scalar(sc3), true)
 
-	var yval1, yval2, yval3  yapi.Yval_t
+	var yval1, yval2, yval3 yapi.Yval_t
 
 	AssertEqual(t, yapi.Get_value(*modelp, sc1, &yval1), 0)
 	AssertEqual(t, yapi.Get_value(*modelp, sc2, &yval2), 0)
@@ -629,7 +624,7 @@ func Test_implicant(t *testing.T) {
 
 	fmla0 := yapi.Parse_term("(>= i1 3)")
 
-	terms :=  yapi.Implicant_for_formula(*modelp, fmla0)
+	terms := yapi.Implicant_for_formula(*modelp, fmla0)
 
 	AssertEqual(t, len(terms), 1)
 
@@ -650,16 +645,12 @@ func Test_implicant(t *testing.T) {
 	implstr3 := yapi.Term_to_string(terms[1], 200, 10, 0)
 	AssertEqual(t, implstr3, "(>= (+ 9 (* -1 i1)) 0)")
 
-
 	fmlas = yapi.Generalize_model_array(*modelp, fmlas, []yapi.Term_t{i1}, 0)
 	AssertEqual(t, len(fmlas), 2)
 	tstr0 := yapi.Term_to_string(fmlas[0], 200, 10, 0)
 	AssertEqual(t, tstr0, "true")
 	tstr1 := yapi.Term_to_string(fmlas[1], 200, 10, 0)
 	AssertEqual(t, tstr1, "true")
-
-
-
 
 	yapi.Close_model(modelp)
 
@@ -688,12 +679,12 @@ func Test_yval_numeric_models(t *testing.T) {
 	errcode := yapi.Get_value(*modelp, i1, &y1)
 	AssertEqual(t, errcode, 0)
 	yerror := yapi.YicesError()
-	AssertEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+	AssertEqual(t, yerror, nil) //aye curumba: hay magic in testlib.go to avoid: (*yapi.YicesError_t)(nil)
 
 	errcode = yapi.Get_value(*modelp, i2, &y2)
 	AssertEqual(t, errcode, 0)
 	yerror = yapi.YicesError()
-	AssertEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+	AssertEqual(t, yerror, nil) //aye curumba. ibid
 
 	AssertEqual(t, yapi.Val_is_int32(*modelp, &y1), 1)
 	AssertEqual(t, yapi.Val_is_int64(*modelp, &y1), 1)
@@ -711,7 +702,7 @@ func Test_yval_numeric_models(t *testing.T) {
 	errcode = yapi.Val_get_bool(*modelp, &y1, &b1)
 	AssertEqual(t, errcode, -1)
 	yerror = yapi.YicesError()
-	AssertNotEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+	AssertNotEqual(t, yerror, nil) //aye curumba. ibid
 	AssertEqual(t, yerror.Error_string, "invalid operation on yval")
 	AssertEqual(t, yerror.Code, yapi.YVAL_INVALID_OP)
 
@@ -719,14 +710,14 @@ func Test_yval_numeric_models(t *testing.T) {
 	errcode = yapi.Val_get_int32(*modelp, &y1, &ival32)
 	AssertEqual(t, errcode, 0)
 	yerror = yapi.YicesError()
-	AssertEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+	AssertEqual(t, yerror, nil) //aye curumba. ibid
 	AssertEqual(t, ival32, 4)
 
 	var ival64 int64
 	errcode = yapi.Val_get_int64(*modelp, &y1, &ival64)
 	AssertEqual(t, errcode, 0)
 	yerror = yapi.YicesError()
-	AssertEqual(t, yerror, (* yapi.YicesError_t)(nil))  //aye curumba
+	AssertEqual(t, yerror, nil) //aye curumba. ibid
 	AssertEqual(t, ival64, 4)
 
 	var num32 int32
@@ -742,7 +733,6 @@ func Test_yval_numeric_models(t *testing.T) {
 	AssertEqual(t, errcode, 0)
 	AssertEqual(t, num64, 4)
 	AssertEqual(t, den64, 1)
-
 
 	var dval float64
 	errcode = yapi.Val_get_double(*modelp, &y1, &dval)
