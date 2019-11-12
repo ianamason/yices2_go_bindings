@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
+	y "github.com/ianamason/yices2_go_bindings/yices"
 )
 
 func main() {
@@ -14,4 +15,5 @@ func main() {
 	fmt.Printf("Yices has mcsat:      %d\n", yapi.Has_mcsat())
 	fmt.Printf("Yices is thread safe: %d\n", yapi.Is_thread_safe())
 
+	y.Init()
 }
