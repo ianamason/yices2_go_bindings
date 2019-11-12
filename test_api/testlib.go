@@ -221,11 +221,11 @@ func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...str
 
 func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...string) {
 
-	if(isNil(lhs) && isNil(rhs)) {
+	if isNil(lhs) && isNil(rhs) {
 		return
 	}
 
-	if(isNil(lhs) || isNil(rhs)){
+	if isNil(lhs) || isNil(rhs) {
 		t.Errorf("%s : AssertEqual of pointer %v : %v != %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 	}
 

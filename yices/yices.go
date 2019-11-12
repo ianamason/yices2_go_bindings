@@ -31,12 +31,9 @@ func init() {
 
 }
 
-
-
 /***************************************
  *  GLOBAL INITIALIZATION AND CLEANUP  *
  **************************************/
-
 
 func Init() { yapi.Init() }
 
