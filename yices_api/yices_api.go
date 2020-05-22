@@ -1749,8 +1749,8 @@ func Get_scalar_value(model Model_t, t Term_t, val *int32) int32 {
 
 type Yval_t C.yval_t
 
-func Get_tag(yval Yval_t) Yval_tag_t {
-	return Yval_tag_t(yval.node_tag)
+func Get_tag(yval Yval_t) YvalTagT {
+	return YvalTagT(yval.node_tag)
 }
 
 type Yval_vector_t C.yval_vector_t

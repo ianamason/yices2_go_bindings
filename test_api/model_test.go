@@ -82,7 +82,7 @@ func Test_bool_models(t *testing.T) {
 	var yval yapi.Yval_t
 
 	yapi.Get_value(*modelp, b1, &yval)
-	AssertEqual(t, yapi.Get_tag(yval), yapi.YVAL_BOOL)
+	AssertEqual(t, yapi.Get_tag(yval), yapi.YvalBool)
 	yapi.Val_get_bool(*modelp, &yval, &bval1)
 	AssertEqual(t, bval1, 0, "bval1 == 0")
 
@@ -386,12 +386,12 @@ func Test_tuple_models(t *testing.T) {
 	AssertEqual(t, mstr, "(= t1 (mk-tuple false 1 0))")
 	var yval yapi.Yval_t
 	yapi.Get_value(*modelp, t1, &yval)
-	AssertEqual(t, yapi.Get_tag(yval), yapi.YVAL_TUPLE)
+	AssertEqual(t, yapi.Get_tag(yval), yapi.YvalTuple)
 	AssertEqual(t, yapi.Val_tuple_arity(*modelp, &yval), 3)
 
 	yvec := make([]yapi.Yval_t, 3)
 	yapi.Val_expand_tuple(*modelp, &yval, yvec)
-	AssertEqual(t, yapi.Get_tag(yvec[0]), yapi.YVAL_BOOL)
+	AssertEqual(t, yapi.Get_tag(yvec[0]), yapi.YvalBool)
 	var bval int32
 	var ival int32
 	yapi.Val_get_bool(*modelp, &yvec[0], &bval)
@@ -436,14 +436,14 @@ func Test_function_models(t *testing.T) {
 
 	var yval yapi.Yval_t
 	yapi.Get_value(*modelp, fn, &yval)
-	AssertEqual(t, yapi.Get_tag(yval), yapi.YVAL_FUNCTION)
+	AssertEqual(t, yapi.Get_tag(yval), yapi.YvalFunction)
 	AssertEqual(t, yapi.Val_function_arity(*modelp, &yval), 3)
 
 	var ydef yapi.Yval_t
 
 	yvec := yapi.Val_expand_function(*modelp, &yval, &ydef)
 	AssertNotEqual(t, yvec, nil)
-	AssertEqual(t, yapi.Get_tag(ydef), yapi.YVAL_RATIONAL)
+	AssertEqual(t, yapi.Get_tag(ydef), yapi.YvalRational)
 
 	var def32val int32
 	yapi.Val_get_int32(*modelp, &ydef, &def32val)
@@ -451,8 +451,8 @@ func Test_function_models(t *testing.T) {
 	AssertEqual(t, len(yvec), 2)
 	map1 := yvec[0]
 	map2 := yvec[1]
-	AssertEqual(t, yapi.Get_tag(map1), yapi.YVAL_MAPPING)
-	AssertEqual(t, yapi.Get_tag(map2), yapi.YVAL_MAPPING)
+	AssertEqual(t, yapi.Get_tag(map1), yapi.YvalMapping)
+	AssertEqual(t, yapi.Get_tag(map2), yapi.YvalMapping)
 	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map1), 3)
 	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map2), 3)
 
@@ -461,8 +461,8 @@ func Test_function_models(t *testing.T) {
 	vec1 := yapi.Val_expand_mapping(*modelp, &map1, &yval1)
 	vec2 := yapi.Val_expand_mapping(*modelp, &map2, &yval2)
 
-	AssertEqual(t, yapi.Get_tag(yval1), yapi.YVAL_RATIONAL)
-	AssertEqual(t, yapi.Get_tag(yval2), yapi.YVAL_RATIONAL)
+	AssertEqual(t, yapi.Get_tag(yval1), yapi.YvalRational)
+	AssertEqual(t, yapi.Get_tag(yval2), yapi.YvalRational)
 
 	AssertEqual(t, len(vec1), 3)
 	AssertEqual(t, len(vec2), 3)
@@ -555,9 +555,9 @@ func Test_scalar_models(t *testing.T) {
 	AssertEqual(t, yapi.Get_value(*modelp, sc2, &yval2), 0)
 	AssertEqual(t, yapi.Get_value(*modelp, sc3, &yval3), 0)
 
-	AssertEqual(t, yapi.Get_tag(yval1), yapi.YVAL_SCALAR)
-	AssertEqual(t, yapi.Get_tag(yval2), yapi.YVAL_SCALAR)
-	AssertEqual(t, yapi.Get_tag(yval3), yapi.YVAL_SCALAR)
+	AssertEqual(t, yapi.Get_tag(yval1), yapi.YvalScalar)
+	AssertEqual(t, yapi.Get_tag(yval2), yapi.YvalScalar)
+	AssertEqual(t, yapi.Get_tag(yval3), yapi.YvalScalar)
 
 	var tau1, tau2, tau3 yapi.Type_t
 

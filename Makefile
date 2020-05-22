@@ -10,6 +10,7 @@ help:
 	@echo 'To develop             :    "make develop"'
 	@echo 'To install             :    "make install"'
 	@echo 'To format              :    "make format"'
+	@echo 'To lint                :    "make lint"'
 	@echo ''
 
 
@@ -26,3 +27,6 @@ check: develop
 
 format:
 	gofmt -s -w yices_api/*.go yices/*.go cmd/*/*.go test_api/*.go
+
+lint:
+	golint ./test_api/  ./yices/ ./yices_api/ ./cmd/...
