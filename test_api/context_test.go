@@ -60,7 +60,7 @@ func TestContext1(t *testing.T) {
 
 	yapi.Init_context(cfg, &ctx)
 
-	stat := yapi.Context_status(ctx)
+	yapi.Context_status(ctx)
 	ret := yapi.Push(ctx)
 	AssertEqual(t, ret, 0, "ret == 0")
 	ret = yapi.Pop(ctx)

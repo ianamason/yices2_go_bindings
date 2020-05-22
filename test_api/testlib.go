@@ -44,8 +44,8 @@ func SignedUnsignedEqual(x interface{}, y interface{}) bool {
 		return false
 	}
 
-	var xint int64 = 0
-	var yint int64 = 0
+	var xint int64
+	var yint int64
 
 	xtyp := reflect.TypeOf(x)
 	switch xtyp.Kind() {
@@ -101,8 +101,8 @@ func SignedEqual(x interface{}, y interface{}) bool {
 		return false
 	}
 
-	var xint int64 = 0
-	var yint int64 = 0
+	var xint int64
+	var yint int64
 
 	xtyp := reflect.TypeOf(x)
 	switch xtyp.Kind() {
@@ -149,8 +149,8 @@ func UnsignedEqual(x interface{}, y interface{}) bool {
 		return false
 	}
 
-	var xuint uint = 0
-	var yuint uint = 0
+	var xuint uint
+	var yuint uint
 
 	xtyp := reflect.TypeOf(x)
 	switch xtyp.Kind() {

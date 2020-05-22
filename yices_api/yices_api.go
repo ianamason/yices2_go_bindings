@@ -1761,7 +1761,6 @@ func Init_yval_vector(v *Yval_vector_t) {
 
 func Delete_yval_vector(v *Yval_vector_t) {
 	C.yices_delete_yval_vector((*C.yval_vector_t)(v))
-	v = nil
 }
 
 func Reset_yval_vector(v *Yval_vector_t) {

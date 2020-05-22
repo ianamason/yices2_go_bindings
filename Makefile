@@ -30,3 +30,7 @@ format:
 
 lint:
 	golint ./test_api/  ./yices/ ./yices_api/ ./cmd/...
+
+
+ineffassign:
+	ineffassign ./test_api/  ./yices/ ./yices_api/ ./cmd/
