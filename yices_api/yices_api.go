@@ -92,6 +92,9 @@ import "unsafe"
  *  This layer (yices_api.go) is a thin wrapper to the yices_api. Maybe a more go-like layer will sit atop this
  *  much like the python version of the API.
  *
+ *  Currently backward compatibility is in the "too hard" basket. We are going to assume the yices library is
+ *  at least 2.6.2 (look for the "Since 2.6.2" comments)
+ *
  */
 
 /*********************
@@ -118,6 +121,7 @@ func Has_mcsat() int32 {
 	return int32(C.yices_has_mcsat())
 }
 
+// Since 2.6.2
 func Is_thread_safe() int32 {
 	return int32(C.yices_is_thread_safe())
 }
@@ -1376,6 +1380,23 @@ func Term_child(t Term_t, i int32) Term_t {
 	return Term_t(C.yices_term_child(C.term_t(t), C.int32_t(i)))
 }
 
+// Since 2.6.2
+func Term_children(t Term_t) (children []Term_t) {
+	var tv C.term_vector_t
+	C.yices_init_term_vector(&tv)
+	ycount := int32(C.yices_term_children(C.type_t(t), &tv))
+	if ycount != -1 {
+		count := int(tv.size)
+		children = make([]Term_t, count, count)
+		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			children[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
+		}
+	}
+	C.yices_delete_term_vector(&tv)
+	return
+}
+
 func Proj_index(t Term_t) int32 {
 	return int32(C.yices_proj_index(C.term_t(t)))
 }
@@ -1787,6 +1808,7 @@ func Val_function_arity(model Model_t, val *Yval_t) uint32 {
 	return uint32(C.yices_val_function_arity(ymodel(model), (*C.yval_t)(val)))
 }
 
+// Since 2.6.2
 func Val_function_type(model Model_t, val *Yval_t) Type_t {
 	return Type_t(C.yices_val_function_type(ymodel(model), (*C.yval_t)(val)))
 }
@@ -1931,9 +1953,9 @@ func Implicant_for_formulas(model Model_t, t []Term_t) (literals []Term_t) {
 	return
 }
 
-/*
- * MODEL GENERALIZATION
- */
+/************************
+ * MODEL GENERALIZATION *
+ ************************/
 
 type Gen_mode_t int32
 
@@ -1978,9 +2000,141 @@ func Generalize_model_array(model Model_t, a []Term_t, elims []Term_t, mode Gen_
 	return
 }
 
+/*******************
+ *   Model Support *
+ *******************/
+
+func Model_term_support(model Model_t, t Term_t) (support []Term_t) {
+	var tv C.term_vector_t
+	C.yices_init_term_vector(&tv)
+	errcode := int32(C.yices_model_term_support(ymodel(model), C.term_t(t), (*C.term_vector_t)(&tv)))
+	if errcode != -1 {
+		count := int(tv.size)
+		support = make([]Term_t, count, count)
+		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			support[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
+		}
+	}
+	C.yices_delete_term_vector(&tv)
+	return
+}
+
+func Model_term_array_support(model Model_t, t []Term_t) (support []Term_t) {
+	var tv C.term_vector_t
+	C.yices_init_term_vector(&tv)
+	tcount := C.uint32_t(len(t))
+	errcode := int32(C.yices_model_term_array_support(ymodel(model), tcount, (*C.term_t)(&t[0]), (*C.term_vector_t)(&tv)))
+	if errcode != -1 {
+		count := int(tv.size)
+		support = make([]Term_t, count, count)
+		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
+		for i := 0; i < count; i++ {
+			support[i] = Term_t(C.yices_term_vector_get(&tv, C.uint32_t(i)))
+		}
+	}
+	C.yices_delete_term_vector(&tv)
+	return
+}
+
+/***************
+ *   DELEGATES *
+ **************/
+
+func Has_delegate(delegate string) bool {
+	cdelegate := C.CString(delegate)
+	defer C.free(unsafe.Pointer(cdelegate))
+	has := C.yices_has_delegate(cdelegate)
+	return has == 1
+}
+
+func Check_formula(t Term_t, logic string, delegate string, model *Model_t) (status Smt_status_t) {
+	clogic := C.CString(logic)
+	defer C.free(unsafe.Pointer(clogic))
+	cdelegate := C.CString(delegate)
+	defer C.free(unsafe.Pointer(cdelegate))
+	var cstatus C.smt_status_t
+	var cmodel *C.model_t = nil
+	if model != nil {
+		var cmodel *C.model_t
+		cstatus = C.yices_check_formula(C.term_t(t), clogic, &cmodel, cdelegate)
+	} else {
+		cstatus = C.yices_check_formula(C.term_t(t), clogic, (**C.model_t)(C.NULL), cdelegate)
+	}
+	if cstatus == C.STATUS_SAT {
+		status = Smt_status_t(cstatus)
+		if model != nil {
+			*model = Model_t{uintptr(unsafe.Pointer(cmodel))}
+		}
+	}
+	return
+}
+
+func Check_formulas(t []Term_t, logic string, delegate string, model *Model_t) (status Smt_status_t) {
+	count := C.uint32_t(len(t))
+	clogic := C.CString(logic)
+	defer C.free(unsafe.Pointer(clogic))
+	cdelegate := C.CString(delegate)
+	defer C.free(unsafe.Pointer(cdelegate))
+	var cstatus C.smt_status_t
+	var cmodel *C.model_t = nil
+	if model != nil {
+		var cmodel *C.model_t
+		cstatus = C.yices_check_formulas((*C.term_t)(&t[0]), count, clogic, &cmodel, cdelegate)
+	} else {
+		cstatus = C.yices_check_formulas((*C.term_t)(&t[0]), count, clogic, (**C.model_t)(C.NULL), cdelegate)
+	}
+	if cstatus == C.STATUS_SAT {
+		status = Smt_status_t(cstatus)
+		if model != nil {
+			*model = Model_t{uintptr(unsafe.Pointer(cmodel))}
+		}
+	}
+	return
+}
+
+/*************
+ *   DIMACS  *
+ *************/
+
+func Export_formula_to_dimacs(t Term_t, filename string, simplify bool, status *Smt_status_t) (errcode int32) {
+	path := C.CString(filename)
+	defer C.free(unsafe.Pointer(path))
+	var csimplify C.int
+	if simplify {
+		csimplify = 1
+	} else {
+		csimplify = 0
+	}
+	var cstatus C.smt_status_t = 0
+	errcode = int32(C.yices_export_formula_to_dimacs(C.term_t(t), path, csimplify, &cstatus))
+	if errcode == 0 {
+		*status = Smt_status_t(cstatus)
+	}
+	return
+}
+
+func Export_formulas_to_dimacs(t []Term_t, filename string, simplify bool, status *Smt_status_t) (errcode int32) {
+	path := C.CString(filename)
+	defer C.free(unsafe.Pointer(path))
+	count := C.uint32_t(len(t))
+	var csimplify C.int
+	if simplify {
+		csimplify = 1
+	} else {
+		csimplify = 0
+	}
+	var cstatus C.smt_status_t = 0
+	errcode = int32(C.yices_export_formulas_to_dimacs((*C.term_t)(&t[0]), count, path, csimplify, &cstatus))
+	if errcode == 0 {
+		*status = Smt_status_t(cstatus)
+	}
+	return
+}
+
 /**********************
  *  PRETTY PRINTING   *
- *********************/
+ **********************/
 
 func Pp_type(file *os.File, tau Type_t, width uint32, height uint32, offset uint32) int32 {
 	return int32(C.yices_pp_type_fd(C.int(file.Fd()), C.type_t(tau), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
@@ -1997,6 +2151,18 @@ func Pp_term_array(file *os.File, t []Term_t, width uint32, height uint32, offse
 
 func Print_model(file *os.File, model Model_t) int32 {
 	return int32(C.yices_print_model_fd(C.int(file.Fd()), ymodel(model)))
+}
+
+// Since 2.6.2
+func Print_term_values(file *os.File, model Model_t, t []Term_t) int32 {
+	tcount := C.uint32_t(len(t))
+	return int32(C.yices_print_term_values_fd(C.int(file.Fd()), ymodel(model), tcount, (*C.term_t)(&t[0])))
+}
+
+// Since 2.6.2
+func Pp_term_values(file *os.File, model Model_t, t []Term_t, width uint32, height uint32, offset uint32) int32 {
+	tcount := C.uint32_t(len(t))
+	return int32(C.yices_pp_term_values_fd(C.int(file.Fd()), ymodel(model), tcount, (*C.term_t)(&t[0]), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
 }
 
 func Pp_model(file *os.File, model Model_t, width uint32, height uint32, offset uint32) int32 {

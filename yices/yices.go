@@ -2,6 +2,7 @@ package yices
 
 import (
 	yapi "github.com/ianamason/yices2_go_bindings/yices_api"
+	"os"
 )
 
 /*********************
@@ -40,3 +41,31 @@ func Init() { yapi.Init() }
 func Exit() { yapi.Exit() }
 
 func Reset() { yapi.Reset() }
+
+/*********************
+ *  ERROR REPORTING  *
+ ********************/
+
+func YicesError() (yerror *yapi.YicesError_t) {
+	return yapi.YicesError()
+}
+
+func Error_code() yapi.Error_code_t {
+	return yapi.Error_code()
+}
+
+func Clear_error() {
+	yapi.Clear_error()
+}
+
+func Print_error(f *os.File) int32 {
+	return yapi.Print_error(f)
+}
+
+func Error_string() string {
+	return yapi.Error_string()
+}
+
+/***********************
+ *  TYPE CONSTRUCTORS  *
+ **********************/
