@@ -45,9 +45,9 @@ func TestTerms0(t *testing.T) {
 	AssertNotEqual(t, app3, yapi.NULL_TERM)
 	tup3_t := yapi.Tuple_type3(bool_t, int_t, unint_t)
 	tupconst1 := yapi.New_variable(tup3_t)
-	ta4 := []yapi.Type_t{int_t, int_t, int_t, int_t}
-	int4 := []yapi.Term_t{int1, int2, iconst1, ivar1}
-	int4_2 := []yapi.Term_t{ivar1, ivar2, ivar3, ivar4}
+	ta4 := []yapi.TypeT{int_t, int_t, int_t, int_t}
+	int4 := []yapi.TermT{int1, int2, iconst1, ivar1}
+	int4_2 := []yapi.TermT{ivar1, ivar2, ivar3, ivar4}
 	fun4_t := yapi.Function_type(ta4, bool_t)
 	fun4 := yapi.New_variable(fun4_t)
 	app4 := yapi.Application(fun4, int4)
@@ -56,7 +56,7 @@ func TestTerms0(t *testing.T) {
 	neq1 := yapi.Neq(int1, int1)
 	not1 := yapi.Not(false_)
 	AssertNotEqual(t, not1, yapi.NULL_TERM)
-	bool5 := []yapi.Term_t{false_, eq1, neq1, app4, false_}
+	bool5 := []yapi.TermT{false_, eq1, neq1, app4, false_}
 	or1 := yapi.Or(bool5)
 	AssertNotEqual(t, or1, yapi.NULL_TERM)
 	and1 := yapi.And(bool5)
@@ -101,7 +101,7 @@ func TestTerms0(t *testing.T) {
 	AssertNotEqual(t, var2, yapi.NULL_TERM)
 	vareq := yapi.Eq(var1, var2)
 	AssertNotEqual(t, vareq, yapi.NULL_TERM)
-	vars2 := []yapi.Term_t{var1, var2}
+	vars2 := []yapi.TermT{var1, var2}
 	AssertNotEqual(t, vars2, yapi.NULL_TERM)
 	forall1 := yapi.Forall(vars2, vareq)
 	AssertNotEqual(t, forall1, yapi.NULL_TERM)
@@ -253,9 +253,9 @@ func TestTerms0(t *testing.T) {
 	AssertNotEqual(t, bvlshr1, yapi.NULL_TERM)
 	bvashr1 := yapi.Bvashr(bvbin1, bvbin1)
 	AssertNotEqual(t, bvashr1, yapi.NULL_TERM)
-	bvand1 := yapi.Bvand([]yapi.Term_t{bvbin1, bvbin1, bvbin1, bvbin1})
+	bvand1 := yapi.Bvand([]yapi.TermT{bvbin1, bvbin1, bvbin1, bvbin1})
 	AssertNotEqual(t, bvand1, yapi.NULL_TERM)
-	bvor1 := yapi.Bvor([]yapi.Term_t{bvbin1, bvbin1, bvbin1, bvbin1})
+	bvor1 := yapi.Bvor([]yapi.TermT{bvbin1, bvbin1, bvbin1, bvbin1})
 	AssertNotEqual(t, bvor1, yapi.NULL_TERM)
 	bvand2_1 := yapi.Bvand2(bvbin1, bvbin1)
 	AssertNotEqual(t, bvand2_1, yapi.NULL_TERM)
@@ -269,11 +269,11 @@ func TestTerms0(t *testing.T) {
 	AssertNotEqual(t, bvor3_1, yapi.NULL_TERM)
 	bvxor3_1 := yapi.Bvxor3(bvbin1, bvbin1, bvbin1)
 	AssertNotEqual(t, bvxor3_1, yapi.NULL_TERM)
-	bvsum1 := yapi.Bvsum([]yapi.Term_t{bvbin1, bvbin1, bvbin1, bvbin1})
+	bvsum1 := yapi.Bvsum([]yapi.TermT{bvbin1, bvbin1, bvbin1, bvbin1})
 	AssertNotEqual(t, bvsum1, yapi.NULL_TERM)
-	bvsum2 := yapi.Bvsum([]yapi.Term_t{bvvar1, bvvar2, bvvar3, bvvar4})
+	bvsum2 := yapi.Bvsum([]yapi.TermT{bvvar1, bvvar2, bvvar3, bvvar4})
 	AssertNotEqual(t, bvsum2, yapi.NULL_TERM)
-	bvproduct1 := yapi.Bvproduct([]yapi.Term_t{bvbin1, bvbin1, bvbin1, bvbin1})
+	bvproduct1 := yapi.Bvproduct([]yapi.TermT{bvbin1, bvbin1, bvbin1, bvbin1})
 	AssertNotEqual(t, bvproduct1, yapi.NULL_TERM)
 	shleft0_1 := yapi.Shift_left0(bvbin1, 5)
 	AssertNotEqual(t, shleft0_1, yapi.NULL_TERM)
@@ -293,7 +293,7 @@ func TestTerms0(t *testing.T) {
 	AssertNotEqual(t, bvextract1, yapi.NULL_TERM)
 	bvconcat2_1 := yapi.Bvconcat2(bvbin1, bvbin1)
 	AssertNotEqual(t, bvconcat2_1, yapi.NULL_TERM)
-	bvconcat_1 := yapi.Bvconcat([]yapi.Term_t{bvbin1, bvbin1, bvbin1, bvbin1})
+	bvconcat_1 := yapi.Bvconcat([]yapi.TermT{bvbin1, bvbin1, bvbin1, bvbin1})
 	AssertNotEqual(t, bvconcat_1, yapi.NULL_TERM)
 	bvrepeat1 := yapi.Bvrepeat(bvbin1, 8)
 	AssertNotEqual(t, bvrepeat1, yapi.NULL_TERM)
@@ -307,7 +307,7 @@ func TestTerms0(t *testing.T) {
 	AssertNotEqual(t, redor1, yapi.NULL_TERM)
 	redcomp1 := yapi.Redcomp(bvbin1, bvbin1)
 	AssertNotEqual(t, redcomp1, yapi.NULL_TERM)
-	bvarray1 := yapi.Bvarray([]yapi.Term_t{true_, false_, true_, false_})
+	bvarray1 := yapi.Bvarray([]yapi.TermT{true_, false_, true_, false_})
 	AssertNotEqual(t, bvarray1, yapi.NULL_TERM)
 	bitextract1 := yapi.Bitextract(bvbin1, 3)
 	AssertNotEqual(t, bitextract1, yapi.NULL_TERM)
@@ -335,13 +335,13 @@ func TestTerms0(t *testing.T) {
 	AssertEqual(t, ptype1, yapi.Int_type())
 	pterm1 := yapi.Parse_term("42")
 	AssertEqual(t, pterm1, yapi.Int32(42))
-	subst1 := yapi.Subst_term([]yapi.Term_t{yapi.New_variable(ptype1), yapi.New_variable(ptype1)},
-		[]yapi.Term_t{yapi.Int32(2), yapi.Int32(3)},
+	subst1 := yapi.Subst_term([]yapi.TermT{yapi.New_variable(ptype1), yapi.New_variable(ptype1)},
+		[]yapi.TermT{yapi.Int32(2), yapi.Int32(3)},
 		yapi.Int32(42))
 	AssertNotEqual(t, subst1, yapi.NULL_TERM)
-	substarr1 := yapi.Subst_term_array([]yapi.Term_t{yapi.New_variable(ptype1), yapi.New_variable(ptype1)},
-		[]yapi.Term_t{yapi.Int32(2), yapi.Int32(3)},
-		[]yapi.Term_t{yapi.Int32(2), yapi.Int32(3), yapi.Int32(7)})
+	substarr1 := yapi.Subst_term_array([]yapi.TermT{yapi.New_variable(ptype1), yapi.New_variable(ptype1)},
+		[]yapi.TermT{yapi.Int32(2), yapi.Int32(3)},
+		[]yapi.TermT{yapi.Int32(2), yapi.Int32(3), yapi.Int32(7)})
 	AssertNotEqual(t, substarr1, yapi.NULL_TERM)
 	settypename1 := yapi.Set_type_name(ptype1, "I")
 	AssertEqual(t, settypename1, int32(0))
@@ -421,9 +421,9 @@ func TestTerms0(t *testing.T) {
 	scalar_c := yapi.Constant(scalar_t, 13)
 	AssertEqual(t, yapi.Scalar_const_value(scalar_c, &val), 0)
 	AssertEqual(t, val, 13)
-	AssertEqual(t, yapi.Type_of_term(bvsum2), yapi.Type_t(13)) //BD: not very robust
+	AssertEqual(t, yapi.Type_of_term(bvsum2), yapi.TypeT(13)) //BD: not very robust
 	// val must be an array of eight integers since bvsum has type (bitvector 8)
-	var term yapi.Term_t
+	var term yapi.TermT
 	dodgy := yapi.Bvsum_component(bvsum2, 1, bval, &term)
 	AssertEqual(t, dodgy, 0)
 	AssertTrue(t, yapi.Term_is_bitvector(term))

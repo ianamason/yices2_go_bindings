@@ -34,7 +34,7 @@ func parse_assert(fmla_str string, ctx yapi.Context_t) {
 }
 
 // sam's helper functions
-func define_const(name string, typ yapi.Type_t) (term yapi.Term_t) {
+func define_const(name string, typ yapi.TypeT) (term yapi.TermT) {
 	term = yapi.New_uninterpreted_term(typ)
 	yapi.Set_term_name(term, name)
 	return
@@ -118,7 +118,7 @@ func Test_int_models(t *testing.T) {
 	AssertEqual(t, i64v2, 3, "i64v2 == 3")
 	yapi.Print_model(os.Stdout, *modelp)
 	yapi.Pp_model(os.Stdout, *modelp, 80, 100, 0)
-	mdlstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	mdlstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mdlstr, "(= i1 4)\n(= i2 3)")
 
 	yapi.Close_model(modelp)
@@ -201,7 +201,7 @@ func Test_mpz_models(t *testing.T) {
 	modelp := yapi.Get_model(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
-	mstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	mstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mstr, "(= i1 987654321987654321987654322)\n(= i2 987654321987654321987654321)")
 
 	var i32val1 int32
@@ -225,14 +225,14 @@ func Test_mpz_models(t *testing.T) {
 	AssertEqual(t, errcode, 0)
 
 	mpz1 := yapi.Mpz(&mpzval1)
-	AssertEqual(t, yapi.Term_to_string(mpz1, 200, 10, 0), "987654321987654321987654322")
+	AssertEqual(t, yapi.TermToString(mpz1, 200, 10, 0), "987654321987654321987654322")
 
 	var mpzval2 yapi.Mpz_t
 	errcode = yapi.Get_mpz_value(*modelp, i2, &mpzval2)
 	AssertEqual(t, errcode, 0)
 
 	mpz2 := yapi.Mpz(&mpzval2)
-	AssertEqual(t, yapi.Term_to_string(mpz2, 200, 10, 0), "987654321987654321987654321")
+	AssertEqual(t, yapi.TermToString(mpz2, 200, 10, 0), "987654321987654321987654321")
 
 	yapi.Close_model(modelp)
 
@@ -257,7 +257,7 @@ func Test_mpq_models(t *testing.T) {
 	modelp := yapi.Get_model(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
-	mstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	mstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mstr, "(= r1 987654325444320656205432115/3456666334217777794)\n(= r2 987654321987654321987654321/3456666334217777794)")
 
 	var r32num1 int32
@@ -281,14 +281,14 @@ func Test_mpq_models(t *testing.T) {
 	AssertEqual(t, errcode, 0)
 
 	mpq1 := yapi.Mpq(&mpqval1)
-	AssertEqual(t, yapi.Term_to_string(mpq1, 200, 10, 0), "987654325444320656205432115/3456666334217777794")
+	AssertEqual(t, yapi.TermToString(mpq1, 200, 10, 0), "987654325444320656205432115/3456666334217777794")
 
 	var mpqval2 yapi.Mpq_t
 	errcode = yapi.Get_mpq_value(*modelp, r2, &mpqval2)
 	AssertEqual(t, errcode, 0)
 
 	mpq2 := yapi.Mpq(&mpqval2)
-	AssertEqual(t, yapi.Term_to_string(mpq2, 200, 10, 0), "987654321987654321987654321/3456666334217777794")
+	AssertEqual(t, yapi.TermToString(mpq2, 200, 10, 0), "987654321987654321987654321/3456666334217777794")
 
 	yapi.Close_model(modelp)
 
@@ -382,7 +382,7 @@ func Test_tuple_models(t *testing.T) {
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
 	modelp := yapi.Get_model(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
-	mstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	mstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mstr, "(= t1 (mk-tuple false 1 0))")
 	var yval yapi.Yval_t
 	yapi.Get_value(*modelp, t1, &yval)
@@ -414,7 +414,7 @@ func Test_function_models(t *testing.T) {
 	real_t := yapi.Real_type()
 	fun_t := yapi.Function_type3(int_t, bool_t, real_t, real_t)
 
-	fstr := yapi.Type_to_string(fun_t, 100, 80, 0)
+	fstr := yapi.TypeToString(fun_t, 100, 80, 0)
 
 	AssertEqual(t, fstr, "(-> int bool real real)")
 
@@ -431,7 +431,7 @@ func Test_function_models(t *testing.T) {
 	modelp := yapi.Get_model(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
-	mstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	mstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mstr, "(= b1 false)\n(= i1 1463)\n(= r1 -579)\n(function fn\n (type (-> int bool real real))\n (= (fn 1463 false -579) 1)\n (= (fn 1464 true -2042) 0)\n (default 2))")
 
 	var yval yapi.Yval_t
@@ -500,8 +500,8 @@ func Test_function_models(t *testing.T) {
 
 	AssertEqual(t, yapi.Formula_true_in_model(*modelp, fmla), 1)
 
-	a_arr := []yapi.Term_t{i1, fmla, r1}
-	b_arr := make([]yapi.Term_t, 3)
+	a_arr := []yapi.TermT{i1, fmla, r1}
+	b_arr := make([]yapi.TermT, 3)
 
 	errcode := yapi.Term_array_value(*modelp, a_arr, b_arr)
 
@@ -541,9 +541,9 @@ func Test_scalar_models(t *testing.T) {
 	yapi.Get_scalar_value(*modelp, sc2, &val2)
 	yapi.Get_scalar_value(*modelp, sc3, &val3)
 
-	AssertEqual(t, sc1, yapi.Term_t(6))
-	AssertEqual(t, sc2, yapi.Term_t(8))
-	AssertEqual(t, sc3, yapi.Term_t(10))
+	AssertEqual(t, sc1, yapi.TermT(6))
+	AssertEqual(t, sc2, yapi.TermT(8))
+	AssertEqual(t, sc3, yapi.TermT(10))
 
 	AssertEqual(t, yapi.Term_is_scalar(sc1), true)
 	AssertEqual(t, yapi.Term_is_scalar(sc2), true)
@@ -559,7 +559,7 @@ func Test_scalar_models(t *testing.T) {
 	AssertEqual(t, yapi.Get_tag(yval2), yapi.YvalScalar)
 	AssertEqual(t, yapi.Get_tag(yval3), yapi.YvalScalar)
 
-	var tau1, tau2, tau3 yapi.Type_t
+	var tau1, tau2, tau3 yapi.TypeT
 
 	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval1, &val1, &tau1), 0)
 	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval2, &val2, &tau2), 0)
@@ -591,13 +591,13 @@ func Test_model_from_map(t *testing.T) {
 	rconst1 := yapi.Rational32(13, 131)
 	bvconst1 := yapi.Bvconst_int32(8, 134)
 
-	vars := []yapi.Term_t{i1, r1, bv1}
-	vals := []yapi.Term_t{iconst1, rconst1, bvconst1}
+	vars := []yapi.TermT{i1, r1, bv1}
+	vals := []yapi.TermT{iconst1, rconst1, bvconst1}
 
 	modelp := yapi.Model_from_map(vars, vals)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
-	modelstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	modelstr := yapi.ModelToString(*modelp, 80, 100, 0)
 
 	AssertEqual(t, modelstr, "(= i1 42)\n(= r1 13/131)\n(= bv1 0b10000110)")
 
@@ -628,28 +628,28 @@ func Test_implicant(t *testing.T) {
 
 	AssertEqual(t, len(terms), 1)
 
-	mdlstr := yapi.Model_to_string(*modelp, 80, 100, 0)
+	mdlstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mdlstr, "(= i1 7)")
 
-	implstr := yapi.Term_to_string(terms[0], 200, 10, 0)
+	implstr := yapi.TermToString(terms[0], 200, 10, 0)
 	AssertEqual(t, implstr, "(>= (+ -3 i1) 0)")
 
 	fmla1 := yapi.Parse_term("(<= i1 9)")
-	fmlas := []yapi.Term_t{fmla0, fmla1}
+	fmlas := []yapi.TermT{fmla0, fmla1}
 
 	terms = yapi.Implicant_for_formulas(*modelp, fmlas)
 	AssertEqual(t, len(terms), 2)
 
-	implstr2 := yapi.Term_to_string(terms[0], 200, 10, 0)
+	implstr2 := yapi.TermToString(terms[0], 200, 10, 0)
 	AssertEqual(t, implstr2, "(>= (+ -3 i1) 0)")
-	implstr3 := yapi.Term_to_string(terms[1], 200, 10, 0)
+	implstr3 := yapi.TermToString(terms[1], 200, 10, 0)
 	AssertEqual(t, implstr3, "(>= (+ 9 (* -1 i1)) 0)")
 
-	fmlas = yapi.Generalize_model_array(*modelp, fmlas, []yapi.Term_t{i1}, 0)
+	fmlas = yapi.Generalize_model_array(*modelp, fmlas, []yapi.TermT{i1}, 0)
 	AssertEqual(t, len(fmlas), 2)
-	tstr0 := yapi.Term_to_string(fmlas[0], 200, 10, 0)
+	tstr0 := yapi.TermToString(fmlas[0], 200, 10, 0)
 	AssertEqual(t, tstr0, "true")
-	tstr1 := yapi.Term_to_string(fmlas[1], 200, 10, 0)
+	tstr1 := yapi.TermToString(fmlas[1], 200, 10, 0)
 	AssertEqual(t, tstr1, "true")
 
 	yapi.Close_model(modelp)
@@ -744,7 +744,7 @@ func Test_yval_numeric_models(t *testing.T) {
 	errcode = yapi.Val_get_mpz(*modelp, &y1, &mpz)
 	AssertEqual(t, errcode, 0)
 	ytz := yapi.Mpz(&mpz)
-	AssertEqual(t, yapi.Term_to_string(ytz, 200, 10, 0), "4")
+	AssertEqual(t, yapi.TermToString(ytz, 200, 10, 0), "4")
 	yapi.Close_mpz(&mpz)
 
 	var mpq yapi.Mpq_t
@@ -752,7 +752,7 @@ func Test_yval_numeric_models(t *testing.T) {
 	errcode = yapi.Val_get_mpq(*modelp, &y1, &mpq)
 	AssertEqual(t, errcode, 0)
 	ytq := yapi.Mpq(&mpq)
-	AssertEqual(t, yapi.Term_to_string(ytq, 200, 10, 0), "4")
+	AssertEqual(t, yapi.TermToString(ytq, 200, 10, 0), "4")
 	yapi.Close_mpq(&mpq)
 
 	yapi.Close_model(modelp)

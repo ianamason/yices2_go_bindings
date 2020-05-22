@@ -22,7 +22,7 @@ func TestBasis0(t *testing.T) {
 	fmt.Printf("Int_type(): %v %v\n", ivt, yapi.Type_is_int(ivt))
 	fmt.Printf("Real_type(): %v %v\n", rvt, yapi.Type_is_real(rvt))
 
-	typs := []yapi.Type_t{bvt, ivt, rvt}
+	typs := []yapi.TypeT{bvt, ivt, rvt}
 
 	tupt := yapi.Tuple_type(typs)
 

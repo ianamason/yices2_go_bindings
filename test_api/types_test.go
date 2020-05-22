@@ -20,11 +20,11 @@ func TestTypes0(t *testing.T) {
 	tup1_t := yapi.Tuple_type1(bool_t)
 	tup2_t := yapi.Tuple_type2(int_t, real_t)
 	tup3_t := yapi.Tuple_type3(bv_t, scal_t, unint_t)
-	tup4_t := yapi.Tuple_type([]yapi.Type_t{bool_t, tup1_t, tup2_t, tup3_t})
+	tup4_t := yapi.Tuple_type([]yapi.TypeT{bool_t, tup1_t, tup2_t, tup3_t})
 	fun1_t := yapi.Function_type1(int_t, bool_t)
 	fun2_t := yapi.Function_type2(real_t, bv_t, scal_t)
 	fun3_t := yapi.Function_type3(tup1_t, tup2_t, tup3_t, fun1_t)
-	fun4_t := yapi.Function_type([]yapi.Type_t{bool_t, tup1_t, tup2_t, tup3_t}, fun3_t)
+	fun4_t := yapi.Function_type([]yapi.TypeT{bool_t, tup1_t, tup2_t, tup3_t}, fun3_t)
 
 	AssertTrue(t, yapi.Type_is_bool(bool_t))
 	AssertFalse(t, yapi.Type_is_bool(int_t))

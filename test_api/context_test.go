@@ -30,7 +30,7 @@ func TestContext0(t *testing.T) {
 	fmla2 := yapi.Parse_term("(bv-gt y 0b000)")
 	fmla3 := yapi.Parse_term("(bv-gt z 0b000)")
 	yapi.Assert_formula(ctx, fmla1)
-	yapi.Assert_formulas(ctx, []yapi.Term_t{fmla1, fmla2, fmla3})
+	yapi.Assert_formulas(ctx, []yapi.TermT{fmla1, fmla2, fmla3})
 	var params yapi.Param_t
 	smt_stat := yapi.Check_context(ctx, params)
 	AssertEqual(t, smt_stat, yapi.STATUS_SAT, "smt_stat == yapi.STATUS_SAT")
@@ -70,7 +70,7 @@ func TestContext1(t *testing.T) {
 	AssertEqual(t, ret, 0, "ret == 0")
 	ret = yapi.Context_disable_option(ctx, "arith-elim")
 	AssertEqual(t, ret, 0, "ret == 0")
-	stat = yapi.Context_status(ctx)
+	stat := yapi.Context_status(ctx)
 	AssertEqual(t, stat, yapi.STATUS_IDLE, "stat == yapi.STATUS_IDLE")
 	yapi.Reset_context(ctx)
 	bool_t := yapi.Bool_type()
@@ -90,7 +90,7 @@ func TestContext1(t *testing.T) {
 	fmla2 := yapi.Parse_term("(bv-gt y 0b000)")
 	fmla3 := yapi.Parse_term("(bv-gt z 0b000)")
 	yapi.Assert_formula(ctx, fmla1)
-	yapi.Assert_formulas(ctx, []yapi.Term_t{fmla1, fmla2, fmla3})
+	yapi.Assert_formulas(ctx, []yapi.TermT{fmla1, fmla2, fmla3})
 
 	var params yapi.Param_t
 	smt_stat := yapi.Check_context(ctx, params) //same as passing NULL to the C
