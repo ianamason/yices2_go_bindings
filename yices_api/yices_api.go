@@ -101,28 +101,34 @@ import "unsafe"
  *  VERSION NUMBERS  *
  ********************/
 
+// Version is the yices2 library version.
 func Version() string {
 	return C.GoString(C.yices_version)
 }
 
-func Build_arch() string {
+// BuildArch is the yices2 library build architecture.
+func BuildArch() string {
 	return C.GoString(C.yices_build_arch)
 }
 
-func Build_mode() string {
+// BuildMode is the yices2 library build mode.
+func BuildMode() string {
 	return C.GoString(C.yices_build_mode)
 }
 
-func Build_date() string {
+// BuildDate is the yices2 library build date.
+func BuildDate() string {
 	return C.GoString(C.yices_build_date)
 }
 
-func Has_mcsat() int32 {
+// HasMcsat indicates if the yices2 library supports MCSAT.
+func HasMcsat() int32 {
 	return int32(C.yices_has_mcsat())
 }
 
 // Since 2.6.2
-func Is_thread_safe() int32 {
+// IsThreadSafe indicate if the yices2 library was built with thread safety enabled.
+func IsThreadSafe() int32 {
 	return int32(C.yices_is_thread_safe())
 }
 
@@ -130,14 +136,17 @@ func Is_thread_safe() int32 {
  *  GLOBAL INITIALIZATION AND CLEANUP  *
  **************************************/
 
+// Init initializes the internal yices2 library data structures.
 func Init() {
 	C.yices_init()
 }
 
+// Exit cleans up the internal yices2 library data structures.
 func Exit() {
 	C.yices_exit()
 }
 
+// Reset resets up the internal yices2 library data structures.
 func Reset() {
 	C.yices_reset()
 }
@@ -154,11 +163,11 @@ func Reset() {
  *  ERROR REPORTING  *
  ********************/
 
-type Error_code_t int32
+type ErrorCodeT int32
 
-type YicesError_t struct {
+type YicesErrorT struct {
 	Error_string string
-	Code         Error_code_t
+	Code         ErrorCodeT
 	Line         uint32
 	Column       uint32
 	Term1        TermT
@@ -169,11 +178,11 @@ type YicesError_t struct {
 }
 
 // the all important error interface
-func (yerror *YicesError_t) Error() string {
+func (yerror *YicesErrorT) Error() string {
 	return yerror.Error_string
 }
 
-func fetchErrorReport(yerror *YicesError_t) {
+func fetchErrorReport(yerror *YicesErrorT) {
 	var code C.error_code_t
 	var line C.uint32_t
 	var column C.uint32_t
@@ -183,7 +192,7 @@ func fetchErrorReport(yerror *YicesError_t) {
 	var type2 C.type_t
 	var badval C.int64_t
 	C.fetchReport(&code, &line, &column, &term1, &type1, &term2, &type2, &badval)
-	yerror.Code = Error_code_t(code)
+	yerror.Code = ErrorCodeT(code)
 	yerror.Line = uint32(line)
 	yerror.Column = uint32(column)
 	yerror.Term1 = TermT(term1)
@@ -195,10 +204,10 @@ func fetchErrorReport(yerror *YicesError_t) {
 }
 
 // YicesError() returns a copy of the current error state
-func YicesError() (yerror *YicesError_t) {
+func YicesError() (yerror *YicesErrorT) {
 	errcode := Error_code()
 	if errcode != NO_ERROR {
-		yerror = new(YicesError_t)
+		yerror = new(YicesErrorT)
 		yerror.Error_string = Error_string()
 		fetchErrorReport(yerror)
 		Clear_error()
@@ -206,7 +215,7 @@ func YicesError() (yerror *YicesError_t) {
 	return
 }
 
-func (yerror *YicesError_t) String() string {
+func (yerror *YicesErrorT) String() string {
 	return fmt.Sprintf("string = %s code = %d line = %d column = %d term1 = %d type1 = %d term2 = %d type2 = %d badval = %d",
 		yerror.Error_string, yerror.Code, yerror.Line, yerror.Column,
 		yerror.Term1, yerror.Type1,
@@ -214,8 +223,8 @@ func (yerror *YicesError_t) String() string {
 		yerror.Badval)
 }
 
-func Error_code() Error_code_t {
-	return Error_code_t(C.yices_error_code())
+func Error_code() ErrorCodeT {
+	return ErrorCodeT(C.yices_error_code())
 }
 
 func Clear_error() {

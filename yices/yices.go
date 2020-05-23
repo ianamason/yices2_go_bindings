@@ -28,14 +28,12 @@ var HasMcsat bool
 var IsThreadSafe bool
 
 func init() {
-
 	Version = yapi.Version()
-	BuildArch = yapi.Build_arch()
-	BuildMode = yapi.Build_mode()
-	BuildDate = yapi.Build_date()
-	HasMcsat = (yapi.Has_mcsat() == int32(1))
-	IsThreadSafe = (yapi.Is_thread_safe() == int32(1))
-
+	BuildArch = yapi.BuildArch()
+	BuildMode = yapi.BuildMode()
+	BuildDate = yapi.BuildDate()
+	HasMcsat = (yapi.HasMcsat() == int32(1))
+	IsThreadSafe = (yapi.IsThreadSafe() == int32(1))
 }
 
 /***************************************
@@ -56,12 +54,12 @@ func Reset() { yapi.Reset() }
  ********************/
 
 // Error returns the current yices error structure.
-func Error() (yerror *yapi.YicesError_t) {
+func Error() (yerror *yapi.YicesErrorT) {
 	return yapi.YicesError()
 }
 
 // ErrorCode returns the most recent yices error code.
-func ErrorCode() yapi.Error_code_t {
+func ErrorCode() yapi.ErrorCodeT {
 	return yapi.Error_code()
 }
 

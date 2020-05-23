@@ -298,7 +298,7 @@ func Test_mpq_models(t *testing.T) {
 
 func Test_algebraic_models(t *testing.T) {
 	yapi.Init()
-	if yapi.Has_mcsat() == int32(0) {
+	if yapi.HasMcsat() == int32(0) {
 		fmt.Println("TestAlgebraicModels skipped because no mcsat.")
 		return
 	}

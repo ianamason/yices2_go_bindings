@@ -1,7 +1,7 @@
 package yices2
 
 const (
-	NO_ERROR Error_code_t = iota
+	NO_ERROR ErrorCodeT = iota
 	/*
 	 * Errors in type or term construction
 	 */
@@ -53,7 +53,7 @@ const (
 	/*
 	 * Parser errors
 	 */
-	INVALID_TOKEN Error_code_t = 100 + iota
+	INVALID_TOKEN ErrorCodeT = 100 + iota
 	SYNTAX_ERROR
 	UNDEFINED_TYPE_NAME
 	UNDEFINED_TERM_NAME
@@ -80,7 +80,7 @@ const (
 	 * These codes mean that the context as configured
 	 * cannot process the assertions.
 	 */
-	CTX_FREE_VAR_IN_FORMULA Error_code_t = 300 + iota
+	CTX_FREE_VAR_IN_FORMULA ErrorCodeT = 300 + iota
 	CTX_LOGIC_NOT_SUPPORTED
 	CTX_UF_NOT_SUPPORTED
 	CTX_ARITH_NOT_SUPPORTED
@@ -107,7 +107,7 @@ const (
 	/*
 	 * Error codes for other operations
 	 */
-	CTX_INVALID_OPERATION Error_code_t = 400 + iota
+	CTX_INVALID_OPERATION ErrorCodeT = 400 + iota
 	CTX_OPERATION_NOT_SUPPORTED
 )
 
@@ -115,7 +115,7 @@ const (
 	/*
 	 * Errors in context configurations and search parameter settings
 	 */
-	CTX_INVALID_CONFIG Error_code_t = 500 + iota
+	CTX_INVALID_CONFIG ErrorCodeT = 500 + iota
 	CTX_UNKNOWN_PARAMETER
 	CTX_INVALID_PARAMETER_VALUE
 	CTX_UNKNOWN_LOGIC
@@ -125,7 +125,7 @@ const (
 	/*
 	 * Error codes for model queries
 	 */
-	EVAL_UNKNOWN_TERM Error_code_t = 600 + iota
+	EVAL_UNKNOWN_TERM ErrorCodeT = 600 + iota
 	EVAL_FREEVAR_IN_TERM
 	EVAL_QUANTIFIER
 	EVAL_LAMBDA
@@ -140,7 +140,7 @@ const (
 	/*
 	 * Error codes for model construction
 	 */
-	MDL_UNINT_REQUIRED Error_code_t = 700 + iota
+	MDL_UNINT_REQUIRED ErrorCodeT = 700 + iota
 	MDL_CONSTANT_REQUIRED
 	MDL_DUPLICATE_VAR
 	MDL_FTYPE_NOT_ALLOWED
@@ -151,7 +151,7 @@ const (
 	/*
 	 * Error codes in DAG/node queries
 	 */
-	YVAL_INVALID_OP Error_code_t = 800 + iota
+	YVAL_INVALID_OP ErrorCodeT = 800 + iota
 	YVAL_OVERFLOW
 	YVAL_NOT_SUPPORTED
 )
@@ -160,7 +160,7 @@ const (
 	/*
 	 * Error codes for model generalization
 	 */
-	MDL_GEN_TYPE_NOT_SUPPORTED Error_code_t = 900 + iota
+	MDL_GEN_TYPE_NOT_SUPPORTED ErrorCodeT = 900 + iota
 	MDL_GEN_NONLINEAR
 	MDL_GEN_FAILED
 )
@@ -169,14 +169,14 @@ const (
 	/*
 	 * MCSAT error codes
 	 */
-	MCSAT_ERROR_UNSUPPORTED_THEORY Error_code_t = 1000 + iota
+	MCSAT_ERROR_UNSUPPORTED_THEORY ErrorCodeT = 1000 + iota
 )
 
 const (
 	/*
 	 * Input/output and system errors
 	 */
-	OUTPUT_ERROR Error_code_t = 9000 + iota
+	OUTPUT_ERROR ErrorCodeT = 9000 + iota
 )
 
 const (
@@ -184,5 +184,5 @@ const (
 	 * Catch-all code for anything else.
 	 * This is a symptom that a bug has been found.
 	 */
-	INTERNAL_EXCEPTION Error_code_t = 9999 + iota
+	INTERNAL_EXCEPTION ErrorCodeT = 9999 + iota
 )
