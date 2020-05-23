@@ -126,8 +126,8 @@ func HasMcsat() int32 {
 	return int32(C.yices_has_mcsat())
 }
 
-// Since 2.6.2
 // IsThreadSafe indicate if the yices2 library was built with thread safety enabled.
+// Since 2.6.2
 func IsThreadSafe() int32 {
 	return int32(C.yices_is_thread_safe())
 }
