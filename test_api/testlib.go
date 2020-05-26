@@ -112,7 +112,6 @@ func convertUnsigned2UInt(y interface{}, yuint *uint) bool {
 	}
 }
 
-
 // SignedUnsignedEqual compares a signed integer with an unsigned one
 func SignedUnsignedEqual(x interface{}, y interface{}) bool {
 
@@ -153,7 +152,7 @@ func SignedEqual(x interface{}, y interface{}) bool {
 		return false
 	}
 
-	if !convertSigned2Int64(y, &yint){
+	if !convertSigned2Int64(y, &yint) {
 		return false
 	}
 
@@ -174,12 +173,11 @@ func UnsignedEqual(x interface{}, y interface{}) bool {
 	var xuint uint
 	var yuint uint
 
-
 	if !convertUnsigned2UInt(x, &xuint) {
 		return false
 	}
 
-	if !convertUnsigned2UInt(y, &yuint){
+	if !convertUnsigned2UInt(y, &yuint) {
 		return false
 	}
 
