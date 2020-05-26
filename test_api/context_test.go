@@ -33,7 +33,7 @@ func TestContext0(t *testing.T) {
 	yapi.AssertFormulas(ctx, []yapi.TermT{fmla1, fmla2, fmla3})
 	var params yapi.ParamT
 	smtStat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, smtStat, yapi.STATUS_SAT, "smtStat == yapi.STATUS_SAT")
+	AssertEqual(t, smtStat, yapi.StatusSat, "smtStat == yapi.StatusSat")
 
 	yapi.InitParamRecord(&params)
 	yapi.DefaultParamsForContext(ctx, params)
@@ -71,7 +71,7 @@ func TestContext1(t *testing.T) {
 	ret = yapi.ContextDisableOption(ctx, "arith-elim")
 	AssertEqual(t, ret, 0, "ret == 0")
 	stat := yapi.ContextStatus(ctx)
-	AssertEqual(t, stat, yapi.STATUS_IDLE, "stat == yapi.STATUS_IDLE")
+	AssertEqual(t, stat, yapi.StatusIdle, "stat == yapi.StatusIdle")
 	yapi.ResetContext(ctx)
 	boolT := yapi.BoolType()
 	bvar1 := yapi.NewVariable(boolT)
@@ -94,7 +94,7 @@ func TestContext1(t *testing.T) {
 
 	var params yapi.ParamT
 	smtStat := yapi.CheckContext(ctx, params) //same as passing NULL to the C
-	AssertEqual(t, smtStat, yapi.STATUS_SAT, "smtStat == yapi.STATUS_SAT")
+	AssertEqual(t, smtStat, yapi.StatusSat, "smtStat == yapi.StatusSat")
 	yapi.AssertBlockingClause(ctx)
 	yapi.StopSearch(ctx)
 

@@ -39,6 +39,80 @@ func Unsigned(thing interface{}) (retval bool) {
 	return
 }
 
+func convertSigned2Int64(x interface{}, xint *int64) bool {
+	xtyp := reflect.TypeOf(x)
+	switch xtyp.Kind() {
+	case reflect.Int:
+		*xint = int64(x.(int))
+		return true
+	case reflect.Int8:
+		*xint = int64(x.(int8))
+		return true
+	case reflect.Int16:
+		*xint = int64(x.(int16))
+		return true
+	case reflect.Int32:
+		*xint = int64(x.(int32))
+		return true
+	case reflect.Int64:
+		*xint = x.(int64)
+		return true
+	default:
+		return false
+	}
+}
+
+func convertUnsigned2Int64(y interface{}, yint *int64) bool {
+	ytyp := reflect.TypeOf(y)
+	switch ytyp.Kind() {
+	case reflect.Uint:
+		*yint = int64(y.(uint))
+		return true
+	case reflect.Uint8:
+		*yint = int64(y.(uint8))
+		return true
+	case reflect.Uint16:
+		*yint = int64(y.(uint16))
+		return true
+	case reflect.Uint32:
+		*yint = int64(y.(uint32))
+		return true
+	case reflect.Uint64:
+		yval := y.(uint64)
+		if yval > math.MaxInt64 {
+			return false
+		}
+		*yint = int64(y.(uint64))
+		return true
+	default:
+		return false
+	}
+}
+
+func convertUnsigned2UInt(y interface{}, yuint *uint) bool {
+	ytyp := reflect.TypeOf(y)
+	switch ytyp.Kind() {
+	case reflect.Uint:
+		*yuint = uint(y.(uint))
+		return true
+	case reflect.Uint8:
+		*yuint = uint(y.(uint8))
+		return true
+	case reflect.Uint16:
+		*yuint = uint(y.(uint16))
+		return true
+	case reflect.Uint32:
+		*yuint = uint(y.(uint32))
+		return true
+	case reflect.Uint64:
+		*yuint = uint(y.(uint64))
+		return true
+	default:
+		return false
+	}
+}
+
+
 // SignedUnsignedEqual compares a signed integer with an unsigned one
 func SignedUnsignedEqual(x interface{}, y interface{}) bool {
 
@@ -49,43 +123,11 @@ func SignedUnsignedEqual(x interface{}, y interface{}) bool {
 	var xint int64
 	var yint int64
 
-	xtyp := reflect.TypeOf(x)
-	switch xtyp.Kind() {
-	case reflect.Int:
-		xint = int64(x.(int))
-	case reflect.Int8:
-		xint = int64(x.(int8))
-	case reflect.Int16:
-		xint = int64(x.(int16))
-	case reflect.Int32:
-		xint = int64(x.(int32))
-	case reflect.Int64:
-		xint = x.(int64)
-	default:
+	if !convertSigned2Int64(x, &xint) {
 		return false
 	}
 
-	if xint < 0 {
-		return false
-	}
-
-	ytyp := reflect.TypeOf(y)
-	switch ytyp.Kind() {
-	case reflect.Uint:
-		yint = int64(y.(uint))
-	case reflect.Uint8:
-		yint = int64(y.(uint8))
-	case reflect.Uint16:
-		yint = int64(y.(uint16))
-	case reflect.Uint32:
-		yint = int64(y.(uint32))
-	case reflect.Uint64:
-		yval := y.(uint64)
-		if yval > math.MaxInt64 {
-			return false
-		}
-		yint = int64(y.(uint64))
-	default:
+	if !convertUnsigned2Int64(y, &yint) {
 		return false
 	}
 
@@ -107,35 +149,11 @@ func SignedEqual(x interface{}, y interface{}) bool {
 	var xint int64
 	var yint int64
 
-	xtyp := reflect.TypeOf(x)
-	switch xtyp.Kind() {
-	case reflect.Int:
-		xint = int64(x.(int))
-	case reflect.Int8:
-		xint = int64(x.(int8))
-	case reflect.Int16:
-		xint = int64(x.(int16))
-	case reflect.Int32:
-		xint = int64(x.(int32))
-	case reflect.Int64:
-		xint = x.(int64)
-	default:
+	if !convertSigned2Int64(x, &xint) {
 		return false
 	}
 
-	ytyp := reflect.TypeOf(y)
-	switch ytyp.Kind() {
-	case reflect.Int:
-		yint = int64(y.(int))
-	case reflect.Int8:
-		yint = int64(y.(int8))
-	case reflect.Int16:
-		yint = int64(y.(int16))
-	case reflect.Int32:
-		yint = int64(y.(int32))
-	case reflect.Int64:
-		yint = y.(int64)
-	default:
+	if !convertSigned2Int64(y, &yint){
 		return false
 	}
 
@@ -156,35 +174,12 @@ func UnsignedEqual(x interface{}, y interface{}) bool {
 	var xuint uint
 	var yuint uint
 
-	xtyp := reflect.TypeOf(x)
-	switch xtyp.Kind() {
-	case reflect.Uint:
-		xuint = uint(x.(uint))
-	case reflect.Uint8:
-		xuint = uint(x.(uint8))
-	case reflect.Uint16:
-		xuint = uint(x.(uint16))
-	case reflect.Uint32:
-		xuint = uint(x.(uint32))
-	case reflect.Uint64:
-		xuint = uint(x.(uint64))
-	default:
+
+	if !convertUnsigned2UInt(x, &xuint) {
 		return false
 	}
 
-	ytyp := reflect.TypeOf(y)
-	switch ytyp.Kind() {
-	case reflect.Uint:
-		yuint = uint(y.(uint))
-	case reflect.Uint8:
-		yuint = uint(y.(uint8))
-	case reflect.Uint16:
-		yuint = uint(y.(uint16))
-	case reflect.Uint32:
-		yuint = uint(y.(uint32))
-	case reflect.Uint64:
-		yuint = uint(y.(uint64))
-	default:
+	if !convertUnsigned2UInt(y, &yuint){
 		return false
 	}
 

@@ -1596,7 +1596,7 @@ func CheckContextWithAssumptions(ctx ContextT, params ParamT, t []TermT) SmtStat
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return SmtStatusT(STATUS_ERROR)
+		return SmtStatusT(StatusError)
 	}
 	return SmtStatusT(C.yices_check_context_with_assumptions(yctx(ctx), yparam(params), count, (*C.term_t)(&t[0])))
 }

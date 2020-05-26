@@ -51,7 +51,7 @@ func TestBoolModels(t *testing.T) {
 	bFml1 := yapi.ParseTerm("(or b1 b2 b3)")
 	yapi.AssertFormula(ctx, bFml1)
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 	var bval1 int32
@@ -69,7 +69,7 @@ func TestBoolModels(t *testing.T) {
 
 	yapi.AssertFormula(ctx, bFmla2)
 	stat = yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp = yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 	yapi.GetBoolValue(*modelp, b1, &bval1)
@@ -101,7 +101,7 @@ func TestIntModels(t *testing.T) {
 	parseAssert("(> i1 3)", ctx)
 	parseAssert("(< i2 i1)", ctx)
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 	var i32v1 int32
@@ -139,7 +139,7 @@ func Test_rat_models(t *testing.T) {
 	parseAssert("(< (- r1 r2) 0)", ctx)
 
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
@@ -197,7 +197,7 @@ func TestMpzModels(t *testing.T) {
 	parseAssert("(< i2 i1)", ctx)
 
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
@@ -253,7 +253,7 @@ func TestMpqModels(t *testing.T) {
 	parseAssert("(< r2 r1)", ctx)
 
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
@@ -313,7 +313,7 @@ func TestAlgebraicModels(t *testing.T) {
 	x := defineConst("x", realT)
 	parseAssert("(= (* x x) 2)", ctx)
 	stat := yapi.CheckContext(ctx, params) //params == NULL in the C
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 	yapi.PrintModel(os.Stdout, *modelp)
@@ -339,7 +339,7 @@ func TestBvModels(t *testing.T) {
 	parseAssert("(bv-gt bv3 0b000)", ctx)
 
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
@@ -379,7 +379,7 @@ func TestTupleModels(t *testing.T) {
 	t1 := defineConst("t1", tupT)
 	parseAssert("(ite (select t1 1) (< (select t1 2) (select t1 3)) (> (select t1 2) (select t1 3)))", ctx)
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 	mstr := yapi.ModelToString(*modelp, 80, 100, 0)
@@ -427,7 +427,7 @@ func Test_function_models(t *testing.T) {
 	parseAssert("(> (fn i1 b1 r1) (fn (+ i1 1) (not b1) (- r1 i1)))", ctx)
 
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
@@ -531,7 +531,7 @@ func TestScalarModels(t *testing.T) {
 	parseAssert("(/= sc1 sc3)", ctx)
 
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
@@ -618,7 +618,7 @@ func TestImplicant(t *testing.T) {
 	parseAssert("(and (> i1 2) (< i1 8) (/= i1 4))", ctx)
 
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
@@ -671,7 +671,7 @@ func TestYvalNumericModels(t *testing.T) {
 	parseAssert("(< i2 i1)", ctx)
 
 	stat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
+	AssertEqual(t, stat, yapi.StatusSat, "stat == yapi.StatusSat")
 	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
