@@ -399,8 +399,8 @@ func TestTerms0(t *testing.T) {
 	AssertFalse(t, yapi.TermIsProduct(ite1))
 	AssertFalse(t, yapi.TermIsProduct(product1))
 	AssertTrue(t, yapi.TermIsProduct(product2))
-	AssertEqual(t, yapi.TermConstructor(trueC), yapi.TermConstructorT(0))       //yuk
-	AssertEqual(t, yapi.TermConstructor(int1), yapi.TermConstructorT(1))        //yuk
+	AssertEqual(t, yapi.TermConstructor(trueC), yapi.TermConstructorT(0))      //yuk
+	AssertEqual(t, yapi.TermConstructor(int1), yapi.TermConstructorT(1))       //yuk
 	AssertEqual(t, yapi.TermConstructor(bvconst321), yapi.TermConstructorT(2)) //yuk
 	AssertEqual(t, yapi.TermNumChildren(bvconst321), 0)
 	AssertEqual(t, yapi.TermNumChildren(select2), 1)

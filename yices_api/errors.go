@@ -39,14 +39,14 @@ const (
 	ErrorEmptyBitvector
 	ErrorArithconstantRequired // added 2013/01/23
 	ErrorInvalidMacro          // added 2013/03/31
-	ErrorTooManyMacroParams  // added 2013/03/31
-	ErrorTypeVarRequired      // added 2013/03/31
-	ErrorDuplicateTypeVar     // added 2013/03/31
+	ErrorTooManyMacroParams    // added 2013/03/31
+	ErrorTypeVarRequired       // added 2013/03/31
+	ErrorDuplicateTypeVar      // added 2013/03/31
 	ErrorBvtypeRequired        // added 2013/05/27
-	ErrorBadTermDecref        // added 2013/10/03
-	ErrorBadTypeDecref        // added 2013/10/03
-	ErrorInvalidTypeOp        // added 2014/12/03
-	ErrorInvalidTermOp        // added 2014/12/04
+	ErrorBadTermDecref         // added 2013/10/03
+	ErrorBadTypeDecref         // added 2013/10/03
+	ErrorInvalidTypeOp         // added 2014/12/03
+	ErrorInvalidTermOp         // added 2014/12/04
 )
 
 const (

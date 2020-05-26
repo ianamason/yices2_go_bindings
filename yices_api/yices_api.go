@@ -169,14 +169,14 @@ type ErrorCodeT int32
 // YicesErrorT is the go representation of the yices_error_t struct of yices library.
 type YicesErrorT struct {
 	ErrorString string
-	Code         ErrorCodeT
-	Line         uint32
-	Column       uint32
-	Term1        TermT
-	Type1        TypeT
-	Term2        TermT
-	Type2        TypeT
-	Badval       int64
+	Code        ErrorCodeT
+	Line        uint32
+	Column      uint32
+	Term1       TermT
+	Type1       TypeT
+	Term2       TermT
+	Type2       TypeT
+	Badval      int64
 }
 
 // Error returns the error's current error string.

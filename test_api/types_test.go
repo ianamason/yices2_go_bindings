@@ -40,7 +40,7 @@ func TestTypes0(t *testing.T) {
 	AssertTrue(t, yapi.TypeIsUninterpreted(unintT))
 	AssertTrue(t, yapi.TestSubtype(intT, realT))
 	AssertFalse(t, yapi.TestSubtype(realT, intT))
-	AssertEqual(t, yapi.BvtypeSize(bvT), uint32(8))         //yuk
+	AssertEqual(t, yapi.BvtypeSize(bvT), uint32(8))        //yuk
 	AssertEqual(t, yapi.ScalarTypeCard(scalT), uint32(12)) //yuk
 	AssertEqual(t, yapi.TypeNumChildren(tup3T), int32(3))  //yuk
 	AssertEqual(t, yapi.TypeChild(tup3T, 1), scalT)

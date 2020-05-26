@@ -97,7 +97,6 @@ func SignedUnsignedEqual(x interface{}, y interface{}) bool {
 
 }
 
-
 // SignedEqual encodes equality on signed integers.
 func SignedEqual(x interface{}, y interface{}) bool {
 

@@ -1,6 +1,5 @@
 package yices2
 
-
 type SmtStatusT int32
 
 const (
