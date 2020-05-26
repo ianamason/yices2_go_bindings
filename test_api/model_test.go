@@ -704,7 +704,7 @@ func TestYvalNumericModels(t *testing.T) {
 	yerror = yapi.YicesError()
 	AssertNotEqual(t, yerror, nil) //aye curumba. ibid
 	AssertEqual(t, yerror.ErrorString, "invalid operation on yval")
-	AssertEqual(t, yerror.Code, yapi.YVAL_INVALID_OP)
+	AssertEqual(t, yerror.Code, yapi.ErrorYvalInvalidOp)
 
 	var ival32 int32
 	errcode = yapi.ValGetInt32(*modelp, &y1, &ival32)

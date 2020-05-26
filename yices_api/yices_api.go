@@ -208,7 +208,7 @@ func fetchErrorReport(yerror *YicesErrorT) {
 // YicesError returns a copy of the current error state
 func YicesError() (yerror *YicesErrorT) {
 	errcode := ErrorCode()
-	if errcode != NO_ERROR {
+	if errcode != NoError {
 		yerror = new(YicesErrorT)
 		yerror.ErrorString = ErrorString()
 		fetchErrorReport(yerror)
@@ -1974,9 +1974,9 @@ func ImplicantForFormulas(model ModelT, t []TermT) (literals []TermT) {
 type GenModeT int32
 
 const (
-	GEN_DEFAULT GenModeT = iota
-	GEN_BY_SUBST
-	GEN_BY_PROJ
+	GenDefault GenModeT = iota
+	GenBySubst
+	GenByProj
 )
 
 func GeneralizeModel(model ModelT, t TermT, elims []TermT, mode GenModeT) (formulas []TermT) {

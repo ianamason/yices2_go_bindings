@@ -4,11 +4,11 @@ package yices2
 type SmtStatusT int32
 
 const (
-	STATUS_IDLE SmtStatusT = iota
-	STATUS_SEARCHING
-	STATUS_UNKNOWN
-	STATUS_SAT
-	STATUS_UNSAT
-	STATUS_INTERRUPTED
-	STATUS_ERROR
+	StatusIdle SmtStatusT = iota
+	StatusSearching
+	StatusUnknown
+	StatusSat
+	StatusUnsat
+	StatusInterrupted
+	StatusError
 )

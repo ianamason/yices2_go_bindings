@@ -10,6 +10,7 @@ func isNil(x interface{}) bool {
 	return x == nil || (reflect.ValueOf(x).Kind() == reflect.Ptr && reflect.ValueOf(x).IsNil())
 }
 
+// Signed returns True if it's argument is a signed integer, False othewise
 func Signed(thing interface{}) (retval bool) {
 	if thing == nil {
 		return
@@ -25,6 +26,7 @@ func Signed(thing interface{}) (retval bool) {
 	return
 }
 
+// Unsigned returns True if it's argument is an unsigned integer, False othewise
 func Unsigned(thing interface{}) (retval bool) {
 	if thing == nil {
 		return
@@ -37,7 +39,7 @@ func Unsigned(thing interface{}) (retval bool) {
 	return
 }
 
-// x is signed; y is unsigned
+// SignedUnsignedEqual compares a signed integer with an unsigned one
 func SignedUnsignedEqual(x interface{}, y interface{}) bool {
 
 	if x == nil || y == nil {
@@ -95,6 +97,8 @@ func SignedUnsignedEqual(x interface{}, y interface{}) bool {
 
 }
 
+
+// SignedEqual encodes equality on signed integers.
 func SignedEqual(x interface{}, y interface{}) bool {
 
 	if x == nil || y == nil {
@@ -143,6 +147,7 @@ func SignedEqual(x interface{}, y interface{}) bool {
 	return true
 }
 
+// UnsignedEqual encodes equality on unsigned integers.
 func UnsignedEqual(x interface{}, y interface{}) bool {
 
 	if x == nil || y == nil {
@@ -191,6 +196,7 @@ func UnsignedEqual(x interface{}, y interface{}) bool {
 	return true
 }
 
+// AssertNotEqual asserts that the lhs is not equal to the rhs.
 func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...string) {
 	if Signed(lhs) && Signed(rhs) {
 		if SignedEqual(lhs, rhs) {
@@ -219,6 +225,7 @@ func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...str
 	}
 }
 
+// AssertEqual asserts that the lhs is equal to the rhs.
 func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...string) {
 
 	if isNil(lhs) && isNil(rhs) {
@@ -255,12 +262,14 @@ func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...string
 	}
 }
 
+// AssertTrue asserts that cond is True
 func AssertTrue(t *testing.T, cond interface{}, where ...string) {
 	if cond != true {
 		t.Errorf("%s AssertTrue %v : %v\n", where, cond, reflect.TypeOf(cond))
 	}
 }
 
+// AssertFalse asserts that cond is True
 func AssertFalse(t *testing.T, cond interface{}, where ...string) {
 	if cond != false {
 		t.Errorf("%s AssertFalse %v : %v\n", where, cond, reflect.TypeOf(cond))

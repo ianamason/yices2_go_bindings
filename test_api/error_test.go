@@ -11,7 +11,7 @@ func TestErrors(t *testing.T) {
 
 	//First with no error
 	errcode := yapi.ErrorCode()
-	AssertEqual(t, errcode, yapi.NO_ERROR, "errcode == yices.NO_ERROR")
+	AssertEqual(t, errcode, yapi.NoError, "errcode == yices.NoError")
 	yapi.ClearError()
 	errstr := yapi.ErrorString()
 	AssertEqual(t, errstr, "no error", "errstr == 'no error'")
@@ -30,12 +30,12 @@ func TestErrors(t *testing.T) {
 	println(yerror.String())
 
 	yapi.ClearError()
-	AssertEqual(t, yapi.ErrorCode(), yapi.NO_ERROR, "yapi.ErrorCode() == yapi.NO_ERROR")
+	AssertEqual(t, yapi.ErrorCode(), yapi.NoError, "yapi.ErrorCode() == yapi.NoError")
 	errstr = yapi.ErrorString()
 	AssertEqual(t, errstr, "no error", "errstr == 'no error'")
 	yapi.PrintError(os.Stderr)
 	yapi.ClearError()
-	AssertEqual(t, yapi.ErrorCode(), yapi.NO_ERROR, "yapi.ErrorCode() == yapi.NO_ERROR")
+	AssertEqual(t, yapi.ErrorCode(), yapi.NoError, "yapi.ErrorCode() == yapi.NoError")
 
 	yapi.Exit()
 }
