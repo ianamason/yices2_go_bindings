@@ -8,25 +8,25 @@ import (
 func TestConfig0(t *testing.T) {
 	yapi.Init()
 
-	var cfg yapi.Config_t
+	var cfg yapi.ConfigT
 
-	yapi.Init_config(&cfg)
+	yapi.InitConfig(&cfg)
 
 	// Valid call
-	yapi.Set_config(cfg, "mode", "push-pop")
+	yapi.SetConfig(cfg, "mode", "push-pop")
 	// Invalid name
-	errcode := yapi.Set_config(cfg, "baz", "bar")
-	error_string := yapi.Error_string()
+	errcode := yapi.SetConfig(cfg, "baz", "bar")
+	errorString := yapi.ErrorString()
 	AssertEqual(t, errcode, -1, "errcode == -1")
-	AssertEqual(t, error_string, "invalid parameter", "error_string == 'invalid parameter'")
+	AssertEqual(t, errorString, "invalid parameter", "errorString == 'invalid parameter'")
 	// Invalid value
-	errcode = yapi.Set_config(cfg, "mode", "bar")
-	error_string = yapi.Error_string()
+	errcode = yapi.SetConfig(cfg, "mode", "bar")
+	errorString = yapi.ErrorString()
 	AssertEqual(t, errcode, -1, "errcode == -1")
-	AssertEqual(t, error_string, "value not valid for parameter", "error_string == 'value not valid for parameter'")
-	yapi.Default_config_for_logic(cfg, "QF_UFNIRA")
+	AssertEqual(t, errorString, "value not valid for parameter", "errorString == 'value not valid for parameter'")
+	yapi.DefaultConfigForLogic(cfg, "QF_UFNIRA")
 
-	yapi.Close_config(&cfg)
+	yapi.CloseConfig(&cfg)
 
 	yapi.Exit()
 }

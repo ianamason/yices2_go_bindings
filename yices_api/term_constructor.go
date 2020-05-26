@@ -1,12 +1,12 @@
 package yices2
 
-type Term_constructor_t int32
+type TermConstructorT int32
 
 const (
-	CONSTRUCTOR_ERROR Term_constructor_t = iota - 1 // to report an error
+	CONSTRUCTOR_ERROR TermConstructorT = iota - 1 // to report an error
 
 	// atomic terms
-	BOOL_CONSTANT      Term_constructor_t = iota // boolean constant
+	BOOL_CONSTANT      TermConstructorT = iota // boolean constant
 	ARITH_CONSTANT                               // rational constant
 	BV_CONSTANT                                  // bitvector constant
 	SCALAR_CONSTANT                              // constant of uninterpreted/scalar

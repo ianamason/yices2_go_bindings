@@ -163,10 +163,12 @@ func Reset() {
  *  ERROR REPORTING  *
  ********************/
 
+// ErrorCodeT is the analog of the error_code_t enum of the yices library.
 type ErrorCodeT int32
 
+// YicesErrorT is the go representation of the yices_error_t struct of yices library.
 type YicesErrorT struct {
-	Error_string string
+	ErrorString string
 	Code         ErrorCodeT
 	Line         uint32
 	Column       uint32
@@ -177,9 +179,9 @@ type YicesErrorT struct {
 	Badval       int64
 }
 
-// the all important error interface
+// Error returns the error's current error string.
 func (yerror *YicesErrorT) Error() string {
-	return yerror.Error_string
+	return yerror.ErrorString
 }
 
 func fetchErrorReport(yerror *YicesErrorT) {
@@ -203,39 +205,43 @@ func fetchErrorReport(yerror *YicesErrorT) {
 	return
 }
 
-// YicesError() returns a copy of the current error state
+// YicesError returns a copy of the current error state
 func YicesError() (yerror *YicesErrorT) {
-	errcode := Error_code()
+	errcode := ErrorCode()
 	if errcode != NO_ERROR {
 		yerror = new(YicesErrorT)
-		yerror.Error_string = Error_string()
+		yerror.ErrorString = ErrorString()
 		fetchErrorReport(yerror)
-		Clear_error()
+		ClearError()
 	}
 	return
 }
 
+// String returns the error string component of the YicesErrorT struct.
 func (yerror *YicesErrorT) String() string {
 	return fmt.Sprintf("string = %s code = %d line = %d column = %d term1 = %d type1 = %d term2 = %d type2 = %d badval = %d",
-		yerror.Error_string, yerror.Code, yerror.Line, yerror.Column,
+		yerror.ErrorString, yerror.Code, yerror.Line, yerror.Column,
 		yerror.Term1, yerror.Type1,
 		yerror.Term2, yerror.Type2,
 		yerror.Badval)
 }
 
-func Error_code() ErrorCodeT {
+// ErrorCode returns the most recent yices error code.
+func ErrorCode() ErrorCodeT {
 	return ErrorCodeT(C.yices_error_code())
 }
 
-func Clear_error() {
+// ClearError reset the current yices error struct.
+func ClearError() {
 	C.yices_clear_error()
 }
 
-func Print_error(f *os.File) int32 {
+// PrintError prints the most recent yices error out to the given file.
+func PrintError(f *os.File) int32 {
 	return int32(C.yices_print_error_fd(C.int(f.Fd())))
 } //iam: FIXME error checking and File without the os.
 
-func Error_string() string {
+func ErrorString() string {
 	cs := C.yices_error_string()
 	defer C.yices_free_string(cs)
 	return C.GoString(cs)
@@ -262,76 +268,76 @@ func Error_string() string {
 
 type TypeT int32
 
-const NULL_TYPE TypeT = -1
+const NullType TypeT = -1
 
-func Bool_type() TypeT {
+func BoolType() TypeT {
 	return TypeT(C.yices_bool_type())
 }
 
-func Int_type() TypeT {
+func IntType() TypeT {
 	return TypeT(C.yices_int_type())
 }
 
-func Real_type() TypeT {
+func RealType() TypeT {
 	return TypeT(C.yices_real_type())
 }
 
-func Bv_type(size uint32) TypeT {
+func BvType(size uint32) TypeT {
 	return TypeT(C.yices_bv_type(C.uint32_t(size)))
 }
 
-func New_scalar_type(card uint32) TypeT {
+func NewScalarType(card uint32) TypeT {
 	return TypeT(C.yices_new_scalar_type(C.uint32_t(card)))
 }
 
-func New_uninterpreted_type() TypeT {
+func NewUninterpretedType() TypeT {
 	return TypeT(C.yices_new_uninterpreted_type())
 }
 
-func Tuple_type(tau []TypeT) TypeT {
-	tau_len := len(tau)
+func TupleType(tau []TypeT) TypeT {
+	tauLen := len(tau)
 	//iam: FIXME need to unify the yices errors and the go errors...
-	if tau_len == 0 {
-		return NULL_TYPE
+	if tauLen == 0 {
+		return NullType
 	}
-	return TypeT(C.yices_tuple_type(C.uint32_t(tau_len), (*C.type_t)(&tau[0])))
+	return TypeT(C.yices_tuple_type(C.uint32_t(tauLen), (*C.type_t)(&tau[0])))
 }
 
-func Tuple_type1(tau1 TypeT) TypeT {
+func TupleType1(tau1 TypeT) TypeT {
 	carr := []C.type_t{C.type_t(tau1)}
 	return TypeT(C.yices_tuple_type(C.uint32_t(1), (*C.type_t)(&carr[0])))
 }
 
-func Tuple_type2(tau1 TypeT, tau2 TypeT) TypeT {
+func TupleType2(tau1 TypeT, tau2 TypeT) TypeT {
 	carr := []C.type_t{C.type_t(tau1), C.type_t(tau2)}
 	return TypeT(C.yices_tuple_type(C.uint32_t(2), (*C.type_t)(&carr[0])))
 }
 
-func Tuple_type3(tau1 TypeT, tau2 TypeT, tau3 TypeT) TypeT {
+func TupleType3(tau1 TypeT, tau2 TypeT, tau3 TypeT) TypeT {
 	carr := []C.type_t{C.type_t(tau1), C.type_t(tau2), C.type_t(tau3)}
 	return TypeT(C.yices_tuple_type(C.uint32_t(3), (*C.type_t)(&carr[0])))
 }
 
-func Function_type(dom []TypeT, rng TypeT) TypeT {
-	dom_len := len(dom)
+func FunctionType(dom []TypeT, rng TypeT) TypeT {
+	domLen := len(dom)
 	//iam: FIXME need to unify the yices errors and the go errors...
-	if dom_len == 0 {
-		return NULL_TYPE
+	if domLen == 0 {
+		return NullType
 	}
-	return TypeT(C.yices_function_type(C.uint32_t(dom_len), (*C.type_t)(&dom[0]), C.type_t(rng)))
+	return TypeT(C.yices_function_type(C.uint32_t(domLen), (*C.type_t)(&dom[0]), C.type_t(rng)))
 }
 
-func Function_type1(tau1 TypeT, rng TypeT) TypeT {
+func FunctionType1(tau1 TypeT, rng TypeT) TypeT {
 	carr := []C.type_t{C.type_t(tau1)}
 	return TypeT(C.yices_function_type(C.uint32_t(1), (*C.type_t)(&carr[0]), C.type_t(rng)))
 }
 
-func Function_type2(tau1 TypeT, tau2 TypeT, rng TypeT) TypeT {
+func FunctionType2(tau1 TypeT, tau2 TypeT, rng TypeT) TypeT {
 	carr := []C.type_t{C.type_t(tau1), C.type_t(tau2)}
 	return TypeT(C.yices_function_type(C.uint32_t(2), (*C.type_t)(&carr[0]), C.type_t(rng)))
 }
 
-func Function_type3(tau1 TypeT, tau2 TypeT, tau3 TypeT, rng TypeT) TypeT {
+func FunctionType3(tau1 TypeT, tau2 TypeT, tau3 TypeT, rng TypeT) TypeT {
 	carr := []C.type_t{C.type_t(tau1), C.type_t(tau2), C.type_t(tau3)}
 	return TypeT(C.yices_function_type(C.uint32_t(3), (*C.type_t)(&carr[0]), C.type_t(rng)))
 }
@@ -340,67 +346,67 @@ func Function_type3(tau1 TypeT, tau2 TypeT, tau3 TypeT, rng TypeT) TypeT {
  *   TYPE EXPLORATION    *
  ************************/
 
-func Type_is_bool(tau TypeT) bool {
+func TypeIsBool(tau TypeT) bool {
 	return int32(1) == int32(C.yices_type_is_bool(C.type_t(tau)))
 }
 
-func Type_is_int(tau TypeT) bool {
+func TypeIsInt(tau TypeT) bool {
 	return int32(1) == int32(C.yices_type_is_int(C.type_t(tau)))
 }
 
-func Type_is_real(tau TypeT) bool {
+func TypeIsReal(tau TypeT) bool {
 	return int32(1) == int32(C.yices_type_is_real(C.type_t(tau)))
 }
 
-func Type_is_arithmetic(tau TypeT) bool {
+func TypeIsArithmetic(tau TypeT) bool {
 	return int32(1) == int32(C.yices_type_is_arithmetic(C.type_t(tau)))
 }
 
-func Type_is_bitvector(tau TypeT) bool {
+func TypeIsBitvector(tau TypeT) bool {
 	return int32(1) == int32(C.yices_type_is_bitvector(C.type_t(tau)))
 }
 
-func Type_is_tuple(tau TypeT) bool {
+func TypeIsTuple(tau TypeT) bool {
 	return int32(1) == int32(C.yices_type_is_tuple(C.type_t(tau)))
 }
 
-func Type_is_function(tau TypeT) bool {
+func TypeIsFunction(tau TypeT) bool {
 	return int32(1) == int32(C.yices_type_is_function(C.type_t(tau)))
 }
 
-func Type_is_scalar(tau TypeT) bool {
+func TypeIsScalar(tau TypeT) bool {
 	return int32(1) == int32(C.yices_type_is_scalar(C.type_t(tau)))
 }
 
-func Type_is_uninterpreted(tau TypeT) bool {
+func TypeIsUninterpreted(tau TypeT) bool {
 	return int32(1) == int32(C.yices_type_is_uninterpreted(C.type_t(tau)))
 }
 
-func Test_subtype(tau TypeT, sigma TypeT) bool {
+func TestSubtype(tau TypeT, sigma TypeT) bool {
 	return int32(1) == int32(C.yices_test_subtype(C.type_t(tau), C.type_t(sigma)))
 }
 
-func Compatible_types(tau TypeT, sigma TypeT) bool {
+func CompatibleTypes(tau TypeT, sigma TypeT) bool {
 	return int32(1) == int32(C.yices_compatible_types(C.type_t(tau), C.type_t(sigma)))
 }
 
-func Bvtype_size(tau TypeT) uint32 {
+func BvtypeSize(tau TypeT) uint32 {
 	return uint32(C.yices_bvtype_size(C.type_t(tau)))
 }
 
-func Scalar_type_card(tau TypeT) uint32 {
+func ScalarTypeCard(tau TypeT) uint32 {
 	return uint32(C.yices_scalar_type_card(C.type_t(tau)))
 }
 
-func Type_num_children(tau TypeT) int32 {
+func TypeNumChildren(tau TypeT) int32 {
 	return int32(C.yices_type_num_children(C.type_t(tau)))
 }
 
-func Type_child(tau TypeT, i int32) TypeT {
+func TypeChild(tau TypeT, i int32) TypeT {
 	return TypeT(C.yices_type_child(C.type_t(tau), C.int32_t(i)))
 }
 
-func Type_children(tau TypeT) (children []TypeT) {
+func TypeChildren(tau TypeT) (children []TypeT) {
 	var tv C.type_vector_t
 	C.yices_init_type_vector(&tv)
 	ycount := int32(C.yices_type_children(C.type_t(tau), &tv))
@@ -422,7 +428,7 @@ func Type_children(tau TypeT) (children []TypeT) {
 
 type TermT int32
 
-const NULL_TERM TermT = -1
+const NullTerm TermT = -1
 
 func True() TermT {
 	return TermT(C.yices_true())
@@ -436,11 +442,11 @@ func Constant(tau TypeT, index int32) TermT {
 	return TermT(C.yices_constant(C.type_t(tau), C.int32_t(index)))
 }
 
-func New_uninterpreted_term(tau TypeT) TermT {
+func NewUninterpretedTerm(tau TypeT) TermT {
 	return TermT(C.yices_new_uninterpreted_term(C.type_t(tau)))
 }
 
-func New_variable(tau TypeT) TermT {
+func NewVariable(tau TypeT) TermT {
 	return TermT(C.yices_new_variable(C.type_t(tau)))
 }
 
@@ -448,7 +454,7 @@ func Application(fun TermT, argv []TermT) TermT {
 	argc := len(argv)
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if argc == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_application(C.term_t(fun), C.uint32_t(argc), (*C.term_t)(&argv[0])))
 }
@@ -468,8 +474,8 @@ func Application3(fun TermT, arg1 TermT, arg2 TermT, arg3 TermT) TermT {
 	return TermT(C.yices_application(C.term_t(fun), C.uint32_t(3), (*C.term_t)(&argv[0])))
 }
 
-func Ite(cond TermT, then_term TermT, else_term TermT) TermT {
-	return TermT(C.yices_ite(C.term_t(cond), C.term_t(then_term), C.term_t(else_term)))
+func Ite(cond TermT, thenTerm TermT, elseTerm TermT) TermT {
+	return TermT(C.yices_ite(C.term_t(cond), C.term_t(thenTerm), C.term_t(elseTerm)))
 }
 
 func Eq(lhs TermT, rhs TermT) TermT {
@@ -549,7 +555,7 @@ func Tuple(argv []TermT) TermT {
 	count := C.uint32_t(len(argv))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_tuple(count, (*C.term_t)(&argv[0])))
 }
@@ -566,7 +572,7 @@ func Select(index uint32, tuple TermT) TermT {
 	return TermT(C.yices_select(C.uint32_t(index), C.term_t(tuple)))
 }
 
-func Tuple_update(tuple TermT, index uint32, value TermT) TermT {
+func TupleUpdate(tuple TermT, index uint32, value TermT) TermT {
 	return TermT(C.yices_tuple_update(C.term_t(tuple), C.uint32_t(index), C.term_t(value)))
 }
 
@@ -574,7 +580,7 @@ func Update(fun TermT, argv []TermT, value TermT) TermT {
 	count := C.uint32_t(len(argv))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_update(C.term_t(fun), count, (*C.term_t)(&argv[0]), C.term_t(value)))
 }
@@ -595,7 +601,7 @@ func Distinct(argv []TermT) TermT {
 	n := C.uint32_t(len(argv))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if n == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_distinct(n, (*C.term_t)(&argv[0])))
 }
@@ -604,7 +610,7 @@ func Forall(vars []TermT, body TermT) TermT {
 	n := C.uint32_t(len(vars))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if n == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_forall(n, (*C.term_t)(&vars[0]), C.term_t(body)))
 }
@@ -613,7 +619,7 @@ func Exists(vars []TermT, body TermT) TermT {
 	n := C.uint32_t(len(vars))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if n == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_exists(n, (*C.term_t)(&vars[0]), C.term_t(body)))
 }
@@ -622,7 +628,7 @@ func Lambda(vars []TermT, body TermT) TermT {
 	n := C.uint32_t(len(vars))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if n == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_lambda(n, (*C.term_t)(&vars[0]), C.term_t(body)))
 }
@@ -652,17 +658,17 @@ func Rational64(num int64, den uint64) TermT {
 }
 
 // need to name these to use them outside this package
-type Mpz_t C.mpz_t
+type MpzT C.mpz_t
 
-func Init_mpz(mpz *Mpz_t) {
+func InitMpz(mpz *MpzT) {
 	C.init_mpzp(C.uintptr_t(uintptr(unsafe.Pointer(mpz))))
 }
 
-func Close_mpz(mpz *Mpz_t) {
+func CloseMpz(mpz *MpzT) {
 	C.close_mpzp(C.uintptr_t(uintptr(unsafe.Pointer(mpz))))
 }
 
-func Mpz(z *Mpz_t) TermT {
+func Mpz(z *MpzT) TermT {
 	// some contortions needed here to do the simplest of things
 	// similar contortions are needed to "identify" yices2._Ctype_mpz_t
 	// with gmp._Ctype_mpz_t, which seems a little odd.
@@ -670,28 +676,28 @@ func Mpz(z *Mpz_t) TermT {
 }
 
 // need to name these to use them outside this package
-type Mpq_t C.mpq_t
+type MpqT C.mpq_t
 
-func Init_mpq(mpq *Mpq_t) {
+func InitMpq(mpq *MpqT) {
 	C.init_mpqp(C.uintptr_t(uintptr(unsafe.Pointer(mpq))))
 }
 
-func Close_mpq(mpq *Mpq_t) {
+func CloseMpq(mpq *MpqT) {
 	C.close_mpqp(C.uintptr_t(uintptr(unsafe.Pointer(mpq))))
 }
 
-func Mpq(q *Mpq_t) TermT {
+func Mpq(q *MpqT) TermT {
 	// some contortions needed here to do the simplest of things
 	return TermT(C.ympq(C.uintptr_t(uintptr(unsafe.Pointer(q)))))
 }
 
-func Parse_rational(s string) TermT {
+func ParseRational(s string) TermT {
 	cs := C.CString(s)
 	defer C.free(unsafe.Pointer(cs))
 	return TermT(C.yices_parse_rational(cs))
 }
 
-func Parse_float(s string) TermT {
+func ParseFloat(s string) TermT {
 	cs := C.CString(s)
 	defer C.free(unsafe.Pointer(cs))
 	return TermT(C.yices_parse_float(cs))
@@ -755,11 +761,11 @@ func Imod(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_imod(C.term_t(t1), C.term_t(t2)))
 }
 
-func Divides_atom(t1 TermT, t2 TermT) TermT {
+func DividesAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_divides_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Is_int_atom(t TermT) TermT {
+func IsIntAtom(t TermT) TermT {
 	return TermT(C.yices_is_int_atom(C.term_t(t)))
 }
 
@@ -779,7 +785,7 @@ func Ceil(t1 TermT) TermT {
  * POLYNOMIALS
  */
 
-func Poly_int32(a []int32, t []TermT) TermT {
+func PolyInt32(a []int32, t []TermT) TermT {
 	count := C.uint32_t(len(a))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	// do we want to be nannies here?
@@ -789,7 +795,7 @@ func Poly_int32(a []int32, t []TermT) TermT {
 	return TermT(C.yices_poly_int32(count, (*C.int32_t)(&a[0]), (*C.term_t)(&t[0])))
 }
 
-func Poly_int64(a []int64, t []TermT) TermT {
+func PolyInt64(a []int64, t []TermT) TermT {
 	count := C.uint32_t(len(a))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	// do we want to be nannies here?
@@ -799,7 +805,7 @@ func Poly_int64(a []int64, t []TermT) TermT {
 	return TermT(C.yices_poly_int64(count, (*C.int64_t)(&a[0]), (*C.term_t)(&t[0])))
 }
 
-func Poly_rational32(num []int32, den []uint32, t []TermT) TermT {
+func PolyRational32(num []int32, den []uint32, t []TermT) TermT {
 	count := C.uint32_t(len(num))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	// do we want to be nannies here?
@@ -809,7 +815,7 @@ func Poly_rational32(num []int32, den []uint32, t []TermT) TermT {
 	return TermT(C.yices_poly_rational32(count, (*C.int32_t)(&num[0]), (*C.uint32_t)(&den[0]), (*C.term_t)(&t[0])))
 }
 
-func Poly_rational64(num []int64, den []uint64, t []TermT) TermT {
+func PolyRational64(num []int64, den []uint64, t []TermT) TermT {
 	count := C.uint32_t(len(num))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	// do we want to be nannies here?
@@ -819,7 +825,7 @@ func Poly_rational64(num []int64, den []uint64, t []TermT) TermT {
 	return TermT(C.yices_poly_rational64(count, (*C.int64_t)(&num[0]), (*C.uint64_t)(&den[0]), (*C.term_t)(&t[0])))
 }
 
-func Poly_mpz(z []Mpz_t, t []TermT) TermT {
+func PolyMpz(z []MpzT, t []TermT) TermT {
 	count := C.uint32_t(len(z))
 	if count == 0 {
 		return TermT(C.yices_zero())
@@ -827,7 +833,7 @@ func Poly_mpz(z []Mpz_t, t []TermT) TermT {
 	return TermT(C.yices_poly_mpz(count, (*C.mpz_t)(&z[0]), (*C.term_t)(&t[0])))
 }
 
-func Poly_mpq(q []Mpq_t, t []TermT) TermT {
+func PolyMpq(q []MpqT, t []TermT) TermT {
 	count := C.uint32_t(len(q))
 	if count == 0 {
 		return TermT(C.yices_zero())
@@ -839,51 +845,51 @@ func Poly_mpq(q []Mpq_t, t []TermT) TermT {
  * ARITHMETIC ATOMS
  */
 
-func Arith_eq_atom(t1 TermT, t2 TermT) TermT {
+func ArithEqAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_arith_eq_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Arith_neq_atom(t1 TermT, t2 TermT) TermT {
+func ArithNeqAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_arith_neq_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Arith_geq_atom(t1 TermT, t2 TermT) TermT {
+func ArithGeqAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_arith_geq_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Arith_leq_atom(t1 TermT, t2 TermT) TermT {
+func ArithLeqAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_arith_leq_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Arith_gt_atom(t1 TermT, t2 TermT) TermT {
+func ArithGtAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_arith_gt_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Arith_lt_atom(t1 TermT, t2 TermT) TermT {
+func ArithLtAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_arith_lt_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Arith_eq0_atom(t TermT) TermT {
+func ArithEq0Atom(t TermT) TermT {
 	return TermT(C.yices_arith_eq0_atom(C.term_t(t)))
 }
 
-func Arith_neq0_atom(t TermT) TermT {
+func ArithNeq0Atom(t TermT) TermT {
 	return TermT(C.yices_arith_neq0_atom(C.term_t(t)))
 }
 
-func Arith_geq0_atom(t TermT) TermT {
+func ArithGeq0Atom(t TermT) TermT {
 	return TermT(C.yices_arith_geq0_atom(C.term_t(t)))
 }
 
-func Arith_leq0_atom(t TermT) TermT {
+func ArithLeq0Atom(t TermT) TermT {
 	return TermT(C.yices_arith_leq0_atom(C.term_t(t)))
 }
 
-func Arith_gt0_atom(t TermT) TermT {
+func ArithGt0Atom(t TermT) TermT {
 	return TermT(C.yices_arith_gt0_atom(C.term_t(t)))
 }
 
-func Arith_lt0_atom(t TermT) TermT {
+func ArithLt0Atom(t TermT) TermT {
 	return TermT(C.yices_arith_lt0_atom(C.term_t(t)))
 }
 
@@ -891,55 +897,55 @@ func Arith_lt0_atom(t TermT) TermT {
  *  BITVECTOR TERM CONSTRUCTORS  *
  ********************************/
 
-func Bvconst_uint32(bits uint32, x uint32) TermT {
+func BvconstUint32(bits uint32, x uint32) TermT {
 	return TermT(C.yices_bvconst_uint32(C.uint32_t(bits), C.uint32_t(x)))
 }
 
-func Bvconst_uint64(bits uint32, x uint64) TermT {
+func BvconstUint64(bits uint32, x uint64) TermT {
 	return TermT(C.yices_bvconst_uint64(C.uint32_t(bits), C.uint64_t(x)))
 }
 
-func Bvconst_int32(bits uint32, x int32) TermT {
+func BvconstInt32(bits uint32, x int32) TermT {
 	return TermT(C.yices_bvconst_int32(C.uint32_t(bits), C.int32_t(x)))
 }
 
-func Bvconst_int64(bits uint32, x int64) TermT {
+func BvconstInt64(bits uint32, x int64) TermT {
 	return TermT(C.yices_bvconst_int64(C.uint32_t(bits), C.int64_t(x)))
 }
 
-func Bvconst_mpz(bits uint32, z Mpz_t) TermT {
+func BvconstMpz(bits uint32, z MpzT) TermT {
 	return TermT(C.yices_bvconst_mpzp(C.uint32_t(bits), (*C.mpz_t)(unsafe.Pointer(&z))))
 }
 
-func Bvconst_zero(bits uint32) TermT {
+func BvconstZero(bits uint32) TermT {
 	return TermT(C.yices_bvconst_zero(C.uint32_t(bits)))
 }
 
-func Bvconst_one(bits uint32) TermT {
+func BvconstOne(bits uint32) TermT {
 	return TermT(C.yices_bvconst_one(C.uint32_t(bits)))
 }
 
-func Bvconst_minus_one(bits uint32) TermT {
+func BvconstMinusOne(bits uint32) TermT {
 	return TermT(C.yices_bvconst_minus_one(C.uint32_t(bits)))
 }
 
 //iam: FIXME check that bits is restricted to len(a)
-func Bvconst_from_array(a []int32) TermT {
+func BvconstFromArray(a []int32) TermT {
 	bits := C.uint32_t(len(a))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if bits == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_bvconst_from_array(bits, (*C.int32_t)(&a[0])))
 }
 
-func Parse_bvbin(s string) TermT {
+func ParseBvbin(s string) TermT {
 	cs := C.CString(s)
 	defer C.free(unsafe.Pointer(cs))
 	return TermT(C.yices_parse_bvbin(cs))
 }
 
-func Parse_bvhex(s string) TermT {
+func ParseBvhex(s string) TermT {
 	cs := C.CString(s)
 	defer C.free(unsafe.Pointer(cs))
 	return TermT(C.yices_parse_bvhex(cs))
@@ -1021,7 +1027,7 @@ func Bvand(t []TermT) TermT {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_bvand(count, (*C.term_t)(&t[0])))
 }
@@ -1030,7 +1036,7 @@ func Bvor(t []TermT) TermT {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_bvor(count, (*C.term_t)(&t[0])))
 }
@@ -1039,7 +1045,7 @@ func Bvxor(t []TermT) TermT {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_bvxor(count, (*C.term_t)(&t[0])))
 }
@@ -1072,7 +1078,7 @@ func Bvsum(t []TermT) TermT {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_bvsum(count, (*C.term_t)(&t[0])))
 }
@@ -1081,36 +1087,36 @@ func Bvproduct(t []TermT) TermT {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_bvproduct(count, (*C.term_t)(&t[0])))
 }
 
-func Shift_left0(t TermT, n uint32) TermT {
+func ShiftLeft0(t TermT, n uint32) TermT {
 	return TermT(C.yices_shift_left0(C.term_t(t), C.uint32_t(n)))
 }
 
-func Shift_left1(t TermT, n uint32) TermT {
+func ShiftLeft1(t TermT, n uint32) TermT {
 	return TermT(C.yices_shift_left1(C.term_t(t), C.uint32_t(n)))
 }
 
-func Shift_right0(t TermT, n uint32) TermT {
+func ShiftRight0(t TermT, n uint32) TermT {
 	return TermT(C.yices_shift_right0(C.term_t(t), C.uint32_t(n)))
 }
 
-func Shift_right1(t TermT, n uint32) TermT {
+func ShiftRight1(t TermT, n uint32) TermT {
 	return TermT(C.yices_shift_right1(C.term_t(t), C.uint32_t(n)))
 }
 
-func Ashift_right(t TermT, n uint32) TermT {
+func AshiftRight(t TermT, n uint32) TermT {
 	return TermT(C.yices_ashift_right(C.term_t(t), C.uint32_t(n)))
 }
 
-func Rotate_left(t TermT, n uint32) TermT {
+func RotateLeft(t TermT, n uint32) TermT {
 	return TermT(C.yices_rotate_left(C.term_t(t), C.uint32_t(n)))
 }
 
-func Rotate_right(t TermT, n uint32) TermT {
+func RotateRight(t TermT, n uint32) TermT {
 	return TermT(C.yices_rotate_right(C.term_t(t), C.uint32_t(n)))
 }
 
@@ -1126,7 +1132,7 @@ func Bvconcat(t []TermT) TermT {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_bvconcat(count, (*C.term_t)(&t[0])))
 }
@@ -1135,11 +1141,11 @@ func Bvrepeat(t TermT, n uint32) TermT {
 	return TermT(C.yices_bvrepeat(C.term_t(t), C.uint32_t(n)))
 }
 
-func Sign_extend(t TermT, n uint32) TermT {
+func SignExtend(t TermT, n uint32) TermT {
 	return TermT(C.yices_sign_extend(C.term_t(t), C.uint32_t(n)))
 }
 
-func Zero_extend(t TermT, n uint32) TermT {
+func ZeroExtend(t TermT, n uint32) TermT {
 	return TermT(C.yices_zero_extend(C.term_t(t), C.uint32_t(n)))
 }
 
@@ -1159,7 +1165,7 @@ func Bvarray(t []TermT) TermT {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_bvarray(count, (*C.term_t)(&t[0])))
 }
@@ -1168,43 +1174,43 @@ func Bitextract(t TermT, n uint32) TermT {
 	return TermT(C.yices_bitextract(C.term_t(t), C.uint32_t(n)))
 }
 
-func Bveq_atom(t1 TermT, t2 TermT) TermT {
+func BveqAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bveq_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bvneq_atom(t1 TermT, t2 TermT) TermT {
+func BvneqAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bvneq_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bvge_atom(t1 TermT, t2 TermT) TermT {
+func BvgeAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bvge_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bvgt_atom(t1 TermT, t2 TermT) TermT {
+func BvgtAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bvgt_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bvle_atom(t1 TermT, t2 TermT) TermT {
+func BvleAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bvle_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bvlt_atom(t1 TermT, t2 TermT) TermT {
+func BvltAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bvlt_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bvsge_atom(t1 TermT, t2 TermT) TermT {
+func BvsgeAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bvsge_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bvsgt_atom(t1 TermT, t2 TermT) TermT {
+func BvsgtAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bvsgt_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bvsle_atom(t1 TermT, t2 TermT) TermT {
+func BvsleAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bvsle_atom(C.term_t(t1), C.term_t(t2)))
 }
 
-func Bvslt_atom(t1 TermT, t2 TermT) TermT {
+func BvsltAtom(t1 TermT, t2 TermT) TermT {
 	return TermT(C.yices_bvslt_atom(C.term_t(t1), C.term_t(t2)))
 }
 
@@ -1212,13 +1218,13 @@ func Bvslt_atom(t1 TermT, t2 TermT) TermT {
  *  PARSING   *
  *************/
 
-func Parse_type(s string) TypeT {
+func ParseType(s string) TypeT {
 	cs := C.CString(s)
 	defer C.free(unsafe.Pointer(cs))
 	return TypeT(C.yices_parse_type(cs))
 }
 
-func Parse_term(s string) TermT {
+func ParseTerm(s string) TermT {
 	cs := C.CString(s)
 	defer C.free(unsafe.Pointer(cs))
 	return TermT(C.yices_parse_term(cs))
@@ -1228,21 +1234,21 @@ func Parse_term(s string) TermT {
  *  SUBSTITUTIONS  *
  ******************/
 
-func Subst_term(vars []TermT, vals []TermT, t TermT) TermT {
+func SubstTerm(vars []TermT, vals []TermT, t TermT) TermT {
 	count := C.uint32_t(len(vars))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_subst_term(count, (*C.term_t)(&vars[0]), (*C.term_t)(&vals[0]), C.term_t(t)))
 }
 
-func Subst_term_array(vars []TermT, vals []TermT, t []TermT) TermT {
+func SubstTermArray(vars []TermT, vals []TermT, t []TermT) TermT {
 	count := C.uint32_t(len(vars))
 	tcount := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 || tcount == 0 {
-		return NULL_TERM
+		return NullTerm
 	}
 	return TermT(C.yices_subst_term_array(count, (*C.term_t)(&vars[0]), (*C.term_t)(&vals[0]), tcount, (*C.term_t)(&t[0])))
 }
@@ -1251,56 +1257,56 @@ func Subst_term_array(vars []TermT, vals []TermT, t []TermT) TermT {
  *  NAMES   *
  ***********/
 
-func Set_type_name(tau TypeT, name string) int32 {
+func SetTypeName(tau TypeT, name string) int32 {
 	cs := C.CString(name)
 	defer C.free(unsafe.Pointer(cs))
 	return int32(C.yices_set_type_name(C.type_t(tau), cs))
 }
 
-func Set_term_name(t TermT, name string) int32 {
+func SetTermName(t TermT, name string) int32 {
 	cs := C.CString(name)
 	defer C.free(unsafe.Pointer(cs))
 	return int32(C.yices_set_term_name(C.term_t(t), cs))
 }
 
-func Remove_type_name(name string) {
+func RemoveTypeName(name string) {
 	cs := C.CString(name)
 	defer C.free(unsafe.Pointer(cs))
 	C.yices_remove_type_name(cs)
 }
 
-func Remove_term_name(name string) {
+func RemoveTermName(name string) {
 	cs := C.CString(name)
 	defer C.free(unsafe.Pointer(cs))
 	C.yices_remove_term_name(cs)
 }
 
-func Get_type_by_name(name string) TypeT {
+func GetTypeByName(name string) TypeT {
 	cs := C.CString(name)
 	defer C.free(unsafe.Pointer(cs))
 	return TypeT(C.yices_get_type_by_name(cs))
 }
 
-func Get_term_by_name(name string) TermT {
+func GetTermByName(name string) TermT {
 	cs := C.CString(name)
 	defer C.free(unsafe.Pointer(cs))
 	return TermT(C.yices_get_term_by_name(cs))
 }
 
-func Clear_type_name(tau TypeT) int32 {
+func ClearTypeName(tau TypeT) int32 {
 	return int32(C.yices_clear_type_name(C.type_t(tau)))
 }
 
-func Clear_term_name(t TermT) int32 {
+func ClearTermName(t TermT) int32 {
 	return int32(C.yices_clear_term_name(C.term_t(t)))
 }
 
-func Get_type_name(tau TypeT) string {
+func GetTypeName(tau TypeT) string {
 	//FIXME: check if the name needs to be freed
 	return C.GoString(C.yices_get_type_name(C.type_t(tau)))
 }
 
-func Get_term_name(t TermT) string {
+func GetTermName(t TermT) string {
 	//FIXME: check if the name needs to be freed
 	return C.GoString(C.yices_get_term_name(C.term_t(t)))
 }
@@ -1309,88 +1315,88 @@ func Get_term_name(t TermT) string {
  *  TERM EXPLORATION   *
  **********************/
 
-func Type_of_term(t TermT) TypeT {
+func TypeOfTerm(t TermT) TypeT {
 	return TypeT(C.yices_type_of_term(C.term_t(t)))
 }
 
-func Term_is_bool(t TermT) bool {
+func TermIsBool(t TermT) bool {
 	return C.yices_term_is_bool(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_int(t TermT) bool {
+func TermIsInt(t TermT) bool {
 	return C.yices_term_is_int(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_real(t TermT) bool {
+func TermIsReal(t TermT) bool {
 	return C.yices_term_is_real(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_arithmetic(t TermT) bool {
+func TermIsArithmetic(t TermT) bool {
 	return C.yices_term_is_arithmetic(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_bitvector(t TermT) bool {
+func TermIsBitvector(t TermT) bool {
 	return C.yices_term_is_bitvector(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_tuple(t TermT) bool {
+func TermIsTuple(t TermT) bool {
 	return C.yices_term_is_tuple(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_function(t TermT) bool {
+func TermIsFunction(t TermT) bool {
 	return C.yices_term_is_function(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_scalar(t TermT) bool {
+func TermIsScalar(t TermT) bool {
 	return C.yices_term_is_scalar(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_bitsize(t TermT) uint32 {
+func TermBitsize(t TermT) uint32 {
 	return uint32(C.yices_term_bitsize(C.term_t(t)))
 }
 
-func Term_is_ground(t TermT) bool {
+func TermIsGround(t TermT) bool {
 	return C.yices_term_is_ground(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_atomic(t TermT) bool {
+func TermIsAtomic(t TermT) bool {
 	return C.yices_term_is_atomic(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_composite(t TermT) bool {
+func TermIsComposite(t TermT) bool {
 	return C.yices_term_is_composite(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_projection(t TermT) bool {
+func TermIsProjection(t TermT) bool {
 	return C.yices_term_is_projection(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_sum(t TermT) bool {
+func TermIsSum(t TermT) bool {
 	return C.yices_term_is_sum(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_bvsum(t TermT) bool {
+func TermIsBvsum(t TermT) bool {
 	return C.yices_term_is_bvsum(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_is_product(t TermT) bool {
+func TermIsProduct(t TermT) bool {
 	return C.yices_term_is_product(C.term_t(t)) == C.int32_t(1)
 }
 
-func Term_constructor(t TermT) Term_constructor_t {
-	return Term_constructor_t(C.yices_term_constructor(C.term_t(t)))
+func TermConstructor(t TermT) TermConstructorT {
+	return TermConstructorT(C.yices_term_constructor(C.term_t(t)))
 }
 
-func Term_num_children(t TermT) int32 {
+func TermNumChildren(t TermT) int32 {
 	return int32(C.yices_term_num_children(C.term_t(t)))
 }
 
-func Term_child(t TermT, i int32) TermT {
+func TermChild(t TermT, i int32) TermT {
 	return TermT(C.yices_term_child(C.term_t(t), C.int32_t(i)))
 }
 
 // Since 2.6.2
-func Term_children(t TermT) (children []TermT) {
+func TermChildren(t TermT) (children []TermT) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	ycount := int32(C.yices_term_children(C.type_t(t), &tv))
@@ -1406,39 +1412,39 @@ func Term_children(t TermT) (children []TermT) {
 	return
 }
 
-func Proj_index(t TermT) int32 {
+func ProjIndex(t TermT) int32 {
 	return int32(C.yices_proj_index(C.term_t(t)))
 }
 
-func Proj_arg(t TermT) TermT {
+func ProjArg(t TermT) TermT {
 	return TermT(C.yices_proj_arg(C.term_t(t)))
 }
 
-func Bool_const_value(t TermT, val *int32) int32 {
+func BoolConstValue(t TermT, val *int32) int32 {
 	return int32(C.yices_bool_const_value(C.term_t(t), (*C.int32_t)(val)))
 }
 
-func Bv_const_value(t TermT, val []int32) int32 {
+func BvConstValue(t TermT, val []int32) int32 {
 	return int32(C.yices_bv_const_value(C.term_t(t), (*C.int32_t)(&val[0])))
 }
 
-func Scalar_const_value(t TermT, val *int32) int32 {
+func ScalarConstValue(t TermT, val *int32) int32 {
 	return int32(C.yices_scalar_const_value(C.term_t(t), (*C.int32_t)(val)))
 }
 
-func Rational_const_value(t TermT, q *Mpq_t) int32 {
+func RationalConstValue(t TermT, q *MpqT) int32 {
 	return int32(C.yices_rational_const_valuep(C.term_t(t), (*C.mpq_t)(unsafe.Pointer(q))))
 }
 
-func Sum_component(t TermT, i int32, coeff *Mpq_t, term *TermT) int32 {
+func SumComponent(t TermT, i int32, coeff *MpqT, term *TermT) int32 {
 	return int32(C.yices_sum_componentp(C.term_t(t), C.int32_t(i), (*C.mpq_t)(unsafe.Pointer(coeff)), (*C.term_t)(term)))
 }
 
-func Bvsum_component(t TermT, i int32, val []int32, term *TermT) int32 {
+func BvsumComponent(t TermT, i int32, val []int32, term *TermT) int32 {
 	return int32(C.yices_bvsum_component(C.term_t(t), C.int32_t(i), (*C.int32_t)(&val[0]), (*C.term_t)(term)))
 }
 
-func Product_component(t TermT, i int32, term *TermT, exp *uint32) int32 {
+func ProductComponent(t TermT, i int32, term *TermT, exp *uint32) int32 {
 	return int32(C.yices_product_component(C.term_t(t), C.int32_t(i), (*C.term_t)(term), (*C.uint32_t)(exp)))
 }
 
@@ -1446,66 +1452,66 @@ func Product_component(t TermT, i int32, term *TermT, exp *uint32) int32 {
  *  GARBAGE COLLECTION   *
  ************************/
 
-func Num_terms() uint32 {
+func NumTerms() uint32 {
 	return uint32(C.yices_num_terms())
 }
 
-func Num_types() uint32 {
+func NumTypes() uint32 {
 	return uint32(C.yices_num_types())
 }
 
-func Incref_term(t TermT) int32 {
+func IncrefTerm(t TermT) int32 {
 	return int32(C.yices_incref_term(C.term_t(t)))
 }
 
-func Decref_term(t TermT) int32 {
+func DecrefTerm(t TermT) int32 {
 	return int32(C.yices_decref_term(C.term_t(t)))
 }
 
-func Incref_type(tau TypeT) int32 {
+func IncrefType(tau TypeT) int32 {
 	return int32(C.yices_incref_type(C.type_t(tau)))
 }
 
-func Decref_type(tau TypeT) int32 {
+func DecrefType(tau TypeT) int32 {
 	return int32(C.yices_decref_type(C.type_t(tau)))
 }
 
-func Num_posref_terms() uint32 {
+func NumPosrefTerms() uint32 {
 	return uint32(C.yices_num_posref_terms())
 }
 
-func Num_posref_types() uint32 {
+func NumPosrefTypes() uint32 {
 	return uint32(C.yices_num_posref_types())
 }
 
-func Garbage_collect(ts []TermT, taus []TypeT, keep_named int32) {
-	t_count := C.uint32_t(len(ts))
-	tau_count := C.uint32_t(len(taus))
-	C.yices_garbage_collect((*C.term_t)(&ts[0]), t_count, (*C.type_t)(&taus[0]), tau_count, C.int32_t(keep_named))
+func GarbageCollect(ts []TermT, taus []TypeT, keepNamed int32) {
+	tCount := C.uint32_t(len(ts))
+	tauCount := C.uint32_t(len(taus))
+	C.yices_garbage_collect((*C.term_t)(&ts[0]), tCount, (*C.type_t)(&taus[0]), tauCount, C.int32_t(keepNamed))
 }
 
 /****************************
  *  CONTEXT CONFIGURATION   *
  ***************************/
 
-type Config_t struct {
+type ConfigT struct {
 	raw uintptr // actually *C.ctx_config_t
 }
 
-func ycfg(cfg Config_t) *C.ctx_config_t {
+func ycfg(cfg ConfigT) *C.ctx_config_t {
 	return (*C.ctx_config_t)(unsafe.Pointer(cfg.raw))
 }
 
-func Init_config(cfg *Config_t) {
+func InitConfig(cfg *ConfigT) {
 	cfg.raw = uintptr(unsafe.Pointer(C.yices_new_config()))
 }
 
-func Close_config(cfg *Config_t) {
+func CloseConfig(cfg *ConfigT) {
 	C.yices_free_config(ycfg(*cfg))
 	cfg.raw = 0
 }
 
-func Set_config(cfg Config_t, name string, value string) int32 {
+func SetConfig(cfg ConfigT, name string, value string) int32 {
 	cname := C.CString(name)
 	defer C.free(unsafe.Pointer(cname))
 	cvalue := C.CString(value)
@@ -1513,7 +1519,7 @@ func Set_config(cfg Config_t, name string, value string) int32 {
 	return int32(C.yices_set_config(ycfg(cfg), cname, cvalue))
 }
 
-func Default_config_for_logic(cfg Config_t, logic string) int32 {
+func DefaultConfigForLogic(cfg ConfigT, logic string) int32 {
 	clogic := C.CString(logic)
 	defer C.free(unsafe.Pointer(clogic))
 	return int32(C.yices_default_config_for_logic(ycfg(cfg), clogic))
@@ -1523,57 +1529,57 @@ func Default_config_for_logic(cfg Config_t, logic string) int32 {
  *  CONTEXTS   *
  **************/
 
-type Context_t struct {
+type ContextT struct {
 	raw uintptr // actually *C.context_t
 }
 
-func yctx(ctx Context_t) *C.context_t {
+func yctx(ctx ContextT) *C.context_t {
 	return (*C.context_t)(unsafe.Pointer(ctx.raw))
 }
 
-func Init_context(cfg Config_t, ctx *Context_t) {
+func InitContext(cfg ConfigT, ctx *ContextT) {
 	ctx.raw = uintptr(unsafe.Pointer(C.yices_new_context(ycfg(cfg))))
 }
 
-func Close_context(ctx *Context_t) {
+func CloseContext(ctx *ContextT) {
 	C.yices_free_context(yctx(*ctx))
 	ctx.raw = 0
 }
 
-func Context_status(ctx Context_t) SmtStatusT {
+func ContextStatus(ctx ContextT) SmtStatusT {
 	return SmtStatusT(C.yices_context_status(yctx(ctx)))
 }
 
-func Reset_context(ctx Context_t) {
+func ResetContext(ctx ContextT) {
 	C.yices_reset_context(yctx(ctx))
 }
 
-func Push(ctx Context_t) int32 {
+func Push(ctx ContextT) int32 {
 	return int32(C.yices_push(yctx(ctx)))
 }
 
-func Pop(ctx Context_t) int32 {
+func Pop(ctx ContextT) int32 {
 	return int32(C.yices_pop(yctx(ctx)))
 }
 
-func Context_enable_option(ctx Context_t, option string) int32 {
+func ContextEnableOption(ctx ContextT, option string) int32 {
 	coption := C.CString(option)
 	defer C.free(unsafe.Pointer(coption))
 	return int32(C.yices_context_enable_option(yctx(ctx), coption))
 }
 
-func Context_disable_option(ctx Context_t, option string) int32 {
+func ContextDisableOption(ctx ContextT, option string) int32 {
 	coption := C.CString(option)
 	defer C.free(unsafe.Pointer(coption))
 	return int32(C.yices_context_enable_option(yctx(ctx), coption))
 }
 
-func Assert_formula(ctx Context_t, t TermT) int32 {
+func AssertFormula(ctx ContextT, t TermT) int32 {
 	return int32(C.yices_assert_formula(yctx(ctx), C.term_t(t)))
 
 }
 
-func Assert_formulas(ctx Context_t, t []TermT) int32 {
+func AssertFormulas(ctx ContextT, t []TermT) int32 {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
@@ -1582,11 +1588,11 @@ func Assert_formulas(ctx Context_t, t []TermT) int32 {
 	return int32(C.yices_assert_formulas(yctx(ctx), count, (*C.term_t)(&t[0])))
 }
 
-func Check_context(ctx Context_t, params Param_t) SmtStatusT {
+func CheckContext(ctx ContextT, params ParamT) SmtStatusT {
 	return SmtStatusT(C.yices_check_context(yctx(ctx), yparam(params)))
 }
 
-func Check_context_with_assumptions(ctx Context_t, params Param_t, t []TermT) SmtStatusT {
+func CheckContextWithAssumptions(ctx ContextT, params ParamT, t []TermT) SmtStatusT {
 	count := C.uint32_t(len(t))
 	//iam: FIXME need to unify the yices errors and the go errors...
 	if count == 0 {
@@ -1595,12 +1601,12 @@ func Check_context_with_assumptions(ctx Context_t, params Param_t, t []TermT) Sm
 	return SmtStatusT(C.yices_check_context_with_assumptions(yctx(ctx), yparam(params), count, (*C.term_t)(&t[0])))
 }
 
-func Assert_blocking_clause(ctx Context_t) int32 {
+func AssertBlockingClause(ctx ContextT) int32 {
 	return int32(C.yices_assert_blocking_clause(yctx(ctx)))
 
 }
 
-func Stop_search(ctx Context_t) {
+func StopSearch(ctx ContextT) {
 	C.yices_stop_search(yctx(ctx))
 }
 
@@ -1608,28 +1614,28 @@ func Stop_search(ctx Context_t) {
  * SEARCH PARAMETERS
  */
 
-type Param_t struct {
+type ParamT struct {
 	raw uintptr // actually *C.param_t
 }
 
-func yparam(params Param_t) *C.param_t {
+func yparam(params ParamT) *C.param_t {
 	return (*C.param_t)(unsafe.Pointer(params.raw))
 }
 
-func Init_param_record(params *Param_t) {
+func InitParamRecord(params *ParamT) {
 	params.raw = uintptr(unsafe.Pointer(C.yices_new_param_record()))
 }
 
-func Close_param_record(params *Param_t) {
+func CloseParamRecord(params *ParamT) {
 	C.yices_free_param_record(yparam(*params))
 	params.raw = 0
 }
 
-func Default_params_for_context(ctx Context_t, params Param_t) {
+func DefaultParamsForContext(ctx ContextT, params ParamT) {
 	C.yices_default_params_for_context(yctx(ctx), yparam(params))
 }
 
-func Set_param(params Param_t, pname string, value string) int32 {
+func SetParam(params ParamT, pname string, value string) int32 {
 	cpname := C.CString(pname)
 	defer C.free(unsafe.Pointer(cpname))
 	cvalue := C.CString(value)
@@ -1641,16 +1647,16 @@ func Set_param(params Param_t, pname string, value string) int32 {
  *  UNSAT CORE  *
  ***************/
 
-func Get_unsat_core(ctx Context_t) (unsat_core []TermT) {
+func GetUnsatCore(ctx ContextT) (unsatCore []TermT) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	errcode := int32(C.yices_get_unsat_core(yctx(ctx), &tv))
 	if errcode != -1 {
 		count := int(tv.size)
-		unsat_core = make([]TermT, count, count)
+		unsatCore = make([]TermT, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
-			unsat_core[i] = TermT(C.yices_term_vector_get(&tv, C.uint32_t(i)))
+			unsatCore[i] = TermT(C.yices_term_vector_get(&tv, C.uint32_t(i)))
 		}
 	}
 	C.yices_delete_term_vector(&tv)
@@ -1669,22 +1675,22 @@ func ymodel(model ModelT) *C.model_t {
 	return (*C.model_t)(unsafe.Pointer(model.raw))
 }
 
-func Get_model(ctx Context_t, keep_subst int32) *ModelT {
+func GetModel(ctx ContextT, keepSubst int32) *ModelT {
 	//yes golang lets you return stuff allocated on the stack
-	return &ModelT{uintptr(unsafe.Pointer(C.yices_get_model(yctx(ctx), C.int32_t(keep_subst))))}
+	return &ModelT{uintptr(unsafe.Pointer(C.yices_get_model(yctx(ctx), C.int32_t(keepSubst))))}
 }
 
-func Close_model(model *ModelT) {
+func CloseModel(model *ModelT) {
 	C.yices_free_model(ymodel(*model))
 	model.raw = 0
 }
 
-func Model_from_map(vars []TermT, vals []TermT) *ModelT {
+func ModelFromMap(vars []TermT, vals []TermT) *ModelT {
 	vcount := C.uint32_t(len(vals))
 	return &ModelT{uintptr(unsafe.Pointer(C.yices_model_from_map(vcount, (*C.term_t)(&vars[0]), (*C.term_t)(&vals[0]))))}
 }
 
-func Model_collect_defined_terms(model ModelT) (terms []TermT) {
+func ModelCollectDefinedTerms(model ModelT) (terms []TermT) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	C.yices_model_collect_defined_terms(ymodel(model), &tv)
@@ -1705,35 +1711,35 @@ func Model_collect_defined_terms(model ModelT) (terms []TermT) {
  * EVALUATION FOR SIMPLE TYPES
  */
 
-func Get_bool_value(model ModelT, t TermT, val *int32) int32 {
+func GetBoolValue(model ModelT, t TermT, val *int32) int32 {
 	return int32(C.yices_get_bool_value(ymodel(model), C.term_t(t), (*C.int32_t)(val)))
 }
 
-func Get_int32_value(model ModelT, t TermT, val *int32) int32 {
+func GetInt32Value(model ModelT, t TermT, val *int32) int32 {
 	return int32(C.yices_get_int32_value(ymodel(model), C.term_t(t), (*C.int32_t)(val)))
 }
 
-func Get_int64_value(model ModelT, t TermT, val *int64) int32 {
+func GetInt64Value(model ModelT, t TermT, val *int64) int32 {
 	return int32(C.yices_get_int64_value(ymodel(model), C.term_t(t), (*C.int64_t)(val)))
 }
 
-func Get_rational32_value(model ModelT, t TermT, num *int32, den *uint32) int32 {
+func GetRational32Value(model ModelT, t TermT, num *int32, den *uint32) int32 {
 	return int32(C.yices_get_rational32_value(ymodel(model), C.term_t(t), (*C.int32_t)(num), (*C.uint32_t)(den)))
 }
 
-func Get_rational64_value(model ModelT, t TermT, num *int64, den *uint64) int32 {
+func GetRational64Value(model ModelT, t TermT, num *int64, den *uint64) int32 {
 	return int32(C.yices_get_rational64_value(ymodel(model), C.term_t(t), (*C.int64_t)(num), (*C.uint64_t)(den)))
 }
 
-func Get_double_value(model ModelT, t TermT, val *float64) int32 {
+func GetDoubleValue(model ModelT, t TermT, val *float64) int32 {
 	return int32(C.yices_get_double_value(ymodel(model), C.term_t(t), (*C.double)(val)))
 }
 
-func Get_mpz_value(model ModelT, t TermT, val *Mpz_t) int32 {
+func GetMpzValue(model ModelT, t TermT, val *MpzT) int32 {
 	return int32(C.yices_get_mpz_valuep(ymodel(model), C.term_t(t), (*C.mpz_t)(unsafe.Pointer(val))))
 }
 
-func Get_mpq_value(model ModelT, t TermT, val *Mpq_t) int32 {
+func GetMpqValue(model ModelT, t TermT, val *MpqT) int32 {
 	return int32(C.yices_get_mpq_valuep(ymodel(model), C.term_t(t), (*C.mpq_t)(unsafe.Pointer(val))))
 }
 
@@ -1744,11 +1750,11 @@ __YICES_DLLSPEC__ extern int32_t yices_get_algebraic_number_value(model_t *mdl, 
 #endif
 */
 
-func Get_bv_value(model ModelT, t TermT, val []int32) int32 {
+func GetBvValue(model ModelT, t TermT, val []int32) int32 {
 	return int32(C.yices_get_bv_value(ymodel(model), C.term_t(t), (*C.int32_t)(&val[0])))
 }
 
-func Get_scalar_value(model ModelT, t TermT, val *int32) int32 {
+func GetScalarValue(model ModelT, t TermT, val *int32) int32 {
 	return int32(C.yices_get_scalar_value(ymodel(model), C.term_t(t), (*C.int32_t)(val)))
 }
 
@@ -1756,100 +1762,100 @@ func Get_scalar_value(model ModelT, t TermT, val *int32) int32 {
  * GENERIC FORM: VALUE DESCRIPTORS AND NODES
  */
 
-type Yval_t C.yval_t
+type YvalT C.yval_t
 
-func Get_tag(yval Yval_t) YvalTagT {
+func GetTag(yval YvalT) YvalTagT {
 	return YvalTagT(yval.node_tag)
 }
 
-type Yval_vector_t C.yval_vector_t
+type YvalVectorT C.yval_vector_t
 
-func Init_yval_vector(v *Yval_vector_t) {
+func InitYvalVector(v *YvalVectorT) {
 	C.yices_init_yval_vector((*C.yval_vector_t)(v))
 }
 
-func Delete_yval_vector(v *Yval_vector_t) {
+func DeleteYvalVector(v *YvalVectorT) {
 	C.yices_delete_yval_vector((*C.yval_vector_t)(v))
 }
 
-func Reset_yval_vector(v *Yval_vector_t) {
+func ResetYvalVector(v *YvalVectorT) {
 	C.yices_reset_yval_vector((*C.yval_vector_t)(v))
 }
 
-func Get_value(model ModelT, t TermT, val *Yval_t) int32 {
+func GetValue(model ModelT, t TermT, val *YvalT) int32 {
 	return int32(C.yices_get_value(ymodel(model), C.term_t(t), (*C.yval_t)(val)))
 }
 
-func Val_is_int32(model ModelT, val *Yval_t) int32 {
+func ValIsInt32(model ModelT, val *YvalT) int32 {
 	return int32(C.yices_val_is_int32(ymodel(model), (*C.yval_t)(val)))
 }
 
-func Val_is_int64(model ModelT, val *Yval_t) int32 {
+func ValIsInt64(model ModelT, val *YvalT) int32 {
 	return int32(C.yices_val_is_int64(ymodel(model), (*C.yval_t)(val)))
 }
 
-func Val_is_rational32(model ModelT, val *Yval_t) int32 {
+func ValIsRational32(model ModelT, val *YvalT) int32 {
 	return int32(C.yices_val_is_rational32(ymodel(model), (*C.yval_t)(val)))
 }
 
-func Val_is_rational64(model ModelT, val *Yval_t) int32 {
+func ValIsRational64(model ModelT, val *YvalT) int32 {
 	return int32(C.yices_val_is_rational64(ymodel(model), (*C.yval_t)(val)))
 }
 
-func Val_is_integer(model ModelT, val *Yval_t) int32 {
+func ValIsInteger(model ModelT, val *YvalT) int32 {
 	return int32(C.yices_val_is_integer(ymodel(model), (*C.yval_t)(val)))
 }
 
-func Val_bitsize(model ModelT, val *Yval_t) uint32 {
+func ValBitsize(model ModelT, val *YvalT) uint32 {
 	return uint32(C.yices_val_bitsize(ymodel(model), (*C.yval_t)(val)))
 }
 
-func Val_tuple_arity(model ModelT, val *Yval_t) uint32 {
+func ValTupleArity(model ModelT, val *YvalT) uint32 {
 	return uint32(C.yices_val_tuple_arity(ymodel(model), (*C.yval_t)(val)))
 }
 
-func Val_mapping_arity(model ModelT, val *Yval_t) uint32 {
+func ValMappingArity(model ModelT, val *YvalT) uint32 {
 	return uint32(C.yices_val_mapping_arity(ymodel(model), (*C.yval_t)(val)))
 }
 
-func Val_function_arity(model ModelT, val *Yval_t) uint32 {
+func ValFunctionArity(model ModelT, val *YvalT) uint32 {
 	return uint32(C.yices_val_function_arity(ymodel(model), (*C.yval_t)(val)))
 }
 
 // Since 2.6.2
-func Val_function_type(model ModelT, val *Yval_t) TypeT {
+func ValFunctionType(model ModelT, val *YvalT) TypeT {
 	return TypeT(C.yices_val_function_type(ymodel(model), (*C.yval_t)(val)))
 }
 
-func Val_get_bool(model ModelT, yval *Yval_t, val *int32) int32 {
+func ValGetBool(model ModelT, yval *YvalT, val *int32) int32 {
 	return int32(C.yices_val_get_bool(ymodel(model), (*C.yval_t)(yval), (*C.int32_t)(val)))
 }
 
-func Val_get_int32(model ModelT, yval *Yval_t, val *int32) int32 {
+func ValGetInt32(model ModelT, yval *YvalT, val *int32) int32 {
 	return int32(C.yices_val_get_int32(ymodel(model), (*C.yval_t)(yval), (*C.int32_t)(val)))
 }
 
-func Val_get_int64(model ModelT, yval *Yval_t, val *int64) int32 {
+func ValGetInt64(model ModelT, yval *YvalT, val *int64) int32 {
 	return int32(C.yices_val_get_int64(ymodel(model), (*C.yval_t)(yval), (*C.int64_t)(val)))
 }
 
-func Val_get_rational32(model ModelT, yval *Yval_t, num *int32, den *uint32) int32 {
+func ValGetRational32(model ModelT, yval *YvalT, num *int32, den *uint32) int32 {
 	return int32(C.yices_val_get_rational32(ymodel(model), (*C.yval_t)(yval), (*C.int32_t)(num), (*C.uint32_t)(den)))
 }
 
-func Val_get_rational64(model ModelT, yval *Yval_t, num *int64, den *uint64) int32 {
+func ValGetRational64(model ModelT, yval *YvalT, num *int64, den *uint64) int32 {
 	return int32(C.yices_val_get_rational64(ymodel(model), (*C.yval_t)(yval), (*C.int64_t)(num), (*C.uint64_t)(den)))
 }
 
-func Val_get_double(model ModelT, yval *Yval_t, val *float64) int32 {
+func ValGetDouble(model ModelT, yval *YvalT, val *float64) int32 {
 	return int32(C.yices_val_get_double(ymodel(model), (*C.yval_t)(yval), (*C.double)(val)))
 }
 
-func Val_get_mpz(model ModelT, yval *Yval_t, val *Mpz_t) int32 {
+func ValGetMpz(model ModelT, yval *YvalT, val *MpzT) int32 {
 	return int32(C.yices_val_get_mpzp(ymodel(model), (*C.yval_t)(yval), (*C.mpz_t)(unsafe.Pointer(val))))
 }
 
-func Val_get_mpq(model ModelT, yval *Yval_t, val *Mpq_t) int32 {
+func ValGetMpq(model ModelT, yval *YvalT, val *MpqT) int32 {
 	return int32(C.yices_val_get_mpqp(ymodel(model), (*C.yval_t)(yval), (*C.mpq_t)(unsafe.Pointer(val))))
 }
 
@@ -1860,40 +1866,40 @@ __YICES_DLLSPEC__ extern int32_t yices_val_get_algebraic_number(model_t *mdl, co
 #endif
 */
 
-func Val_get_bv(model ModelT, yval *Yval_t, val []int32) int32 {
+func ValGetBv(model ModelT, yval *YvalT, val []int32) int32 {
 	return int32(C.yices_val_get_bv(ymodel(model), (*C.yval_t)(yval), (*C.int32_t)(&val[0])))
 }
 
-func Val_get_scalar(model ModelT, yval *Yval_t, val *int32, tau *TypeT) int32 {
+func ValGetScalar(model ModelT, yval *YvalT, val *int32, tau *TypeT) int32 {
 	return int32(C.yices_val_get_scalar(ymodel(model), (*C.yval_t)(yval), (*C.int32_t)(val), (*C.type_t)(tau)))
 }
 
-func Val_expand_tuple(model ModelT, yval *Yval_t, child []Yval_t) int32 {
+func ValExpandTuple(model ModelT, yval *YvalT, child []YvalT) int32 {
 	return int32(C.yices_val_expand_tuple(ymodel(model), (*C.yval_t)(yval), (*C.yval_t)(&child[0])))
 }
 
-func Val_expand_function(model ModelT, yval *Yval_t, def *Yval_t) (vector []Yval_t) {
+func ValExpandFunction(model ModelT, yval *YvalT, def *YvalT) (vector []YvalT) {
 	var tv C.yval_vector_t
 	C.yices_init_yval_vector(&tv)
 	errcode := int32(C.yices_val_expand_function(ymodel(model), (*C.yval_t)(yval), (*C.yval_t)(def), (*C.yval_vector_t)(&tv)))
 	if errcode != -1 {
 		count := int(tv.size)
-		vector = make([]Yval_t, count, count)
+		vector = make([]YvalT, count, count)
 		// defined in the preamble yices_term_vector_get(term_vector_t* vec, uint32_t elem)
 		for i := 0; i < count; i++ {
 			var yv C.yval_t
 			C.yices_yval_vector_get(&tv, C.uint32_t(i), (*C.yval_t)(&yv))
-			vector[i] = Yval_t(yv)
+			vector[i] = YvalT(yv)
 		}
 	}
 	C.yices_delete_yval_vector(&tv)
 	return
 }
 
-func Val_expand_mapping(model ModelT, m *Yval_t, val *Yval_t) (vector []Yval_t) {
+func ValExpandMapping(model ModelT, m *YvalT, val *YvalT) (vector []YvalT) {
 	arity := int(C.yices_val_mapping_arity(ymodel(model), (*C.yval_t)(m)))
 	if arity > 0 {
-		vec := make([]Yval_t, arity, arity)
+		vec := make([]YvalT, arity, arity)
 		errcode := int32(C.yices_val_expand_mapping(ymodel(model), (*C.yval_t)(m), (*C.yval_t)(&vec[0]), (*C.yval_t)(val)))
 		if errcode != -1 {
 			vector = vec
@@ -1902,11 +1908,11 @@ func Val_expand_mapping(model ModelT, m *Yval_t, val *Yval_t) (vector []Yval_t) 
 	return
 }
 
-func Formula_true_in_model(model ModelT, t TermT) int32 {
+func FormulaTrueInModel(model ModelT, t TermT) int32 {
 	return int32(C.yices_formula_true_in_model(ymodel(model), C.term_t(t)))
 }
 
-func Formulas_true_in_model(model ModelT, t []TermT) int32 {
+func FormulasTrueInModel(model ModelT, t []TermT) int32 {
 	tcount := C.uint32_t(len(t))
 	return int32(C.yices_formulas_true_in_model(ymodel(model), tcount, (*C.term_t)(&t[0])))
 }
@@ -1915,11 +1921,11 @@ func Formulas_true_in_model(model ModelT, t []TermT) int32 {
  * CONVERSION OF VALUES TO CONSTANT TERMS
  */
 
-func Get_value_as_term(model ModelT, t TermT) TermT {
+func GetValueAsTerm(model ModelT, t TermT) TermT {
 	return TermT(C.yices_get_value_as_term(ymodel(model), C.term_t(t)))
 }
 
-func Term_array_value(model ModelT, a []TermT, b []TermT) int32 {
+func TermArrayValue(model ModelT, a []TermT, b []TermT) int32 {
 	tcount := C.uint32_t(len(a))
 	return int32(C.yices_term_array_value(ymodel(model), tcount, (*C.term_t)(&a[0]), (*C.term_t)(&b[0])))
 }
@@ -1928,7 +1934,7 @@ func Term_array_value(model ModelT, a []TermT, b []TermT) int32 {
  * IMPLICANTS
  */
 
-func Implicant_for_formula(model ModelT, t TermT) (literals []TermT) {
+func ImplicantForFormula(model ModelT, t TermT) (literals []TermT) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	errcode := int32(C.yices_implicant_for_formula(ymodel(model), C.term_t(t), (*C.term_vector_t)(&tv)))
@@ -1944,7 +1950,7 @@ func Implicant_for_formula(model ModelT, t TermT) (literals []TermT) {
 	return
 }
 
-func Implicant_for_formulas(model ModelT, t []TermT) (literals []TermT) {
+func ImplicantForFormulas(model ModelT, t []TermT) (literals []TermT) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	tcount := C.uint32_t(len(t))
@@ -1965,15 +1971,15 @@ func Implicant_for_formulas(model ModelT, t []TermT) (literals []TermT) {
  * MODEL GENERALIZATION *
  ************************/
 
-type Gen_mode_t int32
+type GenModeT int32
 
 const (
-	GEN_DEFAULT Gen_mode_t = iota
+	GEN_DEFAULT GenModeT = iota
 	GEN_BY_SUBST
 	GEN_BY_PROJ
 )
 
-func Generalize_model(model ModelT, t TermT, elims []TermT, mode Gen_mode_t) (formulas []TermT) {
+func GeneralizeModel(model ModelT, t TermT, elims []TermT, mode GenModeT) (formulas []TermT) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	ecount := C.uint32_t(len(elims))
@@ -1990,7 +1996,7 @@ func Generalize_model(model ModelT, t TermT, elims []TermT, mode Gen_mode_t) (fo
 	return
 }
 
-func Generalize_model_array(model ModelT, a []TermT, elims []TermT, mode Gen_mode_t) (formulas []TermT) {
+func GeneralizeModelArray(model ModelT, a []TermT, elims []TermT, mode GenModeT) (formulas []TermT) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	acount := C.uint32_t(len(a))
@@ -2012,7 +2018,7 @@ func Generalize_model_array(model ModelT, a []TermT, elims []TermT, mode Gen_mod
  *   Model Support *
  *******************/
 
-func ModelTerm_support(model ModelT, t TermT) (support []TermT) {
+func ModelTermSupport(model ModelT, t TermT) (support []TermT) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	errcode := int32(C.yices_model_term_support(ymodel(model), C.term_t(t), (*C.term_vector_t)(&tv)))
@@ -2028,7 +2034,7 @@ func ModelTerm_support(model ModelT, t TermT) (support []TermT) {
 	return
 }
 
-func ModelTerm_array_support(model ModelT, t []TermT) (support []TermT) {
+func ModelTermArraySupport(model ModelT, t []TermT) (support []TermT) {
 	var tv C.term_vector_t
 	C.yices_init_term_vector(&tv)
 	tcount := C.uint32_t(len(t))
@@ -2049,14 +2055,14 @@ func ModelTerm_array_support(model ModelT, t []TermT) (support []TermT) {
  *   DELEGATES *
  **************/
 
-func Has_delegate(delegate string) bool {
+func HasDelegate(delegate string) bool {
 	cdelegate := C.CString(delegate)
 	defer C.free(unsafe.Pointer(cdelegate))
 	has := C.yices_has_delegate(cdelegate)
 	return has == 1
 }
 
-func Check_formula(t TermT, logic string, delegate string, model *ModelT) (status SmtStatusT) {
+func CheckFormula(t TermT, logic string, delegate string, model *ModelT) (status SmtStatusT) {
 	clogic := C.CString(logic)
 	defer C.free(unsafe.Pointer(clogic))
 	cdelegate := C.CString(delegate)
@@ -2078,7 +2084,7 @@ func Check_formula(t TermT, logic string, delegate string, model *ModelT) (statu
 	return
 }
 
-func Check_formulas(t []TermT, logic string, delegate string, model *ModelT) (status SmtStatusT) {
+func CheckFormulas(t []TermT, logic string, delegate string, model *ModelT) (status SmtStatusT) {
 	count := C.uint32_t(len(t))
 	clogic := C.CString(logic)
 	defer C.free(unsafe.Pointer(clogic))
@@ -2105,7 +2111,7 @@ func Check_formulas(t []TermT, logic string, delegate string, model *ModelT) (st
  *   DIMACS  *
  *************/
 
-func Export_formula_to_dimacs(t TermT, filename string, simplify bool, status *SmtStatusT) (errcode int32) {
+func ExportFormulaToDimacs(t TermT, filename string, simplify bool, status *SmtStatusT) (errcode int32) {
 	path := C.CString(filename)
 	defer C.free(unsafe.Pointer(path))
 	var csimplify C.int
@@ -2122,7 +2128,7 @@ func Export_formula_to_dimacs(t TermT, filename string, simplify bool, status *S
 	return
 }
 
-func Export_formulas_to_dimacs(t []TermT, filename string, simplify bool, status *SmtStatusT) (errcode int32) {
+func ExportFormulasToDimacs(t []TermT, filename string, simplify bool, status *SmtStatusT) (errcode int32) {
 	path := C.CString(filename)
 	defer C.free(unsafe.Pointer(path))
 	count := C.uint32_t(len(t))
@@ -2144,36 +2150,36 @@ func Export_formulas_to_dimacs(t []TermT, filename string, simplify bool, status
  *  PRETTY PRINTING   *
  **********************/
 
-func Pp_type(file *os.File, tau TypeT, width uint32, height uint32, offset uint32) int32 {
+func PpType(file *os.File, tau TypeT, width uint32, height uint32, offset uint32) int32 {
 	return int32(C.yices_pp_type_fd(C.int(file.Fd()), C.type_t(tau), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
 }
 
-func Pp_term(file *os.File, t TermT, width uint32, height uint32, offset uint32) int32 {
+func PpTerm(file *os.File, t TermT, width uint32, height uint32, offset uint32) int32 {
 	return int32(C.yices_pp_term_fd(C.int(file.Fd()), C.term_t(t), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
 }
 
-func Pp_term_array(file *os.File, t []TermT, width uint32, height uint32, offset uint32, horiz int32) int32 {
+func PpTermArray(file *os.File, t []TermT, width uint32, height uint32, offset uint32, horiz int32) int32 {
 	tcount := C.uint32_t(len(t))
 	return int32(C.yices_pp_term_array_fd(C.int(file.Fd()), tcount, (*C.term_t)(&t[0]), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset), C.int32_t(horiz)))
 }
 
-func Print_model(file *os.File, model ModelT) int32 {
+func PrintModel(file *os.File, model ModelT) int32 {
 	return int32(C.yices_print_model_fd(C.int(file.Fd()), ymodel(model)))
 }
 
 // Since 2.6.2
-func Print_term_values(file *os.File, model ModelT, t []TermT) int32 {
+func PrintTermValues(file *os.File, model ModelT, t []TermT) int32 {
 	tcount := C.uint32_t(len(t))
 	return int32(C.yices_print_term_values_fd(C.int(file.Fd()), ymodel(model), tcount, (*C.term_t)(&t[0])))
 }
 
 // Since 2.6.2
-func Pp_term_values(file *os.File, model ModelT, t []TermT, width uint32, height uint32, offset uint32) int32 {
+func PpTermValues(file *os.File, model ModelT, t []TermT, width uint32, height uint32, offset uint32) int32 {
 	tcount := C.uint32_t(len(t))
 	return int32(C.yices_pp_term_values_fd(C.int(file.Fd()), ymodel(model), tcount, (*C.term_t)(&t[0]), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
 }
 
-func Pp_model(file *os.File, model ModelT, width uint32, height uint32, offset uint32) int32 {
+func PpModel(file *os.File, model ModelT, width uint32, height uint32, offset uint32) int32 {
 	return int32(C.yices_pp_model_fd(C.int(file.Fd()), ymodel(model), C.uint32_t(width), C.uint32_t(height), C.uint32_t(offset)))
 }
 

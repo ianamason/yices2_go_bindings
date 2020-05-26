@@ -8,120 +8,120 @@ import (
 )
 
 // generic start up
-func setup() (cfg yapi.Config_t, ctx yapi.Context_t, params yapi.Param_t) {
+func setup() (cfg yapi.ConfigT, ctx yapi.ContextT, params yapi.ParamT) {
 	yapi.Init()
-	yapi.Init_config(&cfg)
-	yapi.Init_context(cfg, &ctx)
-	yapi.Init_param_record(&params)
-	yapi.Default_params_for_context(ctx, params)
+	yapi.InitConfig(&cfg)
+	yapi.InitContext(cfg, &ctx)
+	yapi.InitParamRecord(&params)
+	yapi.DefaultParamsForContext(ctx, params)
 	return
 }
 
 // clean up a generic startup
-func cleanup(cfg *yapi.Config_t, ctx *yapi.Context_t, params *yapi.Param_t) {
-	yapi.Close_config(cfg)
-	yapi.Close_param_record(params)
-	yapi.Close_context(ctx)
+func cleanup(cfg *yapi.ConfigT, ctx *yapi.ContextT, params *yapi.ParamT) {
+	yapi.CloseConfig(cfg)
+	yapi.CloseParamRecord(params)
+	yapi.CloseContext(ctx)
 	yapi.Exit()
 }
 
 // sam's helper functions
-func parse_assert(fmla_str string, ctx yapi.Context_t) {
-	fmla := yapi.Parse_term(fmla_str)
-	if fmla != yapi.NULL_TERM {
-		yapi.Assert_formula(ctx, fmla)
+func parseAssert(fmlaStr string, ctx yapi.ContextT) {
+	fmla := yapi.ParseTerm(fmlaStr)
+	if fmla != yapi.NullTerm {
+		yapi.AssertFormula(ctx, fmla)
 	}
 }
 
 // sam's helper functions
-func define_const(name string, typ yapi.TypeT) (term yapi.TermT) {
-	term = yapi.New_uninterpreted_term(typ)
-	yapi.Set_term_name(term, name)
+func defineConst(name string, typ yapi.TypeT) (term yapi.TermT) {
+	term = yapi.NewUninterpretedTerm(typ)
+	yapi.SetTermName(term, name)
 	return
 }
 
-func Test_bool_models(t *testing.T) {
+func TestBoolModels(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	bool_t := yapi.Bool_type()
-	b1 := define_const("b1", bool_t)
-	b2 := define_const("b2", bool_t)
-	b3 := define_const("b3", bool_t)
-	b_fml1 := yapi.Parse_term("(or b1 b2 b3)")
-	yapi.Assert_formula(ctx, b_fml1)
-	stat := yapi.Check_context(ctx, params)
+	boolT := yapi.BoolType()
+	b1 := defineConst("b1", boolT)
+	b2 := defineConst("b2", boolT)
+	b3 := defineConst("b3", boolT)
+	bFml1 := yapi.ParseTerm("(or b1 b2 b3)")
+	yapi.AssertFormula(ctx, bFml1)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 	var bval1 int32
 	var bval2 int32
 	var bval3 int32
-	yapi.Get_bool_value(*modelp, b1, &bval1)
-	yapi.Get_bool_value(*modelp, b2, &bval2)
-	yapi.Get_bool_value(*modelp, b3, &bval3)
+	yapi.GetBoolValue(*modelp, b1, &bval1)
+	yapi.GetBoolValue(*modelp, b2, &bval2)
+	yapi.GetBoolValue(*modelp, b3, &bval3)
 	AssertEqual(t, bval1, 0, "bval1 == 0")
 	AssertEqual(t, bval2, 0, "bval2 == 0")
 	AssertEqual(t, bval3, 1, "bval3 == 1")
-	b_fmla2 := yapi.Parse_term("(not b3)")
+	bFmla2 := yapi.ParseTerm("(not b3)")
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
-	yapi.Assert_formula(ctx, b_fmla2)
-	stat = yapi.Check_context(ctx, params)
+	yapi.AssertFormula(ctx, bFmla2)
+	stat = yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp = yapi.Get_model(ctx, 1)
+	modelp = yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
-	yapi.Get_bool_value(*modelp, b1, &bval1)
-	yapi.Get_bool_value(*modelp, b2, &bval2)
-	yapi.Get_bool_value(*modelp, b3, &bval3)
+	yapi.GetBoolValue(*modelp, b1, &bval1)
+	yapi.GetBoolValue(*modelp, b2, &bval2)
+	yapi.GetBoolValue(*modelp, b3, &bval3)
 	AssertEqual(t, bval1, 0, "bval1 == 0")
 	AssertEqual(t, bval2, 1, "bval2 == 1")
 	AssertEqual(t, bval3, 0, "bval3 == 0")
 
-	var yval yapi.Yval_t
+	var yval yapi.YvalT
 
-	yapi.Get_value(*modelp, b1, &yval)
-	AssertEqual(t, yapi.Get_tag(yval), yapi.YvalBool)
-	yapi.Val_get_bool(*modelp, &yval, &bval1)
+	yapi.GetValue(*modelp, b1, &yval)
+	AssertEqual(t, yapi.GetTag(yval), yapi.YvalBool)
+	yapi.ValGetBool(*modelp, &yval, &bval1)
 	AssertEqual(t, bval1, 0, "bval1 == 0")
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 }
 
-func Test_int_models(t *testing.T) {
+func TestIntModels(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	int_t := yapi.Int_type()
-	i1 := define_const("i1", int_t)
-	i2 := define_const("i2", int_t)
-	parse_assert("(> i1 3)", ctx)
-	parse_assert("(< i2 i1)", ctx)
-	stat := yapi.Check_context(ctx, params)
+	intT := yapi.IntType()
+	i1 := defineConst("i1", intT)
+	i2 := defineConst("i2", intT)
+	parseAssert("(> i1 3)", ctx)
+	parseAssert("(< i2 i1)", ctx)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 	var i32v1 int32
 	var i32v2 int32
-	yapi.Get_int32_value(*modelp, i1, &i32v1)
-	yapi.Get_int32_value(*modelp, i2, &i32v2)
+	yapi.GetInt32Value(*modelp, i1, &i32v1)
+	yapi.GetInt32Value(*modelp, i2, &i32v2)
 	AssertEqual(t, i32v1, 4, "i32v1 == 4")
 	AssertEqual(t, i32v2, 3, "i32v2 == 3")
 	var i64v1 int64
 	var i64v2 int64
-	yapi.Get_int64_value(*modelp, i1, &i64v1)
-	yapi.Get_int64_value(*modelp, i2, &i64v2)
+	yapi.GetInt64Value(*modelp, i1, &i64v1)
+	yapi.GetInt64Value(*modelp, i2, &i64v2)
 	AssertEqual(t, i64v1, 4, "i64v1 == 4")
 	AssertEqual(t, i64v2, 3, "i64v2 == 3")
-	yapi.Print_model(os.Stdout, *modelp)
-	yapi.Pp_model(os.Stdout, *modelp, 80, 100, 0)
+	yapi.PrintModel(os.Stdout, *modelp)
+	yapi.PpModel(os.Stdout, *modelp, 80, 100, 0)
 	mdlstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mdlstr, "(= i1 4)\n(= i2 3)")
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
@@ -131,16 +131,16 @@ func Test_rat_models(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	real_t := yapi.Real_type()
-	r1 := define_const("r1", real_t)
-	r2 := define_const("r2", real_t)
-	parse_assert("(> r1 3)", ctx)
-	parse_assert("(< r1 4)", ctx)
-	parse_assert("(< (- r1 r2) 0)", ctx)
+	realT := yapi.RealType()
+	r1 := defineConst("r1", realT)
+	r2 := defineConst("r2", realT)
+	parseAssert("(> r1 3)", ctx)
+	parseAssert("(< r1 4)", ctx)
+	parseAssert("(< (- r1 r2) 0)", ctx)
 
-	stat := yapi.Check_context(ctx, params)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
 	var r32v1num int32
@@ -148,8 +148,8 @@ func Test_rat_models(t *testing.T) {
 	var r32v2num int32
 	var r32v2den uint32
 
-	yapi.Get_rational32_value(*modelp, r1, &r32v1num, &r32v1den)
-	yapi.Get_rational32_value(*modelp, r2, &r32v2num, &r32v2den)
+	yapi.GetRational32Value(*modelp, r1, &r32v1num, &r32v1den)
+	yapi.GetRational32Value(*modelp, r2, &r32v2num, &r32v2den)
 
 	AssertEqual(t, r32v1num, 7, "r32v1num == 7")
 	AssertEqual(t, r32v1den, 2, "r32v1den == 2")
@@ -161,8 +161,8 @@ func Test_rat_models(t *testing.T) {
 	var r64v2num int64
 	var r64v2den uint64
 
-	yapi.Get_rational64_value(*modelp, r1, &r64v1num, &r64v1den)
-	yapi.Get_rational64_value(*modelp, r2, &r64v2num, &r64v2den)
+	yapi.GetRational64Value(*modelp, r1, &r64v1num, &r64v1den)
+	yapi.GetRational64Value(*modelp, r2, &r64v2num, &r64v2den)
 
 	AssertEqual(t, r64v1num, 7, "r64v1num == 7")
 	AssertEqual(t, r64v1den, 2, "r64v1den == 2")
@@ -172,89 +172,89 @@ func Test_rat_models(t *testing.T) {
 	var rdoub1 float64
 	var rdoub2 float64
 
-	yapi.Get_double_value(*modelp, r1, &rdoub1)
-	yapi.Get_double_value(*modelp, r2, &rdoub2)
+	yapi.GetDoubleValue(*modelp, r1, &rdoub1)
+	yapi.GetDoubleValue(*modelp, r2, &rdoub2)
 
 	AssertEqual(t, rdoub1, 3.5, "rdoub1 == 3.5")
 	AssertEqual(t, rdoub2, 4.0, "rdoub2 == 4.0")
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
 }
 
-func Test_mpz_models(t *testing.T) {
+func TestMpzModels(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	int_t := yapi.Int_type()
+	intT := yapi.IntType()
 
-	i1 := define_const("i1", int_t)
-	i2 := define_const("i2", int_t)
+	i1 := defineConst("i1", intT)
+	i2 := defineConst("i2", intT)
 
-	parse_assert("(> i1 987654321987654321987654321)", ctx)
-	parse_assert("(< i2 i1)", ctx)
+	parseAssert("(> i1 987654321987654321987654321)", ctx)
+	parseAssert("(< i2 i1)", ctx)
 
-	stat := yapi.Check_context(ctx, params)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
 	mstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mstr, "(= i1 987654321987654321987654322)\n(= i2 987654321987654321987654321)")
 
 	var i32val1 int32
-	errcode := yapi.Get_int32_value(*modelp, i1, &i32val1)
+	errcode := yapi.GetInt32Value(*modelp, i1, &i32val1)
 	AssertEqual(t, errcode, -1)
-	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
+	AssertEqual(t, yapi.ErrorString(), "eval error: the term value does not fit the expected type")
 	yerror1 := yapi.YicesError()
 
-	yapi.Clear_error()
+	yapi.ClearError()
 
 	var i32val2 int32
-	errcode = yapi.Get_int32_value(*modelp, i2, &i32val2)
+	errcode = yapi.GetInt32Value(*modelp, i2, &i32val2)
 	AssertEqual(t, errcode, -1)
-	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
+	AssertEqual(t, yapi.ErrorString(), "eval error: the term value does not fit the expected type")
 	yerror2 := yapi.YicesError()
 
 	AssertEqual(t, yerror1, yerror2)
 
-	var mpzval1 yapi.Mpz_t
-	errcode = yapi.Get_mpz_value(*modelp, i1, &mpzval1)
+	var mpzval1 yapi.MpzT
+	errcode = yapi.GetMpzValue(*modelp, i1, &mpzval1)
 	AssertEqual(t, errcode, 0)
 
 	mpz1 := yapi.Mpz(&mpzval1)
 	AssertEqual(t, yapi.TermToString(mpz1, 200, 10, 0), "987654321987654321987654322")
 
-	var mpzval2 yapi.Mpz_t
-	errcode = yapi.Get_mpz_value(*modelp, i2, &mpzval2)
+	var mpzval2 yapi.MpzT
+	errcode = yapi.GetMpzValue(*modelp, i2, &mpzval2)
 	AssertEqual(t, errcode, 0)
 
 	mpz2 := yapi.Mpz(&mpzval2)
 	AssertEqual(t, yapi.TermToString(mpz2, 200, 10, 0), "987654321987654321987654321")
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
 }
 
-func Test_mpq_models(t *testing.T) {
+func TestMpqModels(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	real_t := yapi.Real_type()
+	realT := yapi.RealType()
 
-	r1 := define_const("r1", real_t)
-	r2 := define_const("r2", real_t)
+	r1 := defineConst("r1", realT)
+	r2 := defineConst("r2", realT)
 
-	parse_assert("(> (* r1 3456666334217777794) 987654321987654321987654321)", ctx)
-	parse_assert("(< r2 r1)", ctx)
+	parseAssert("(> (* r1 3456666334217777794) 987654321987654321987654321)", ctx)
+	parseAssert("(< r2 r1)", ctx)
 
-	stat := yapi.Check_context(ctx, params)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
 	mstr := yapi.ModelToString(*modelp, 80, 100, 0)
@@ -262,144 +262,144 @@ func Test_mpq_models(t *testing.T) {
 
 	var r32num1 int32
 	var r32den1 uint32
-	errcode := yapi.Get_rational32_value(*modelp, r1, &r32num1, &r32den1)
+	errcode := yapi.GetRational32Value(*modelp, r1, &r32num1, &r32den1)
 	AssertEqual(t, errcode, -1)
-	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
+	AssertEqual(t, yapi.ErrorString(), "eval error: the term value does not fit the expected type")
 	yerror1 := yapi.YicesError()
 
 	var r64num2 int64
 	var r64den2 uint64
-	errcode = yapi.Get_rational64_value(*modelp, r2, &r64num2, &r64den2)
+	errcode = yapi.GetRational64Value(*modelp, r2, &r64num2, &r64den2)
 	AssertEqual(t, errcode, -1)
-	AssertEqual(t, yapi.Error_string(), "eval error: the term value does not fit the expected type")
+	AssertEqual(t, yapi.ErrorString(), "eval error: the term value does not fit the expected type")
 	yerror2 := yapi.YicesError()
 
 	AssertEqual(t, yerror1, yerror2)
 
-	var mpqval1 yapi.Mpq_t
-	errcode = yapi.Get_mpq_value(*modelp, r1, &mpqval1)
+	var mpqval1 yapi.MpqT
+	errcode = yapi.GetMpqValue(*modelp, r1, &mpqval1)
 	AssertEqual(t, errcode, 0)
 
 	mpq1 := yapi.Mpq(&mpqval1)
 	AssertEqual(t, yapi.TermToString(mpq1, 200, 10, 0), "987654325444320656205432115/3456666334217777794")
 
-	var mpqval2 yapi.Mpq_t
-	errcode = yapi.Get_mpq_value(*modelp, r2, &mpqval2)
+	var mpqval2 yapi.MpqT
+	errcode = yapi.GetMpqValue(*modelp, r2, &mpqval2)
 	AssertEqual(t, errcode, 0)
 
 	mpq2 := yapi.Mpq(&mpqval2)
 	AssertEqual(t, yapi.TermToString(mpq2, 200, 10, 0), "987654321987654321987654321/3456666334217777794")
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
 }
 
-func Test_algebraic_models(t *testing.T) {
+func TestAlgebraicModels(t *testing.T) {
 	yapi.Init()
 	if yapi.HasMcsat() == int32(0) {
 		fmt.Println("TestAlgebraicModels skipped because no mcsat.")
 		return
 	}
-	real_t := yapi.Real_type()
-	var cfg yapi.Config_t
-	var ctx yapi.Context_t
-	var params yapi.Param_t
-	yapi.Init_config(&cfg)
-	yapi.Default_config_for_logic(cfg, "QF_NRA")
-	yapi.Set_config(cfg, "mode", "one-shot")
-	yapi.Init_context(cfg, &ctx)
-	x := define_const("x", real_t)
-	parse_assert("(= (* x x) 2)", ctx)
-	stat := yapi.Check_context(ctx, params) //params == NULL in the C
+	realT := yapi.RealType()
+	var cfg yapi.ConfigT
+	var ctx yapi.ContextT
+	var params yapi.ParamT
+	yapi.InitConfig(&cfg)
+	yapi.DefaultConfigForLogic(cfg, "QF_NRA")
+	yapi.SetConfig(cfg, "mode", "one-shot")
+	yapi.InitContext(cfg, &ctx)
+	x := defineConst("x", realT)
+	parseAssert("(= (* x x) 2)", ctx)
+	stat := yapi.CheckContext(ctx, params) //params == NULL in the C
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
-	yapi.Print_model(os.Stdout, *modelp)
+	yapi.PrintModel(os.Stdout, *modelp)
 	var xf float64
-	yapi.Get_double_value(*modelp, x, &xf)
+	yapi.GetDoubleValue(*modelp, x, &xf)
 	AssertEqual(t, xf, -1.414213562373095, "xf == -1.414213562373095")
-	yapi.Close_model(modelp)
-	yapi.Close_config(&cfg)
-	yapi.Close_context(&ctx)
+	yapi.CloseModel(modelp)
+	yapi.CloseConfig(&cfg)
+	yapi.CloseContext(&ctx)
 	yapi.Exit()
 }
 
-func Test_bv_models(t *testing.T) {
+func TestBvModels(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	bv_t := yapi.Bv_type(3)
-	bv1 := define_const("bv1", bv_t)
-	bv2 := define_const("bv2", bv_t)
-	bv3 := define_const("bv3", bv_t)
-	parse_assert("(= bv1 (bv-add bv2 bv3))", ctx)
-	parse_assert("(bv-gt bv2 0b000)", ctx)
-	parse_assert("(bv-gt bv3 0b000)", ctx)
+	bvT := yapi.BvType(3)
+	bv1 := defineConst("bv1", bvT)
+	bv2 := defineConst("bv2", bvT)
+	bv3 := defineConst("bv3", bvT)
+	parseAssert("(= bv1 (bv-add bv2 bv3))", ctx)
+	parseAssert("(bv-gt bv2 0b000)", ctx)
+	parseAssert("(bv-gt bv3 0b000)", ctx)
 
-	stat := yapi.Check_context(ctx, params)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
 	bval1 := []int32{0, 0, 0}
 	bval2 := []int32{0, 0, 0}
 	bval3 := []int32{0, 0, 0}
 
-	errcode := yapi.Get_bv_value(*modelp, bv1, bval1)
+	errcode := yapi.GetBvValue(*modelp, bv1, bval1)
 	AssertEqual(t, errcode, 0, "errcode == 0")
 	fmt.Printf("bval1 = %v\n", bval1)
 	AssertEqual(t, bval1, []int32{0, 0, 0}, "bval1 == []int32{0, 0, 0}")
 
-	errcode = yapi.Get_bv_value(*modelp, bv2, bval2)
+	errcode = yapi.GetBvValue(*modelp, bv2, bval2)
 	AssertEqual(t, errcode, 0, "errcode == 0")
 	fmt.Printf("bval2 = %v\n", bval2)
 	AssertEqual(t, bval2, []int32{0, 0, 1}, "bval2 == []int32{0, 0, 1}")
 
-	errcode = yapi.Get_bv_value(*modelp, bv3, bval3)
+	errcode = yapi.GetBvValue(*modelp, bv3, bval3)
 	AssertEqual(t, errcode, 0, "errcode == 0")
 	fmt.Printf("bval3 = %v\n", bval3)
 	AssertEqual(t, bval3, []int32{0, 0, 1}, "bval1 == []int32{0, 0, 1}")
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
 }
 
-func Test_tuple_models(t *testing.T) {
+func TestTupleModels(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	bool_t := yapi.Bool_type()
-	int_t := yapi.Int_type()
-	real_t := yapi.Real_type()
-	tup_t := yapi.Tuple_type3(bool_t, real_t, int_t)
-	t1 := define_const("t1", tup_t)
-	parse_assert("(ite (select t1 1) (< (select t1 2) (select t1 3)) (> (select t1 2) (select t1 3)))", ctx)
-	stat := yapi.Check_context(ctx, params)
+	boolT := yapi.BoolType()
+	intT := yapi.IntType()
+	realT := yapi.RealType()
+	tupT := yapi.TupleType3(boolT, realT, intT)
+	t1 := defineConst("t1", tupT)
+	parseAssert("(ite (select t1 1) (< (select t1 2) (select t1 3)) (> (select t1 2) (select t1 3)))", ctx)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 	mstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mstr, "(= t1 (mk-tuple false 1 0))")
-	var yval yapi.Yval_t
-	yapi.Get_value(*modelp, t1, &yval)
-	AssertEqual(t, yapi.Get_tag(yval), yapi.YvalTuple)
-	AssertEqual(t, yapi.Val_tuple_arity(*modelp, &yval), 3)
+	var yval yapi.YvalT
+	yapi.GetValue(*modelp, t1, &yval)
+	AssertEqual(t, yapi.GetTag(yval), yapi.YvalTuple)
+	AssertEqual(t, yapi.ValTupleArity(*modelp, &yval), 3)
 
-	yvec := make([]yapi.Yval_t, 3)
-	yapi.Val_expand_tuple(*modelp, &yval, yvec)
-	AssertEqual(t, yapi.Get_tag(yvec[0]), yapi.YvalBool)
+	yvec := make([]yapi.YvalT, 3)
+	yapi.ValExpandTuple(*modelp, &yval, yvec)
+	AssertEqual(t, yapi.GetTag(yvec[0]), yapi.YvalBool)
 	var bval int32
 	var ival int32
-	yapi.Val_get_bool(*modelp, &yvec[0], &bval)
-	yapi.Val_get_int32(*modelp, &yvec[1], &ival)
+	yapi.ValGetBool(*modelp, &yvec[0], &bval)
+	yapi.ValGetInt32(*modelp, &yvec[1], &ival)
 	AssertEqual(t, bval, 0)
 	AssertEqual(t, ival, 1)
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
@@ -409,222 +409,222 @@ func Test_function_models(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	bool_t := yapi.Bool_type()
-	int_t := yapi.Int_type()
-	real_t := yapi.Real_type()
-	fun_t := yapi.Function_type3(int_t, bool_t, real_t, real_t)
+	boolT := yapi.BoolType()
+	intT := yapi.IntType()
+	realT := yapi.RealType()
+	funT := yapi.FunctionType3(intT, boolT, realT, realT)
 
-	fstr := yapi.TypeToString(fun_t, 100, 80, 0)
+	fstr := yapi.TypeToString(funT, 100, 80, 0)
 
 	AssertEqual(t, fstr, "(-> int bool real real)")
 
-	fn := define_const("fn", fun_t)
-	i1 := define_const("i1", int_t)
+	fn := defineConst("fn", funT)
+	i1 := defineConst("i1", intT)
 	//b1 :=
-	define_const("b1", bool_t)
-	r1 := define_const("r1", real_t)
+	defineConst("b1", boolT)
+	r1 := defineConst("r1", realT)
 
-	parse_assert("(> (fn i1 b1 r1) (fn (+ i1 1) (not b1) (- r1 i1)))", ctx)
+	parseAssert("(> (fn i1 b1 r1) (fn (+ i1 1) (not b1) (- r1 i1)))", ctx)
 
-	stat := yapi.Check_context(ctx, params)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
 	mstr := yapi.ModelToString(*modelp, 80, 100, 0)
 	AssertEqual(t, mstr, "(= b1 false)\n(= i1 1463)\n(= r1 -579)\n(function fn\n (type (-> int bool real real))\n (= (fn 1463 false -579) 1)\n (= (fn 1464 true -2042) 0)\n (default 2))")
 
-	var yval yapi.Yval_t
-	yapi.Get_value(*modelp, fn, &yval)
-	AssertEqual(t, yapi.Get_tag(yval), yapi.YvalFunction)
-	AssertEqual(t, yapi.Val_function_arity(*modelp, &yval), 3)
+	var yval yapi.YvalT
+	yapi.GetValue(*modelp, fn, &yval)
+	AssertEqual(t, yapi.GetTag(yval), yapi.YvalFunction)
+	AssertEqual(t, yapi.ValFunctionArity(*modelp, &yval), 3)
 
-	var ydef yapi.Yval_t
+	var ydef yapi.YvalT
 
-	yvec := yapi.Val_expand_function(*modelp, &yval, &ydef)
+	yvec := yapi.ValExpandFunction(*modelp, &yval, &ydef)
 	AssertNotEqual(t, yvec, nil)
-	AssertEqual(t, yapi.Get_tag(ydef), yapi.YvalRational)
+	AssertEqual(t, yapi.GetTag(ydef), yapi.YvalRational)
 
 	var def32val int32
-	yapi.Val_get_int32(*modelp, &ydef, &def32val)
+	yapi.ValGetInt32(*modelp, &ydef, &def32val)
 	AssertEqual(t, def32val, 2)
 	AssertEqual(t, len(yvec), 2)
 	map1 := yvec[0]
 	map2 := yvec[1]
-	AssertEqual(t, yapi.Get_tag(map1), yapi.YvalMapping)
-	AssertEqual(t, yapi.Get_tag(map2), yapi.YvalMapping)
-	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map1), 3)
-	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &map2), 3)
+	AssertEqual(t, yapi.GetTag(map1), yapi.YvalMapping)
+	AssertEqual(t, yapi.GetTag(map2), yapi.YvalMapping)
+	AssertEqual(t, yapi.ValMappingArity(*modelp, &map1), 3)
+	AssertEqual(t, yapi.ValMappingArity(*modelp, &map2), 3)
 
-	var yval1, yval2 yapi.Yval_t
+	var yval1, yval2 yapi.YvalT
 
-	vec1 := yapi.Val_expand_mapping(*modelp, &map1, &yval1)
-	vec2 := yapi.Val_expand_mapping(*modelp, &map2, &yval2)
+	vec1 := yapi.ValExpandMapping(*modelp, &map1, &yval1)
+	vec2 := yapi.ValExpandMapping(*modelp, &map2, &yval2)
 
-	AssertEqual(t, yapi.Get_tag(yval1), yapi.YvalRational)
-	AssertEqual(t, yapi.Get_tag(yval2), yapi.YvalRational)
+	AssertEqual(t, yapi.GetTag(yval1), yapi.YvalRational)
+	AssertEqual(t, yapi.GetTag(yval2), yapi.YvalRational)
 
 	AssertEqual(t, len(vec1), 3)
 	AssertEqual(t, len(vec2), 3)
 
 	var val1, val2 int32
 
-	yapi.Val_get_int32(*modelp, &yval1, &val1)
-	yapi.Val_get_int32(*modelp, &yval2, &val2)
+	yapi.ValGetInt32(*modelp, &yval1, &val1)
+	yapi.ValGetInt32(*modelp, &yval2, &val2)
 
 	AssertEqual(t, val1, 1)
 	AssertEqual(t, val2, 0)
 
-	var arg_1_0, arg_2_0 int32
+	var arg10, arg20 int32
 
-	yapi.Val_get_int32(*modelp, &vec1[0], &arg_1_0)
-	yapi.Val_get_int32(*modelp, &vec2[0], &arg_2_0)
-	AssertEqual(t, arg_1_0, 1463)
-	AssertEqual(t, arg_2_0, 1464)
+	yapi.ValGetInt32(*modelp, &vec1[0], &arg10)
+	yapi.ValGetInt32(*modelp, &vec2[0], &arg20)
+	AssertEqual(t, arg10, 1463)
+	AssertEqual(t, arg20, 1464)
 
-	var arg_1_1, arg_2_1 int32
+	var arg11, arg21 int32
 
-	yapi.Val_get_bool(*modelp, &vec1[1], &arg_1_1)
-	yapi.Val_get_bool(*modelp, &vec2[1], &arg_2_1)
-	AssertEqual(t, arg_1_1, 0)
-	AssertEqual(t, arg_2_1, 1)
+	yapi.ValGetBool(*modelp, &vec1[1], &arg11)
+	yapi.ValGetBool(*modelp, &vec2[1], &arg21)
+	AssertEqual(t, arg11, 0)
+	AssertEqual(t, arg21, 1)
 
-	var arg_1_2, arg_2_2 int32
+	var arg12, arg22 int32
 
-	yapi.Val_get_int32(*modelp, &vec1[2], &arg_1_2)
-	yapi.Val_get_int32(*modelp, &vec2[2], &arg_2_2)
-	AssertEqual(t, arg_1_2, -579)
-	AssertEqual(t, arg_2_2, -2042)
+	yapi.ValGetInt32(*modelp, &vec1[2], &arg12)
+	yapi.ValGetInt32(*modelp, &vec2[2], &arg22)
+	AssertEqual(t, arg12, -579)
+	AssertEqual(t, arg22, -2042)
 
-	fmla := yapi.Parse_term("(> i1 r1)")
+	fmla := yapi.ParseTerm("(> i1 r1)")
 
-	AssertEqual(t, yapi.Formula_true_in_model(*modelp, fmla), 1)
+	AssertEqual(t, yapi.FormulaTrueInModel(*modelp, fmla), 1)
 
-	a_arr := []yapi.TermT{i1, fmla, r1}
-	b_arr := make([]yapi.TermT, 3)
+	aArr := []yapi.TermT{i1, fmla, r1}
+	bArr := make([]yapi.TermT, 3)
 
-	errcode := yapi.Term_array_value(*modelp, a_arr, b_arr)
+	errcode := yapi.TermArrayValue(*modelp, aArr, bArr)
 
 	AssertEqual(t, errcode, 0)
 
-	AssertEqual(t, b_arr[0], yapi.Int32(1463))
-	AssertEqual(t, b_arr[1], yapi.True())
-	AssertEqual(t, b_arr[2], yapi.Int32(-579))
+	AssertEqual(t, bArr[0], yapi.Int32(1463))
+	AssertEqual(t, bArr[1], yapi.True())
+	AssertEqual(t, bArr[2], yapi.Int32(-579))
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
 }
 
-func Test_scalar_models(t *testing.T) {
+func TestScalarModels(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	scalar_t := yapi.New_scalar_type(10)
+	scalarT := yapi.NewScalarType(10)
 
-	sc1 := define_const("sc1", scalar_t)
-	sc2 := define_const("sc2", scalar_t)
-	sc3 := define_const("sc3", scalar_t)
+	sc1 := defineConst("sc1", scalarT)
+	sc2 := defineConst("sc2", scalarT)
+	sc3 := defineConst("sc3", scalarT)
 
-	parse_assert("(/= sc1 sc2)", ctx)
-	parse_assert("(/= sc1 sc3)", ctx)
+	parseAssert("(/= sc1 sc2)", ctx)
+	parseAssert("(/= sc1 sc3)", ctx)
 
-	stat := yapi.Check_context(ctx, params)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
 	var val1, val2, val3 int32
 
-	yapi.Get_scalar_value(*modelp, sc1, &val1)
-	yapi.Get_scalar_value(*modelp, sc2, &val2)
-	yapi.Get_scalar_value(*modelp, sc3, &val3)
+	yapi.GetScalarValue(*modelp, sc1, &val1)
+	yapi.GetScalarValue(*modelp, sc2, &val2)
+	yapi.GetScalarValue(*modelp, sc3, &val3)
 
 	AssertEqual(t, sc1, yapi.TermT(6))
 	AssertEqual(t, sc2, yapi.TermT(8))
 	AssertEqual(t, sc3, yapi.TermT(10))
 
-	AssertEqual(t, yapi.Term_is_scalar(sc1), true)
-	AssertEqual(t, yapi.Term_is_scalar(sc2), true)
-	AssertEqual(t, yapi.Term_is_scalar(sc3), true)
+	AssertEqual(t, yapi.TermIsScalar(sc1), true)
+	AssertEqual(t, yapi.TermIsScalar(sc2), true)
+	AssertEqual(t, yapi.TermIsScalar(sc3), true)
 
-	var yval1, yval2, yval3 yapi.Yval_t
+	var yval1, yval2, yval3 yapi.YvalT
 
-	AssertEqual(t, yapi.Get_value(*modelp, sc1, &yval1), 0)
-	AssertEqual(t, yapi.Get_value(*modelp, sc2, &yval2), 0)
-	AssertEqual(t, yapi.Get_value(*modelp, sc3, &yval3), 0)
+	AssertEqual(t, yapi.GetValue(*modelp, sc1, &yval1), 0)
+	AssertEqual(t, yapi.GetValue(*modelp, sc2, &yval2), 0)
+	AssertEqual(t, yapi.GetValue(*modelp, sc3, &yval3), 0)
 
-	AssertEqual(t, yapi.Get_tag(yval1), yapi.YvalScalar)
-	AssertEqual(t, yapi.Get_tag(yval2), yapi.YvalScalar)
-	AssertEqual(t, yapi.Get_tag(yval3), yapi.YvalScalar)
+	AssertEqual(t, yapi.GetTag(yval1), yapi.YvalScalar)
+	AssertEqual(t, yapi.GetTag(yval2), yapi.YvalScalar)
+	AssertEqual(t, yapi.GetTag(yval3), yapi.YvalScalar)
 
 	var tau1, tau2, tau3 yapi.TypeT
 
-	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval1, &val1, &tau1), 0)
-	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval2, &val2, &tau2), 0)
-	AssertEqual(t, yapi.Val_get_scalar(*modelp, &yval3, &val3, &tau3), 0)
+	AssertEqual(t, yapi.ValGetScalar(*modelp, &yval1, &val1, &tau1), 0)
+	AssertEqual(t, yapi.ValGetScalar(*modelp, &yval2, &val2, &tau2), 0)
+	AssertEqual(t, yapi.ValGetScalar(*modelp, &yval3, &val3, &tau3), 0)
 
 	AssertEqual(t, val1, 9)
 	AssertEqual(t, val2, 8)
 	AssertEqual(t, val3, 8)
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
 }
 
-func Test_model_from_map(t *testing.T) {
+func TestModelFromMap(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	bv_t := yapi.Bv_type(8)
-	int_t := yapi.Int_type()
-	real_t := yapi.Real_type()
+	bvT := yapi.BvType(8)
+	intT := yapi.IntType()
+	realT := yapi.RealType()
 
-	i1 := define_const("i1", int_t)
-	r1 := define_const("r1", real_t)
-	bv1 := define_const("bv1", bv_t)
+	i1 := defineConst("i1", intT)
+	r1 := defineConst("r1", realT)
+	bv1 := defineConst("bv1", bvT)
 
 	iconst1 := yapi.Int32(42)
 	rconst1 := yapi.Rational32(13, 131)
-	bvconst1 := yapi.Bvconst_int32(8, 134)
+	bvconst1 := yapi.BvconstInt32(8, 134)
 
 	vars := []yapi.TermT{i1, r1, bv1}
 	vals := []yapi.TermT{iconst1, rconst1, bvconst1}
 
-	modelp := yapi.Model_from_map(vars, vals)
+	modelp := yapi.ModelFromMap(vars, vals)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
 	modelstr := yapi.ModelToString(*modelp, 80, 100, 0)
 
 	AssertEqual(t, modelstr, "(= i1 42)\n(= r1 13/131)\n(= bv1 0b10000110)")
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
 }
 
-func Test_implicant(t *testing.T) {
+func TestImplicant(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	int_t := yapi.Int_type()
+	intT := yapi.IntType()
 
-	i1 := define_const("i1", int_t)
+	i1 := defineConst("i1", intT)
 
-	parse_assert("(and (> i1 2) (< i1 8) (/= i1 4))", ctx)
+	parseAssert("(and (> i1 2) (< i1 8) (/= i1 4))", ctx)
 
-	stat := yapi.Check_context(ctx, params)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
-	fmla0 := yapi.Parse_term("(>= i1 3)")
+	fmla0 := yapi.ParseTerm("(>= i1 3)")
 
-	terms := yapi.Implicant_for_formula(*modelp, fmla0)
+	terms := yapi.ImplicantForFormula(*modelp, fmla0)
 
 	AssertEqual(t, len(terms), 1)
 
@@ -634,10 +634,10 @@ func Test_implicant(t *testing.T) {
 	implstr := yapi.TermToString(terms[0], 200, 10, 0)
 	AssertEqual(t, implstr, "(>= (+ -3 i1) 0)")
 
-	fmla1 := yapi.Parse_term("(<= i1 9)")
+	fmla1 := yapi.ParseTerm("(<= i1 9)")
 	fmlas := []yapi.TermT{fmla0, fmla1}
 
-	terms = yapi.Implicant_for_formulas(*modelp, fmlas)
+	terms = yapi.ImplicantForFormulas(*modelp, fmlas)
 	AssertEqual(t, len(terms), 2)
 
 	implstr2 := yapi.TermToString(terms[0], 200, 10, 0)
@@ -645,76 +645,76 @@ func Test_implicant(t *testing.T) {
 	implstr3 := yapi.TermToString(terms[1], 200, 10, 0)
 	AssertEqual(t, implstr3, "(>= (+ 9 (* -1 i1)) 0)")
 
-	fmlas = yapi.Generalize_model_array(*modelp, fmlas, []yapi.TermT{i1}, 0)
+	fmlas = yapi.GeneralizeModelArray(*modelp, fmlas, []yapi.TermT{i1}, 0)
 	AssertEqual(t, len(fmlas), 2)
 	tstr0 := yapi.TermToString(fmlas[0], 200, 10, 0)
 	AssertEqual(t, tstr0, "true")
 	tstr1 := yapi.TermToString(fmlas[1], 200, 10, 0)
 	AssertEqual(t, tstr1, "true")
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 
 }
 
-func Test_yval_numeric_models(t *testing.T) {
+func TestYvalNumericModels(t *testing.T) {
 
 	cfg, ctx, params := setup()
 
-	int_t := yapi.Int_type()
+	intT := yapi.IntType()
 
-	i1 := define_const("i1", int_t)
-	i2 := define_const("i2", int_t)
+	i1 := defineConst("i1", intT)
+	i2 := defineConst("i2", intT)
 
-	parse_assert("(> i1 3)", ctx)
-	parse_assert("(< i2 i1)", ctx)
+	parseAssert("(> i1 3)", ctx)
+	parseAssert("(< i2 i1)", ctx)
 
-	stat := yapi.Check_context(ctx, params)
+	stat := yapi.CheckContext(ctx, params)
 	AssertEqual(t, stat, yapi.STATUS_SAT, "stat == yapi.STATUS_SAT")
-	modelp := yapi.Get_model(ctx, 1)
+	modelp := yapi.GetModel(ctx, 1)
 	AssertNotEqual(t, modelp, nil, "modelp != nil")
 
-	var y1, y2 yapi.Yval_t
-	errcode := yapi.Get_value(*modelp, i1, &y1)
+	var y1, y2 yapi.YvalT
+	errcode := yapi.GetValue(*modelp, i1, &y1)
 	AssertEqual(t, errcode, 0)
 	yerror := yapi.YicesError()
-	AssertEqual(t, yerror, nil) //aye curumba: hay magic in testlib.go to avoid: (*yapi.YicesError_t)(nil)
+	AssertEqual(t, yerror, nil) //aye curumba: hay magic in testlib.go to avoid: (*yapi.YicesErrorT)(nil)
 
-	errcode = yapi.Get_value(*modelp, i2, &y2)
+	errcode = yapi.GetValue(*modelp, i2, &y2)
 	AssertEqual(t, errcode, 0)
 	yerror = yapi.YicesError()
 	AssertEqual(t, yerror, nil) //aye curumba. ibid
 
-	AssertEqual(t, yapi.Val_is_int32(*modelp, &y1), 1)
-	AssertEqual(t, yapi.Val_is_int64(*modelp, &y1), 1)
-	AssertEqual(t, yapi.Val_is_rational32(*modelp, &y1), 1)
-	AssertEqual(t, yapi.Val_is_rational64(*modelp, &y1), 1)
-	AssertEqual(t, yapi.Val_is_integer(*modelp, &y1), 1)
+	AssertEqual(t, yapi.ValIsInt32(*modelp, &y1), 1)
+	AssertEqual(t, yapi.ValIsInt64(*modelp, &y1), 1)
+	AssertEqual(t, yapi.ValIsRational32(*modelp, &y1), 1)
+	AssertEqual(t, yapi.ValIsRational64(*modelp, &y1), 1)
+	AssertEqual(t, yapi.ValIsInteger(*modelp, &y1), 1)
 
-	AssertEqual(t, yapi.Val_bitsize(*modelp, &y1), 0)
-	AssertEqual(t, yapi.Val_tuple_arity(*modelp, &y1), 0)
-	AssertEqual(t, yapi.Val_mapping_arity(*modelp, &y1), 0)
-	AssertEqual(t, yapi.Val_function_arity(*modelp, &y1), 0)
+	AssertEqual(t, yapi.ValBitsize(*modelp, &y1), 0)
+	AssertEqual(t, yapi.ValTupleArity(*modelp, &y1), 0)
+	AssertEqual(t, yapi.ValMappingArity(*modelp, &y1), 0)
+	AssertEqual(t, yapi.ValFunctionArity(*modelp, &y1), 0)
 
 	var b1 int32
 
-	errcode = yapi.Val_get_bool(*modelp, &y1, &b1)
+	errcode = yapi.ValGetBool(*modelp, &y1, &b1)
 	AssertEqual(t, errcode, -1)
 	yerror = yapi.YicesError()
 	AssertNotEqual(t, yerror, nil) //aye curumba. ibid
-	AssertEqual(t, yerror.Error_string, "invalid operation on yval")
+	AssertEqual(t, yerror.ErrorString, "invalid operation on yval")
 	AssertEqual(t, yerror.Code, yapi.YVAL_INVALID_OP)
 
 	var ival32 int32
-	errcode = yapi.Val_get_int32(*modelp, &y1, &ival32)
+	errcode = yapi.ValGetInt32(*modelp, &y1, &ival32)
 	AssertEqual(t, errcode, 0)
 	yerror = yapi.YicesError()
 	AssertEqual(t, yerror, nil) //aye curumba. ibid
 	AssertEqual(t, ival32, 4)
 
 	var ival64 int64
-	errcode = yapi.Val_get_int64(*modelp, &y1, &ival64)
+	errcode = yapi.ValGetInt64(*modelp, &y1, &ival64)
 	AssertEqual(t, errcode, 0)
 	yerror = yapi.YicesError()
 	AssertEqual(t, yerror, nil) //aye curumba. ibid
@@ -722,40 +722,40 @@ func Test_yval_numeric_models(t *testing.T) {
 
 	var num32 int32
 	var den32 uint32
-	errcode = yapi.Val_get_rational32(*modelp, &y1, &num32, &den32)
+	errcode = yapi.ValGetRational32(*modelp, &y1, &num32, &den32)
 	AssertEqual(t, errcode, 0)
 	AssertEqual(t, num32, 4)
 	AssertEqual(t, den32, 1)
 
 	var num64 int64
 	var den64 uint64
-	errcode = yapi.Val_get_rational64(*modelp, &y1, &num64, &den64)
+	errcode = yapi.ValGetRational64(*modelp, &y1, &num64, &den64)
 	AssertEqual(t, errcode, 0)
 	AssertEqual(t, num64, 4)
 	AssertEqual(t, den64, 1)
 
 	var dval float64
-	errcode = yapi.Val_get_double(*modelp, &y1, &dval)
+	errcode = yapi.ValGetDouble(*modelp, &y1, &dval)
 	AssertEqual(t, errcode, 0)
 	AssertEqual(t, dval, 4.0)
 
-	var mpz yapi.Mpz_t
-	yapi.Init_mpz(&mpz)
-	errcode = yapi.Val_get_mpz(*modelp, &y1, &mpz)
+	var mpz yapi.MpzT
+	yapi.InitMpz(&mpz)
+	errcode = yapi.ValGetMpz(*modelp, &y1, &mpz)
 	AssertEqual(t, errcode, 0)
 	ytz := yapi.Mpz(&mpz)
 	AssertEqual(t, yapi.TermToString(ytz, 200, 10, 0), "4")
-	yapi.Close_mpz(&mpz)
+	yapi.CloseMpz(&mpz)
 
-	var mpq yapi.Mpq_t
-	yapi.Init_mpq(&mpq)
-	errcode = yapi.Val_get_mpq(*modelp, &y1, &mpq)
+	var mpq yapi.MpqT
+	yapi.InitMpq(&mpq)
+	errcode = yapi.ValGetMpq(*modelp, &y1, &mpq)
 	AssertEqual(t, errcode, 0)
 	ytq := yapi.Mpq(&mpq)
 	AssertEqual(t, yapi.TermToString(ytq, 200, 10, 0), "4")
-	yapi.Close_mpq(&mpq)
+	yapi.CloseMpq(&mpq)
 
-	yapi.Close_model(modelp)
+	yapi.CloseModel(modelp)
 
 	cleanup(&cfg, &ctx, &params)
 

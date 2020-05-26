@@ -14,7 +14,7 @@ func main() {
 	fmt.Printf("Yices build date:           %s\n", yices.BuildDate)
 	fmt.Printf("Yices has mcsat:            %v\n", yices.HasMcsat)
 	fmt.Printf("Yices is thread safe:       %v\n", yices.IsThreadSafe)
-	fmt.Printf("Yices has cadical:          %v\n", yapi.Has_delegate("cadical"))
-	fmt.Printf("Yices has cryptominisat:    %v\n", yapi.Has_delegate("cryptominisat"))
-	fmt.Printf("Yices has y2sat:            %v\n", yapi.Has_delegate("y2sat"))
+	fmt.Printf("Yices has cadical:          %v\n", yapi.HasDelegate("cadical"))
+	fmt.Printf("Yices has cryptominisat:    %v\n", yapi.HasDelegate("cryptominisat"))
+	fmt.Printf("Yices has y2sat:            %v\n", yapi.HasDelegate("y2sat"))
 }

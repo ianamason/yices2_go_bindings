@@ -10,32 +10,32 @@ func TestErrors(t *testing.T) {
 	yapi.Init()
 
 	//First with no error
-	errcode := yapi.Error_code()
+	errcode := yapi.ErrorCode()
 	AssertEqual(t, errcode, yapi.NO_ERROR, "errcode == yices.NO_ERROR")
-	yapi.Clear_error()
-	errstr := yapi.Error_string()
+	yapi.ClearError()
+	errstr := yapi.ErrorString()
 	AssertEqual(t, errstr, "no error", "errstr == 'no error'")
-	yapi.Print_error(os.Stderr)
+	yapi.PrintError(os.Stderr)
 
 	// Illegal - only scalar or uninterpreted types allowed
-	bool_t := yapi.Bool_type()
-	AssertTrue(t, yapi.Type_is_bool(bool_t), "yapi.Type_is_bool(bool_t)")
-	const1 := yapi.Constant(bool_t, 0)
-	error_string := yapi.Error_string()
-	AssertEqual(t, const1, yapi.NULL_TERM, "const1 == yapi.NULL_TERM")
-	AssertEqual(t, error_string, "invalid type in constant creation", "error_string == 'invalid type in constant creation'")
+	boolT := yapi.BoolType()
+	AssertTrue(t, yapi.TypeIsBool(boolT), "yapi.TypeIsBool(boolT)")
+	const1 := yapi.Constant(boolT, 0)
+	errorString := yapi.ErrorString()
+	AssertEqual(t, const1, yapi.NullTerm, "const1 == yapi.NullTerm")
+	AssertEqual(t, errorString, "invalid type in constant creation", "errorString == 'invalid type in constant creation'")
 
 	yerror := yapi.YicesError()
 
 	println(yerror.String())
 
-	yapi.Clear_error()
-	AssertEqual(t, yapi.Error_code(), yapi.NO_ERROR, "yapi.Error_code() == yapi.NO_ERROR")
-	errstr = yapi.Error_string()
+	yapi.ClearError()
+	AssertEqual(t, yapi.ErrorCode(), yapi.NO_ERROR, "yapi.ErrorCode() == yapi.NO_ERROR")
+	errstr = yapi.ErrorString()
 	AssertEqual(t, errstr, "no error", "errstr == 'no error'")
-	yapi.Print_error(os.Stderr)
-	yapi.Clear_error()
-	AssertEqual(t, yapi.Error_code(), yapi.NO_ERROR, "yapi.Error_code() == yapi.NO_ERROR")
+	yapi.PrintError(os.Stderr)
+	yapi.ClearError()
+	AssertEqual(t, yapi.ErrorCode(), yapi.NO_ERROR, "yapi.ErrorCode() == yapi.NO_ERROR")
 
 	yapi.Exit()
 }

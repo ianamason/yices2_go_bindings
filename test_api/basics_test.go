@@ -10,27 +10,27 @@ import (
 func TestBasis0(t *testing.T) {
 	yapi.Init()
 
-	bvt := yapi.Bool_type()
-	ivt := yapi.Int_type()
-	rvt := yapi.Real_type()
+	bvt := yapi.BoolType()
+	ivt := yapi.IntType()
+	rvt := yapi.RealType()
 
 	AssertNotEqual(t, bvt, ivt, "bvt != ivt")
 	AssertNotEqual(t, bvt, rvt, "bvt != rvt")
 	AssertNotEqual(t, ivt, rvt, "ivt != ivt")
 
-	fmt.Printf("Bool_type(): %v %v\n", bvt, yapi.Type_is_bool(bvt))
-	fmt.Printf("Int_type(): %v %v\n", ivt, yapi.Type_is_int(ivt))
-	fmt.Printf("Real_type(): %v %v\n", rvt, yapi.Type_is_real(rvt))
+	fmt.Printf("BoolType(): %v %v\n", bvt, yapi.TypeIsBool(bvt))
+	fmt.Printf("IntType(): %v %v\n", ivt, yapi.TypeIsInt(ivt))
+	fmt.Printf("RealType(): %v %v\n", rvt, yapi.TypeIsReal(rvt))
 
 	typs := []yapi.TypeT{bvt, ivt, rvt}
 
-	tupt := yapi.Tuple_type(typs)
+	tupt := yapi.TupleType(typs)
 
-	fmt.Printf("Tuple type(): %v %v\n", tupt, yapi.Type_is_tuple(tupt))
+	fmt.Printf("Tuple type(): %v %v\n", tupt, yapi.TypeIsTuple(tupt))
 
-	yapi.Pp_type(os.Stdout, tupt, 80, 80, 10)
+	yapi.PpType(os.Stdout, tupt, 80, 80, 10)
 
-	children := yapi.Type_children(tupt)
+	children := yapi.TypeChildren(tupt)
 
 	fmt.Printf("children: %v\n", children)
 

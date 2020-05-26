@@ -60,22 +60,22 @@ func Error() (yerror *yapi.YicesErrorT) {
 
 // ErrorCode returns the most recent yices error code.
 func ErrorCode() yapi.ErrorCodeT {
-	return yapi.Error_code()
+	return yapi.ErrorCode()
 }
 
 // ClearError clears the most recent error structure.
 func ClearError() {
-	yapi.Clear_error()
+	yapi.ClearError()
 }
 
 // PrintError prints the most recent yices error.
 func PrintError(f *os.File) int32 {
-	return yapi.Print_error(f)
+	return yapi.PrintError(f)
 }
 
 // ErrorString returns a string describing the most recent yices error.
 func ErrorString() string {
-	return yapi.Error_string()
+	return yapi.ErrorString()
 }
 
 /***********************

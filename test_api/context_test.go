@@ -9,41 +9,41 @@ func TestContext0(t *testing.T) {
 
 	yapi.Init()
 
-	var cfg yapi.Config_t
+	var cfg yapi.ConfigT
 
-	yapi.Init_config(&cfg)
+	yapi.InitConfig(&cfg)
 
-	var ctx yapi.Context_t
+	var ctx yapi.ContextT
 
-	yapi.Init_context(cfg, &ctx)
+	yapi.InitContext(cfg, &ctx)
 
-	yapi.Close_config(&cfg)
+	yapi.CloseConfig(&cfg)
 
-	bv_t := yapi.Bv_type(3)
-	bvvar1 := yapi.New_uninterpreted_term(bv_t)
-	yapi.Set_term_name(bvvar1, "x")
-	bvvar2 := yapi.New_uninterpreted_term(bv_t)
-	yapi.Set_term_name(bvvar2, "y")
-	bvvar3 := yapi.New_uninterpreted_term(bv_t)
-	yapi.Set_term_name(bvvar3, "z")
-	fmla1 := yapi.Parse_term("(= x (bv-add y z))")
-	fmla2 := yapi.Parse_term("(bv-gt y 0b000)")
-	fmla3 := yapi.Parse_term("(bv-gt z 0b000)")
-	yapi.Assert_formula(ctx, fmla1)
-	yapi.Assert_formulas(ctx, []yapi.TermT{fmla1, fmla2, fmla3})
-	var params yapi.Param_t
-	smt_stat := yapi.Check_context(ctx, params)
-	AssertEqual(t, smt_stat, yapi.STATUS_SAT, "smt_stat == yapi.STATUS_SAT")
+	bvT := yapi.BvType(3)
+	bvvar1 := yapi.NewUninterpretedTerm(bvT)
+	yapi.SetTermName(bvvar1, "x")
+	bvvar2 := yapi.NewUninterpretedTerm(bvT)
+	yapi.SetTermName(bvvar2, "y")
+	bvvar3 := yapi.NewUninterpretedTerm(bvT)
+	yapi.SetTermName(bvvar3, "z")
+	fmla1 := yapi.ParseTerm("(= x (bv-add y z))")
+	fmla2 := yapi.ParseTerm("(bv-gt y 0b000)")
+	fmla3 := yapi.ParseTerm("(bv-gt z 0b000)")
+	yapi.AssertFormula(ctx, fmla1)
+	yapi.AssertFormulas(ctx, []yapi.TermT{fmla1, fmla2, fmla3})
+	var params yapi.ParamT
+	smtStat := yapi.CheckContext(ctx, params)
+	AssertEqual(t, smtStat, yapi.STATUS_SAT, "smtStat == yapi.STATUS_SAT")
 
-	yapi.Init_param_record(&params)
-	yapi.Default_params_for_context(ctx, params)
+	yapi.InitParamRecord(&params)
+	yapi.DefaultParamsForContext(ctx, params)
 
-	errcode := yapi.Set_param(params, "dyn-ack", "true")
+	errcode := yapi.SetParam(params, "dyn-ack", "true")
 	AssertEqual(t, errcode, 0, "errcode == 0") //FIXME: is this right?
 
-	yapi.Close_param_record(&params)
+	yapi.CloseParamRecord(&params)
 
-	yapi.Close_context(&ctx)
+	yapi.CloseContext(&ctx)
 
 	yapi.Exit()
 
@@ -52,66 +52,66 @@ func TestContext0(t *testing.T) {
 func TestContext1(t *testing.T) {
 	yapi.Init()
 
-	var cfg yapi.Config_t
+	var cfg yapi.ConfigT
 
-	var ctx yapi.Context_t
+	var ctx yapi.ContextT
 
-	yapi.Init_config(&cfg)
+	yapi.InitConfig(&cfg)
 
-	yapi.Init_context(cfg, &ctx)
+	yapi.InitContext(cfg, &ctx)
 
-	yapi.Context_status(ctx)
+	yapi.ContextStatus(ctx)
 	ret := yapi.Push(ctx)
 	AssertEqual(t, ret, 0, "ret == 0")
 	ret = yapi.Pop(ctx)
 	AssertEqual(t, ret, 0, "ret == 0")
-	yapi.Reset_context(ctx)
-	ret = yapi.Context_enable_option(ctx, "arith-elim")
+	yapi.ResetContext(ctx)
+	ret = yapi.ContextEnableOption(ctx, "arith-elim")
 	AssertEqual(t, ret, 0, "ret == 0")
-	ret = yapi.Context_disable_option(ctx, "arith-elim")
+	ret = yapi.ContextDisableOption(ctx, "arith-elim")
 	AssertEqual(t, ret, 0, "ret == 0")
-	stat := yapi.Context_status(ctx)
+	stat := yapi.ContextStatus(ctx)
 	AssertEqual(t, stat, yapi.STATUS_IDLE, "stat == yapi.STATUS_IDLE")
-	yapi.Reset_context(ctx)
-	bool_t := yapi.Bool_type()
-	bvar1 := yapi.New_variable(bool_t)
-	errcode := yapi.Assert_formula(ctx, bvar1)
-	error_string := yapi.Error_string()
+	yapi.ResetContext(ctx)
+	boolT := yapi.BoolType()
+	bvar1 := yapi.NewVariable(boolT)
+	errcode := yapi.AssertFormula(ctx, bvar1)
+	errorString := yapi.ErrorString()
 	AssertEqual(t, errcode, -1, "errcode == -1")
-	AssertEqual(t, error_string, "assertion contains a free variable", "error_string == 'assertion contains a free variable'")
-	bv_t := yapi.Bv_type(3)
-	bvvar1 := yapi.New_uninterpreted_term(bv_t)
-	yapi.Set_term_name(bvvar1, "x")
-	bvvar2 := yapi.New_uninterpreted_term(bv_t)
-	yapi.Set_term_name(bvvar2, "y")
-	bvvar3 := yapi.New_uninterpreted_term(bv_t)
-	yapi.Set_term_name(bvvar3, "z")
-	fmla1 := yapi.Parse_term("(= x (bv-add y z))")
-	fmla2 := yapi.Parse_term("(bv-gt y 0b000)")
-	fmla3 := yapi.Parse_term("(bv-gt z 0b000)")
-	yapi.Assert_formula(ctx, fmla1)
-	yapi.Assert_formulas(ctx, []yapi.TermT{fmla1, fmla2, fmla3})
+	AssertEqual(t, errorString, "assertion contains a free variable", "errorString == 'assertion contains a free variable'")
+	bvT := yapi.BvType(3)
+	bvvar1 := yapi.NewUninterpretedTerm(bvT)
+	yapi.SetTermName(bvvar1, "x")
+	bvvar2 := yapi.NewUninterpretedTerm(bvT)
+	yapi.SetTermName(bvvar2, "y")
+	bvvar3 := yapi.NewUninterpretedTerm(bvT)
+	yapi.SetTermName(bvvar3, "z")
+	fmla1 := yapi.ParseTerm("(= x (bv-add y z))")
+	fmla2 := yapi.ParseTerm("(bv-gt y 0b000)")
+	fmla3 := yapi.ParseTerm("(bv-gt z 0b000)")
+	yapi.AssertFormula(ctx, fmla1)
+	yapi.AssertFormulas(ctx, []yapi.TermT{fmla1, fmla2, fmla3})
 
-	var params yapi.Param_t
-	smt_stat := yapi.Check_context(ctx, params) //same as passing NULL to the C
-	AssertEqual(t, smt_stat, yapi.STATUS_SAT, "smt_stat == yapi.STATUS_SAT")
-	yapi.Assert_blocking_clause(ctx)
-	yapi.Stop_search(ctx)
+	var params yapi.ParamT
+	smtStat := yapi.CheckContext(ctx, params) //same as passing NULL to the C
+	AssertEqual(t, smtStat, yapi.STATUS_SAT, "smtStat == yapi.STATUS_SAT")
+	yapi.AssertBlockingClause(ctx)
+	yapi.StopSearch(ctx)
 
-	yapi.Init_param_record(&params)
-	yapi.Default_params_for_context(ctx, params)
-	yapi.Set_param(params, "dyn-ack", "true")
-	errcode = yapi.Set_param(params, "foo", "bar")
-	error_string = yapi.Error_string()
+	yapi.InitParamRecord(&params)
+	yapi.DefaultParamsForContext(ctx, params)
+	yapi.SetParam(params, "dyn-ack", "true")
+	errcode = yapi.SetParam(params, "foo", "bar")
+	errorString = yapi.ErrorString()
 	AssertEqual(t, errcode, -1, "errcode == -1")
-	AssertEqual(t, error_string, "invalid parameter", "error_string == 'invalid parameter'")
-	errcode = yapi.Set_param(params, "dyn-ack", "bar")
-	error_string = yapi.Error_string()
+	AssertEqual(t, errorString, "invalid parameter", "errorString == 'invalid parameter'")
+	errcode = yapi.SetParam(params, "dyn-ack", "bar")
+	errorString = yapi.ErrorString()
 	AssertEqual(t, errcode, -1, "errcode == -1")
-	AssertEqual(t, error_string, "value not valid for parameter", "error_string == 'value not valid for parameter'")
-	yapi.Close_param_record(&params)
+	AssertEqual(t, errorString, "value not valid for parameter", "errorString == 'value not valid for parameter'")
+	yapi.CloseParamRecord(&params)
 
-	yapi.Close_context(&ctx)
+	yapi.CloseContext(&ctx)
 
 	yapi.Exit()
 
