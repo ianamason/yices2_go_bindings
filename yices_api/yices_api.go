@@ -2449,7 +2449,7 @@ func ExportFormulaToDimacs(t TermT, filename string, simplify bool, status *SmtS
 	} else {
 		csimplify = 0
 	}
-	var cstatus C.smt_status_t = 0
+	var cstatus C.smt_status_t
 	errcode = int32(C.yices_export_formula_to_dimacs(C.term_t(t), path, csimplify, &cstatus))
 	if errcode == 0 {
 		*status = SmtStatusT(cstatus)
@@ -2469,7 +2469,7 @@ func ExportFormulasToDimacs(t []TermT, filename string, simplify bool, status *S
 	} else {
 		csimplify = 0
 	}
-	var cstatus C.smt_status_t = 0
+	var cstatus C.smt_status_t
 	errcode = int32(C.yices_export_formulas_to_dimacs((*C.term_t)(&t[0]), count, path, csimplify, &cstatus))
 	if errcode == 0 {
 		*status = SmtStatusT(cstatus)
