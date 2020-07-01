@@ -1,7 +1,9 @@
 package yices2
 
+// TermConstructorT is the analog of the enum term_constructor_t defined in yices_types.h
 type TermConstructorT int32
 
+// These are the elements of TermConstructorT, the analog of the enum elements of term_constructor_t defined in yices_types.h
 const (
 	TrmCnstrConstructorError TermConstructorT = iota - 1 // to report an error
 
