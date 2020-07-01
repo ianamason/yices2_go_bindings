@@ -15,14 +15,11 @@ func Signed(thing interface{}) (retval bool) {
 	if thing == nil {
 		return
 	}
-
 	tau := reflect.TypeOf(thing).String()
-
 	switch tau {
 	case "int", "int8", "int16", "int32", "int64":
 		retval = true
 	}
-
 	return
 }
 
@@ -31,7 +28,6 @@ func Unsigned(thing interface{}) (retval bool) {
 	if thing == nil {
 		return
 	}
-
 	switch reflect.TypeOf(thing).String() {
 	case "uint", "uint8", "uint16", "uint32", "uint64":
 		retval = true
@@ -114,77 +110,58 @@ func convertUnsigned2UInt(y interface{}, yuint *uint) bool {
 
 // SignedUnsignedEqual compares a signed integer with an unsigned one
 func SignedUnsignedEqual(x interface{}, y interface{}) bool {
-
 	if x == nil || y == nil {
 		return false
 	}
-
 	var xint int64
 	var yint int64
-
 	if !convertSigned2Int64(x, &xint) {
 		return false
 	}
-
 	if !convertUnsigned2Int64(y, &yint) {
 		return false
 	}
-
 	if xint != yint {
 		return false
 	}
-
 	return true
-
 }
 
 // SignedEqual encodes equality on signed integers.
 func SignedEqual(x interface{}, y interface{}) bool {
-
 	if x == nil || y == nil {
 		return false
 	}
-
 	var xint int64
 	var yint int64
-
 	if !convertSigned2Int64(x, &xint) {
 		return false
 	}
-
 	if !convertSigned2Int64(y, &yint) {
 		return false
 	}
-
 	if xint != yint {
 		return false
 	}
-
 	return true
 }
 
 // UnsignedEqual encodes equality on unsigned integers.
 func UnsignedEqual(x interface{}, y interface{}) bool {
-
 	if x == nil || y == nil {
 		return false
 	}
-
 	var xuint uint
 	var yuint uint
-
 	if !convertUnsigned2UInt(x, &xuint) {
 		return false
 	}
-
 	if !convertUnsigned2UInt(y, &yuint) {
 		return false
 	}
-
 	if xuint != yuint {
 		return false
 	}
-
 	return true
 }
 
@@ -219,15 +196,12 @@ func AssertNotEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...str
 
 // AssertEqual asserts that the lhs is equal to the rhs.
 func AssertEqual(t *testing.T, lhs interface{}, rhs interface{}, where ...string) {
-
 	if isNil(lhs) && isNil(rhs) {
 		return
 	}
-
 	if isNil(lhs) || isNil(rhs) {
 		t.Errorf("%s : AssertEqual of pointer %v : %v != %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))
 	}
-
 	if Signed(lhs) && Signed(rhs) {
 		if !SignedEqual(lhs, rhs) {
 			t.Errorf("%s : AssertEqual of signed integers %v : %v != %v : %v\n", where, lhs, reflect.TypeOf(lhs), rhs, reflect.TypeOf(rhs))

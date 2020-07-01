@@ -1,10 +1,8 @@
 package yices2
 
+// These are the go versions of the yices_types.h error_code (code <= 100 constants: Errors in type or term construction)
 const (
 	NoError ErrorCodeT = iota
-	/*
-	 * Errors in type or term construction
-	 */
 	ErrorInvalidType
 	ErrorInvalidTerm
 	ErrorInvalidConstantIndex
@@ -49,6 +47,7 @@ const (
 	ErrorInvalidTermOp         // added 2014/12/04
 )
 
+// These are the go versions of the yices_types.h error_code (100 < code  <= 300 constants: Parser errors)
 const (
 	/*
 	 * Parser errors
@@ -74,9 +73,9 @@ const (
 	ErrorBvarithError
 )
 
+// These are the go versions of the yices_types.h error_code (300 < code  <= 400 constants: Errors in assertion processing.)
 const (
 	/*
-	 * Errors in assertion processing.
 	 * These codes mean that the context as configured
 	 * cannot process the assertions.
 	 */
@@ -103,28 +102,24 @@ const (
 	ErrorCtxUtypeNotSupported  // added 2015/03/26
 )
 
+// These are the go versions of the yices_types.h error_code (400 < code  <= 500 constants: Error codes for other operations.)
 const (
-	/*
-	 * Error codes for other operations
-	 */
 	ErrorCtxInvalidOperation ErrorCodeT = 400 + iota
 	ErrorCtxOperationNotSupported
+	ErrorCtxUnknownDelegate      = 420 + iota // Since 2.6.2.
+	ErrorCtxDelegateNotAvailable              // Since 2.6.2.
 )
 
+// These are the go versions of the yices_types.h error_code (500 < code  <= 600 constants: Errors in context configurations and search parameter settings.)
 const (
-	/*
-	 * Errors in context configurations and search parameter settings
-	 */
 	ErrorCtxInvalidConfig ErrorCodeT = 500 + iota
 	ErrorCtxUnknownParameter
 	ErrorCtxInvalidParameterValue
 	ErrorCtxUnknownLogic
 )
 
+// These are the go versions of the yices_types.h error_code (600 < code  <= 700 constants: Error codes for model queries.)
 const (
-	/*
-	 * Error codes for model queries
-	 */
 	ErrorEvalUnknownTerm ErrorCodeT = 600 + iota
 	ErrorEvalFreevarInTerm
 	ErrorEvalQuantifier
@@ -136,10 +131,8 @@ const (
 	ErrorEvalNotSupported
 )
 
+// These are the go versions of the yices_types.h error_code (700 < code  <= 800 constants: Error codes for model construction.)
 const (
-	/*
-	 * Error codes for model construction
-	 */
 	ErrorMdlUnintRequired ErrorCodeT = 700 + iota
 	ErrorMdlConstantRequired
 	ErrorMdlDuplicateVar
@@ -147,41 +140,33 @@ const (
 	ErrorMdlConstructionFailed
 )
 
+// These are the go versions of the yices_types.h error_code (800 < code  <= 900 constants: Error codes in DAG/node queries.)
 const (
-	/*
-	 * Error codes in DAG/node queries
-	 */
 	ErrorYvalInvalidOp ErrorCodeT = 800 + iota
 	ErrorYvalOverflow
 	ErrorYvalNotSupported
 )
 
+// These are the go versions of the yices_types.h error_code (900 < code  <= 1000 constants: Error codes for model generalization.)
 const (
-	/*
-	 * Error codes for model generalization
-	 */
 	ErrorMdlGenTypeNotSupported ErrorCodeT = 900 + iota
 	ErrorMdlGenNonlinear
 	ErrorMdlGenFailed
 )
 
+// These are the go versions of the yices_types.h error_code (1000 < code  <= 9000 constants: MCSAT error codes.)
 const (
-	/*
-	 * MCSAT error codes
-	 */
 	ErrorMcsatErrorUnsupportedTheory ErrorCodeT = 1000 + iota
 )
 
+// These are the go versions of the yices_types.h error_code (9000 < code  <= 9999 constants: Input/output and system errors.)
 const (
-	/*
-	 * Input/output and system errors
-	 */
 	ErrorOutputError ErrorCodeT = 9000 + iota
 )
 
+// These are the go versions of the yices_types.h error_code (9999< code constants: Catch-all code for anything else.)
 const (
 	/*
-	 * Catch-all code for anything else.
 	 * This is a symptom that a bug has been found.
 	 */
 	ErrorInternalException ErrorCodeT = 9999 + iota
