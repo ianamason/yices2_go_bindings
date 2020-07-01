@@ -2395,9 +2395,8 @@ func CheckFormula(t TermT, logic string, delegate string, model *ModelT) (status
 	cdelegate := C.CString(delegate)
 	defer C.free(unsafe.Pointer(cdelegate))
 	var cstatus C.smt_status_t
-	var cmodel *C.model_t = nil
+	var cmodel *C.model_t
 	if model != nil {
-		var cmodel *C.model_t
 		cstatus = C.yices_check_formula(C.term_t(t), clogic, &cmodel, cdelegate)
 	} else {
 		cstatus = C.yices_check_formula(C.term_t(t), clogic, (**C.model_t)(C.NULL), cdelegate)
@@ -2420,9 +2419,8 @@ func CheckFormulas(t []TermT, logic string, delegate string, model *ModelT) (sta
 	cdelegate := C.CString(delegate)
 	defer C.free(unsafe.Pointer(cdelegate))
 	var cstatus C.smt_status_t
-	var cmodel *C.model_t = nil
+	var cmodel *C.model_t
 	if model != nil {
-		var cmodel *C.model_t
 		cstatus = C.yices_check_formulas((*C.term_t)(&t[0]), count, clogic, &cmodel, cdelegate)
 	} else {
 		cstatus = C.yices_check_formulas((*C.term_t)(&t[0]), count, clogic, (**C.model_t)(C.NULL), cdelegate)
