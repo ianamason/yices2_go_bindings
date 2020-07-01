@@ -2509,7 +2509,6 @@ func PrintTermValues(file *os.File, model ModelT, t []TermT) int32 {
 	return int32(C.yices_print_term_values_fd(C.int(file.Fd()), ymodel(model), tcount, (*C.term_t)(&t[0])))
 }
 
-
 // PpTermValues is the go version of yices_pp_term_values_fd
 // Since 2.6.2
 func PpTermValues(file *os.File, model ModelT, t []TermT, width uint32, height uint32, offset uint32) int32 {
