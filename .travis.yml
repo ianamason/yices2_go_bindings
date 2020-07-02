@@ -1,0 +1,17 @@
+language: go
+
+dist: bionic
+
+go:
+ - 1.x
+
+
+before_install:
+  - sudo add-apt-repository -y ppa:sri-csl/formal-methods
+  - sudo apt-get -y update
+  - sudo apt-get -y install yices2-dev
+
+script:
+  - yices --version
+  # make sure we do not run tests in parallel!
+  - go test -v -p 1 ./test_api
