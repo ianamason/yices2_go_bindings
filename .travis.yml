@@ -13,5 +13,6 @@ before_install:
 
 script:
   - yices --version
+  #  - yices_info
   # make sure we do not run tests in parallel!
   - go test -v -p 1 ./test_api

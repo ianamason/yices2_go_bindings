@@ -938,6 +938,7 @@ func PolyRational64(num []int64, den []uint64, t []TermT) TermT {
 	return TermT(C.yices_poly_rational64(count, (*C.int64_t)(&num[0]), (*C.uint64_t)(&den[0]), (*C.term_t)(&t[0])))
 }
 
+/* linux doesn't like this. is there anything else linux doesn't like?
 // PolyMpz is the go version of yices_poly_mpz.
 func PolyMpz(z []MpzT, t []TermT) TermT {
 	count := C.uint32_t(len(z))
@@ -955,6 +956,7 @@ func PolyMpq(q []MpqT, t []TermT) TermT {
 	}
 	return TermT(C.yices_poly_mpqp(count, (*C.mpq_t)(&q[0]), (*C.term_t)(&t[0])))
 }
+*/
 
 
 /*
