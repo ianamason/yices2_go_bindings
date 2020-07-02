@@ -956,7 +956,6 @@ func PolyMpq(q []MpqT, t []TermT) TermT {
 	return TermT(C.yices_poly_mpqp(count, (*C.mpq_t)(&q[0]), (*C.term_t)(&t[0])))
 }
 
-
 /*
  * ARITHMETIC ATOMS
  */
