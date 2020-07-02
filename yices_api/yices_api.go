@@ -63,6 +63,14 @@ int32_t yices_val_get_mpzp(model_t *mdl, const yval_t *v, mpz_t *val){
 int32_t yices_val_get_mpqp(model_t *mdl, const yval_t *v, mpq_t *val){
    return yices_val_get_mpq(mdl, v, *val);
 }
+//iam: passing a mpq_t[] on linux thru cgo seems too hard
+term_t yices_poly_mpzp(uint32_t n, mpz_t *z, const term_t t[]){
+    return yices_poly_mpz(n, z, t);
+}
+//iam: passing a mpq_t[] on linux thru cgo seems too hard
+term_t yices_poly_mpqp(uint32_t n, mpq_t *q, const term_t t[]){
+    return yices_poly_mpq(n, q, t);
+}
 //iam: is there a better way than this?
 void fetchReport(error_code_t *code, uint32_t *line, uint32_t *column, term_t *term1, type_t *type1, term_t *term2, type_t *type2, int64_t *badval){
    error_report_t *report = yices_error_report();
@@ -936,7 +944,7 @@ func PolyMpz(z []MpzT, t []TermT) TermT {
 	if count == 0 {
 		return TermT(C.yices_zero())
 	}
-	return TermT(C.yices_poly_mpz(count, (*C.mpz_t)(&z[0]), (*C.term_t)(&t[0])))
+	return TermT(C.yices_poly_mpzp(count, (*C.mpz_t)(&z[0]), (*C.term_t)(&t[0])))
 }
 
 // PolyMpq is the go version of yices_poly_mpq.
@@ -945,8 +953,9 @@ func PolyMpq(q []MpqT, t []TermT) TermT {
 	if count == 0 {
 		return TermT(C.yices_zero())
 	}
-	return TermT(C.yices_poly_mpq(count, (*C.mpq_t)(&q[0]), (*C.term_t)(&t[0])))
+	return TermT(C.yices_poly_mpqp(count, (*C.mpq_t)(&q[0]), (*C.term_t)(&t[0])))
 }
+
 
 /*
  * ARITHMETIC ATOMS
