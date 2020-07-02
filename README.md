@@ -20,3 +20,5 @@ Coming soon(ish):
 * Documentation.
 
 * Examples
+
+* Tests for the new 2.6.2 bindings.
