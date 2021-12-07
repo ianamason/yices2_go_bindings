@@ -19,7 +19,7 @@ install:
 	go get github.com/ianamason/yices2_go_bindings/cmd/yices_info
 
 develop:
-	go install github.com/ianamason/yices2_go_bindings/cmd/yices_info
+	go install github.com/ianamason/yices2_go_bindings/cmd/yices_info@latest
 
 # make sure we do not run tests in parallel!
 check: develop
