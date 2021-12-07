@@ -442,7 +442,7 @@ func TestTerms0(t *testing.T) {
 	AssertEqual(t, exp1, uint32(1))
 	AssertEqual(t, term, ivar2)
 	// Note that the next two can change easily
-	AssertEqual(t, yapi.NumTerms(), uint32(102))
+	AssertEqual(t, yapi.NumTerms(), uint32(101))
 	AssertEqual(t, yapi.NumTypes(), uint32(26))
 	AssertEqual(t, yapi.IncrefTerm(term), 0)
 	AssertEqual(t, yapi.NumPosrefTerms(), uint32(1))
