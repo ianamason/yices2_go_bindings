@@ -1896,6 +1896,27 @@ func CheckContextWithModel(ctx ContextT, params ParamT, model ModelT, t []TermT)
 	return SmtStatusT(C.yices_check_context_with_model(yctx(ctx), yparam(params), ymodel(model), count, (*C.term_t)(&t[0])))
 }
 
+// CheckContextWithInterpolation is the go version of yices_check_context_with_interpolation (new in 2.6.4).
+func CheckContextWithInterpolation(ctxA ContextT, ctxB ContextT, params ParamT, buildModel bool) (status SmtStatusT, modelp *ModelT, interpolantp *TermT) {
+	modelp = nil
+	interpolantp = nil
+	ictx := C.new_interpolation_context(yctx(ctxA), yctx(ctxB))
+	bm := 0
+	if buildModel {
+		bm = 1
+	}
+	cstatus := C.yices_check_context_with_interpolation(ictx, yparam(params), C.int32_t(bm))
+
+	if cstatus == C.STATUS_SAT {
+		modelp = &ModelT{uintptr(unsafe.Pointer(C.get_interpolation_context_model(ictx)))}
+	} else if cstatus == C.STATUS_UNSAT {
+		term := TermT(C.get_interpolation_context_interpolant(ictx))
+		interpolantp = &term
+	}
+	status = SmtStatusT(cstatus)
+	return
+}
+
 // AssertBlockingClause is the go version of yices_assert_blocking_clause.
 func AssertBlockingClause(ctx ContextT) int32 {
 	return int32(C.yices_assert_blocking_clause(yctx(ctx)))
