@@ -2121,7 +2121,6 @@ func GetScalarValue(model ModelT, t TermT, val *int32) int32 {
  *  SETTING VALUES IN A MODEL *
  ******************************/
 
-
 // SetBoolValue is the go version of yices_model_set_bool (new in 2.6.4).
 func SetBoolValue(model ModelT, t TermT, val int32) int32 {
 	return int32(C.yices_model_set_bool(ymodel(model), C.term_t(t), C.int32_t(val)))
@@ -2161,8 +2160,6 @@ func SetMpqValue(model ModelT, t TermT, val *MpqT) int32 {
 //#ifdef LIBPOLY_VERSION
 //__YICES_DLLSPEC__ extern int32_t yices_model_set_algebraic_number(model_t *model, term_t var, const lp_algebraic_number_t *val);
 //#endif
-
-
 
 /*
  * GENERIC FORM: VALUE DESCRIPTORS AND NODES
