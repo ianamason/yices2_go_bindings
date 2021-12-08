@@ -71,6 +71,15 @@ term_t yices_poly_mpzp(uint32_t n, mpz_t *z, const term_t t[]){
 term_t yices_poly_mpqp(uint32_t n, mpq_t *q, const term_t t[]){
     return yices_poly_mpq(n, q, t);
 }
+//iam: passing a  mpz_t thru cgo seems too hard
+int32_t yices_model_set_mpzp(model_t *model, term_t var, mpz_t *val){
+   return yices_model_set_mpz(model, var, *val);
+}
+//iam: passing a  mpq_t thru cgo seems too hard
+int32_t yices_model_set_mpqp(model_t *model, term_t var, mpq_t *val){
+   return yices_model_set_mpq(model, var, *val);
+}
+
 //iam: is there a better way than this?
 void fetchReport(error_code_t *code, uint32_t *line, uint32_t *column, term_t *term1, type_t *type1, term_t *term2, type_t *type2, int64_t *badval){
    error_report_t *report = yices_error_report();
@@ -83,22 +92,21 @@ void fetchReport(error_code_t *code, uint32_t *line, uint32_t *column, term_t *t
    *type2 = report->type2;
    *badval = report->badval;
 }
-//iam: have to deal with yices 2.6.4's problem child.
+// iam: have to deal with yices 2.6.4's problem child.
+// we can keep the interpolation_context_t hidden from the go user using the following primitives
+// and go's ability to return multiple values.
 interpolation_context_t* new_interpolation_context(context_t *ctx_A, context_t *ctx_B) {
    interpolation_context_t* ictx = (interpolation_context_t*)calloc(1, sizeof(interpolation_context_t));
    ictx->ctx_A = ctx_A;
    ictx->ctx_B = ctx_B;
    return ictx;
 }
-
 term_t get_interpolation_context_interpolant(interpolation_context_t *ictx){
    return ictx->interpolant;
 }
-
 model_t* get_interpolation_context_model(interpolation_context_t *ictx){
    return ictx->model;
 }
-
 void free_interpolation_context(interpolation_context_t *ictx) {
    free(ictx);
 }
@@ -2007,7 +2015,7 @@ func ymodel(model ModelT) *C.model_t {
 	return (*C.model_t)(unsafe.Pointer(model.raw))
 }
 
-// NewModel is the go version of yices_new_model  (new in 2.6.4).
+// NewModel is the go version of yices_new_model (new in 2.6.4).
 func NewModel() *ModelT {
 	return &ModelT{uintptr(unsafe.Pointer(C.yices_new_model()))}
 }
@@ -2108,6 +2116,53 @@ func GetBvValue(model ModelT, t TermT, val []int32) int32 {
 func GetScalarValue(model ModelT, t TermT, val *int32) int32 {
 	return int32(C.yices_get_scalar_value(ymodel(model), C.term_t(t), (*C.int32_t)(val)))
 }
+
+/******************************
+ *  SETTING VALUES IN A MODEL *
+ ******************************/
+
+
+// SetBoolValue is the go version of yices_model_set_bool (new in 2.6.4).
+func SetBoolValue(model ModelT, t TermT, val int32) int32 {
+	return int32(C.yices_model_set_bool(ymodel(model), C.term_t(t), C.int32_t(val)))
+}
+
+// SetInt32Value is the go version of yices_model_set_int32 (new in 2.6.4).
+func SetInt32Value(model ModelT, t TermT, val int32) int32 {
+	return int32(C.yices_model_set_int32(ymodel(model), C.term_t(t), C.int32_t(val)))
+}
+
+// SetInt64Value is the go version of yices_model_set_int64 (new in 2.6.4).
+func SetInt64Value(model ModelT, t TermT, val int64) int32 {
+	return int32(C.yices_model_set_int64(ymodel(model), C.term_t(t), C.int64_t(val)))
+}
+
+// SetRational32Value is the go version of yices_model_set_rational32 (new in 2.6.4).
+func SetRational32Value(model ModelT, t TermT, num int32, den int32) int32 {
+	return int32(C.yices_model_set_rational32(ymodel(model), C.term_t(t), C.int32_t(num), C.uint32_t(den)))
+}
+
+// SetRational64Value is the go version of yices_model_set_rational64 (new in 2.6.4).
+func SetRational64Value(model ModelT, t TermT, num int64, den int64) int32 {
+	return int32(C.yices_model_set_rational64(ymodel(model), C.term_t(t), C.int64_t(num), C.uint64_t(den)))
+}
+
+// GetMpzValue is the go version of yices_get_mpz_value.
+func SetMpzValue(model ModelT, t TermT, val *MpzT) int32 {
+	return int32(C.yices_model_set_mpzp(ymodel(model), C.term_t(t), (*C.mpz_t)(unsafe.Pointer(val))))
+}
+
+// GetMpqValue is the go version of yices_get_mpq_value.
+func SetMpqValue(model ModelT, t TermT, val *MpqT) int32 {
+	return int32(C.yices_model_set_mpqp(ymodel(model), C.term_t(t), (*C.mpq_t)(unsafe.Pointer(val))))
+}
+
+// iam: not going to assume mcsat
+//#ifdef LIBPOLY_VERSION
+//__YICES_DLLSPEC__ extern int32_t yices_model_set_algebraic_number(model_t *model, term_t var, const lp_algebraic_number_t *val);
+//#endif
+
+
 
 /*
  * GENERIC FORM: VALUE DESCRIPTORS AND NODES
