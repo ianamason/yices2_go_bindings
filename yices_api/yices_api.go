@@ -1901,6 +1901,7 @@ func CheckContextWithInterpolation(ctxA ContextT, ctxB ContextT, params ParamT, 
 	modelp = nil
 	interpolantp = nil
 	ictx := C.new_interpolation_context(yctx(ctxA), yctx(ctxB))
+	defer C.free_interpolation_context(ictx)
 	bm := 0
 	if buildModel {
 		bm = 1
