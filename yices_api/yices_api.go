@@ -83,6 +83,25 @@ void fetchReport(error_code_t *code, uint32_t *line, uint32_t *column, term_t *t
    *type2 = report->type2;
    *badval = report->badval;
 }
+//iam: have to deal with yices 2.6.4's problem child.
+interpolation_context_t* new_interpolation_context(context_t *ctx_A, context_t *ctx_B) {
+   interpolation_context_t* ictx = (interpolation_context_t*)calloc(1, sizeof(interpolation_context_t));
+   ictx->ctx_A = ctx_A;
+   ictx->ctx_B = ctx_B;
+   return ictx;
+}
+
+term_t get_interpolation_context_interpolant(interpolation_context_t *ictx){
+   return ictx->interpolant;
+}
+
+model_t* get_interpolation_context_model(interpolation_context_t *ictx){
+   return ictx->model;
+}
+
+void free_interpolation_context(interpolation_context_t *ictx) {
+   free(ictx);
+}
 */
 import "C"
 
@@ -1867,6 +1886,18 @@ func CheckContextWithAssumptions(ctx ContextT, params ParamT, t []TermT) SmtStat
 	return SmtStatusT(C.yices_check_context_with_assumptions(yctx(ctx), yparam(params), count, (*C.term_t)(&t[0])))
 }
 
+// CheckContextWithModel is the go version of yices_check_context_with_model (new in 2.6.4).
+func CheckContextWithModel(ctx ContextT, params ParamT, model ModelT, t []TermT) SmtStatusT {
+	count := C.uint32_t(len(t))
+	//iam: FIXME need to unify the yices errors and the go errors...
+	if count == 0 {
+		return SmtStatusT(StatusError)
+	}
+	return SmtStatusT(C.yices_check_context_with_model(yctx(ctx), yparam(params), ymodel(model), count, (*C.term_t)(&t[0])))
+}
+
+
+
 // AssertBlockingClause is the go version of yices_assert_blocking_clause.
 func AssertBlockingClause(ctx ContextT) int32 {
 	return int32(C.yices_assert_blocking_clause(yctx(ctx)))
@@ -1937,6 +1968,12 @@ func GetUnsatCore(ctx ContextT) (unsatCore []TermT) {
 	return
 }
 
+// GetModelInterpolant is the go version of yices_get_model_interpolant (new in 2.6.4).
+func GetModelInterpolant(ctx ContextT) (interpolant TermT) {
+	interpolant = TermT(C.yices_get_model_interpolant(yctx(ctx)))
+	return
+}
+
 /**************
  *   MODELS   *
  *************/
@@ -1948,6 +1985,11 @@ type ModelT struct {
 
 func ymodel(model ModelT) *C.model_t {
 	return (*C.model_t)(unsafe.Pointer(model.raw))
+}
+
+// NewModel is the go version of yices_new_model  (new in 2.6.4).
+func NewModel()  *ModelT {
+	return &ModelT{uintptr(unsafe.Pointer(C.yices_new_model()))}
 }
 
 // GetModel is the go version of yices_get_model.
