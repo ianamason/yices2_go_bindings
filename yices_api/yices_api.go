@@ -1896,8 +1896,6 @@ func CheckContextWithModel(ctx ContextT, params ParamT, model ModelT, t []TermT)
 	return SmtStatusT(C.yices_check_context_with_model(yctx(ctx), yparam(params), ymodel(model), count, (*C.term_t)(&t[0])))
 }
 
-
-
 // AssertBlockingClause is the go version of yices_assert_blocking_clause.
 func AssertBlockingClause(ctx ContextT) int32 {
 	return int32(C.yices_assert_blocking_clause(yctx(ctx)))
@@ -1988,7 +1986,7 @@ func ymodel(model ModelT) *C.model_t {
 }
 
 // NewModel is the go version of yices_new_model  (new in 2.6.4).
-func NewModel()  *ModelT {
+func NewModel() *ModelT {
 	return &ModelT{uintptr(unsafe.Pointer(C.yices_new_model()))}
 }
 
