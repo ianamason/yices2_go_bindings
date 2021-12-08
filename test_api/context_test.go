@@ -32,11 +32,11 @@ func TestContext0(t *testing.T) {
 	yapi.AssertFormula(ctx, fmla1)
 	yapi.AssertFormulas(ctx, []yapi.TermT{fmla1, fmla2, fmla3})
 	var params yapi.ParamT
-	smtStat := yapi.CheckContext(ctx, params)
-	AssertEqual(t, smtStat, yapi.StatusSat, "smtStat == yapi.StatusSat")
-
 	yapi.InitParamRecord(&params)
 	yapi.DefaultParamsForContext(ctx, params)
+
+	smtStat := yapi.CheckContext(ctx, params)
+	AssertEqual(t, smtStat, yapi.StatusSat, "smtStat == yapi.StatusSat")
 
 	errcode := yapi.SetParam(params, "dyn-ack", "true")
 	AssertEqual(t, errcode, 0, "errcode == 0") //FIXME: is this right?
