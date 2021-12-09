@@ -79,6 +79,10 @@ int32_t yices_model_set_mpzp(model_t *model, term_t var, mpz_t *val){
 int32_t yices_model_set_mpqp(model_t *model, term_t var, mpq_t *val){
    return yices_model_set_mpq(model, var, *val);
 }
+//iam: passing a  mpz_t thru cgo seems too hard
+int32_t yices_model_set_bv_mpzp(model_t *model, term_t var, mpz_t *val){
+   return yices_model_set_bv_mpz(model, var, *val);
+}
 
 //iam: is there a better way than this?
 void fetchReport(error_code_t *code, uint32_t *line, uint32_t *column, term_t *term1, type_t *type1, term_t *term2, type_t *type2, int64_t *badval){
@@ -2146,12 +2150,12 @@ func SetRational64Value(model ModelT, t TermT, num int64, den int64) int32 {
 	return int32(C.yices_model_set_rational64(ymodel(model), C.term_t(t), C.int64_t(num), C.uint64_t(den)))
 }
 
-// GetMpzValue is the go version of yices_get_mpz_value.
+// SetMpzValue is the go version of yices_model_set_mpz_value.
 func SetMpzValue(model ModelT, t TermT, val *MpzT) int32 {
 	return int32(C.yices_model_set_mpzp(ymodel(model), C.term_t(t), (*C.mpz_t)(unsafe.Pointer(val))))
 }
 
-// GetMpqValue is the go version of yices_get_mpq_value.
+// SetMpqValue is the go version of yices_model_set_mpq_value.
 func SetMpqValue(model ModelT, t TermT, val *MpqT) int32 {
 	return int32(C.yices_model_set_mpqp(ymodel(model), C.term_t(t), (*C.mpq_t)(unsafe.Pointer(val))))
 }
@@ -2160,6 +2164,38 @@ func SetMpqValue(model ModelT, t TermT, val *MpqT) int32 {
 //#ifdef LIBPOLY_VERSION
 //__YICES_DLLSPEC__ extern int32_t yices_model_set_algebraic_number(model_t *model, term_t var, const lp_algebraic_number_t *val);
 //#endif
+
+// SetBvInt32Value is the go version of yices_model_set_bv_int32 (new in 2.6.4).
+func SetBvInt32Value(model ModelT, t TermT, val int32) int32 {
+	return int32(C.yices_model_set_bv_int32(ymodel(model), C.term_t(t), C.int32_t(val)))
+}
+
+// SetBvInt64Value is the go version of yices_model_set_bv_int64 (new in 2.6.4).
+func SetBvInt64Value(model ModelT, t TermT, val int64) int32 {
+	return int32(C.yices_model_set_bv_int64(ymodel(model), C.term_t(t), C.int64_t(val)))
+}
+
+// SetBvUint32Value is the go version of yices_model_set_bv_uint32 (new in 2.6.4).
+func SetBvUint32Value(model ModelT, t TermT, val uint32) int32 {
+	return int32(C.yices_model_set_bv_uint32(ymodel(model), C.term_t(t), C.uint32_t(val)))
+}
+
+// SetBvUint64Value is the go version of yices_model_set_bv_uint64 (new in 2.6.4).
+func SetBvUint64Value(model ModelT, t TermT, val uint64) int32 {
+	return int32(C.yices_model_set_bv_uint64(ymodel(model), C.term_t(t), C.uint64_t(val)))
+}
+
+// SetBvMpzValue is the go version of yices_model_set_bv_mpz_value.
+func SetBvMpzValue(model ModelT, t TermT, val *MpzT) int32 {
+	return int32(C.yices_model_set_bv_mpzp(ymodel(model), C.term_t(t), (*C.mpz_t)(unsafe.Pointer(val))))
+}
+
+// SetBvFromArray is the go version of yices_model_bv_from_array
+
+func SetBvFromArray(model ModelT, t TermT, a []int32) int32 {
+	count := C.uint32_t(len(a))
+	return int32(C.yices_model_set_bv_from_array(ymodel(model), C.term_t(t), count, (*C.int32_t)(&a[0])))
+}
 
 /*
  * GENERIC FORM: VALUE DESCRIPTORS AND NODES
